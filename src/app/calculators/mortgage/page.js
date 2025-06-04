@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Slider } from "@mui/material";
 import ChartDisplay from "@/components/ChartDisplay";
 import {
@@ -12,208 +12,309 @@ const MortgageCalculator = () => {
   const [loanAmount, setLoanAmount] = useState(5000000);
   const [tenure, setTenure] = useState(10);
   const [interestRate, setInterestRate] = useState(8);
+
+  const [loanAmountInput, setLoanAmountInput] = useState("");
+  const [tenureInput, setTenureInput] = useState("");
+  const [interestRateInput, setInterestRateInput] = useState("");
+
   const [result, setResult] = useState(null);
   const [chartData, setChartData] = useState(null);
-  const [schedule, setSchedule] = useState([]);
 
-  const handleCalculate = () => {
-    const emi = calculateEMI(loanAmount, tenure, interestRate);
-    const totalInterest = emi * tenure * 12 - loanAmount;
-    const totalPayment = emi * tenure * 12;
+  useEffect(() => {
+    setLoanAmountInput(`${loanAmount.toLocaleString("en-IN")}`);
+    setTenureInput(`${tenure} yrs`);
+    setInterestRateInput(`${interestRate}%`);
+    updateChart(loanAmount, tenure, interestRate);
+  }, [loanAmount, tenure, interestRate]);
 
-    setResult({
-      emi,
-      totalInterest,
-      totalPayment,
-      loanAmount,
-      tenure,
-      interestRate,
-    });
+  const parseAndSetNumericValue = (setter, value, min, max) => {
+    const numericValue = parseFloat(value.replace(/[₹,%\syrs]/g, ""));
+    if (!isNaN(numericValue)) {
+      const constrainedValue = Math.min(Math.max(numericValue, min), max);
+      setter(constrainedValue);
+    } else {
+      setter(min);
+    }
+  };
+
+  const updateChart = (loanAmt, tenureYrs, rate) => {
+    const emi = calculateEMI(loanAmt, tenureYrs, rate);
+    const totalInterest = emi * tenureYrs * 12 - loanAmt;
+    const totalPayment = emi * tenureYrs * 12;
+
+    setResult({ emi, totalInterest, totalPayment });
 
     const amortizationSchedule = generateAmortizationSchedule(
-      loanAmount,
-      tenure,
-      interestRate
+      loanAmt,
+      tenureYrs,
+      rate
     );
-    setSchedule(amortizationSchedule.slice(0, 12));
 
     setChartData({
       labels: ["Principal", "Interest"],
       datasets: [
         {
-          data: [loanAmount, totalInterest],
-          backgroundColor: ["#AB78FF", "#A197BA"],
-          borderColor: ["#AB78FF", "#A197BA"],
+          data: [loanAmt, totalInterest],
+          backgroundColor: ["#AB78FF", "#FD9CD0"],
           borderWidth: 1,
         },
       ],
     });
   };
 
+  const handleCalculate = () => {
+    updateChart(loanAmount, tenure, interestRate);
+  };
+
   return (
-    <div className="min-h-screen bg-[#EFEDF4] py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-4 sm:p-6">
-        <div className="mb-6 sm:mb-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-[#2D14A0] mb-2">
-            Mortgage Calculator
-          </h2>
-          <p className="text-sm sm:text-base text-gray-600">
-            Calculate your monthly EMI for home loans based on loan amount,
-            tenure, and interest rate.
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#EFEDF4] px-5 sm:px-6 lg:px-8">
+      <div className="max-w-xl mx-auto">
+        <h2 className="text-xl font-bold text-[#2D14A0] mb-2">
+          Mortgage Calculator
+        </h2>
+        <p className="text-sm text-[#686868] mb-4">
+          Calculate your monthly EMI based on loan amount, tenure, and interest
+          rate.
+        </p>
 
-        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-2 lg:gap-8">
-          <div className="bg-[radial-gradient(circle_at_center,_#AB78FF,_#192226)] p-4 sm:p-6 rounded-lg text-white">
-            <div className="mb-4 sm:mb-6">
-              <label className="block mb-2 text-sm font-medium">
-                Loan Amount: ₹{loanAmount.toLocaleString("en-IN")}
-              </label>
-              <Slider
-                value={loanAmount}
-                min={100000}
-                max={10000000}
-                step={10000}
-                onChange={(e, val) => setLoanAmount(val)}
-                sx={{ color: "#FFFFFF" }}
-              />
-            </div>
-
-            <div className="mb-4 sm:mb-6">
-              <label className="block mb-2 text-sm font-medium">
-                Loan Tenure: {tenure} years
-              </label>
-              <Slider
-                value={tenure}
-                min={1}
-                max={30}
-                step={1}
-                onChange={(e, val) => setTenure(val)}
-                sx={{ color: "#FFFFFF" }}
-              />
-            </div>
-
-            <div className="mb-4 sm:mb-6">
-              <label className="block mb-2 text-sm font-medium">
-                Interest Rate: {interestRate}%
-              </label>
-              <Slider
-                value={interestRate}
-                min={1}
-                max={20}
-                step={0.1}
-                onChange={(e, val) => setInterestRate(val)}
-                sx={{ color: "#FFFFFF" }}
-              />
-            </div>
-
-            <button
-              onClick={handleCalculate}
-              className="w-full mt-4 bg-white text-[#2D14A0] py-3 px-4 rounded-lg font-bold hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-purple-700 focus:ring-offset-2"
-            >
-              Calculate
-            </button>
-          </div>
-
-          {result && (
-            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm">
-              <h3 className="text-lg sm:text-xl font-semibold text-[#2D14A0] mb-4">
-                Results
-              </h3>
-              <div className="space-y-4">
-                <div className="p-4">
-                  <p className="text-sm text-gray-600">Monthly EMI</p>
-                  <p className="text-xl sm:text-2xl font-bold text-[#2D14A0]">
-                    ₹
-                    {result.emi.toLocaleString("en-IN", {
-                      maximumFractionDigits: 2,
-                    })}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="p-4">
-                    <p className="text-sm text-gray-600">Total Interest</p>
-                    <p className="text-lg font-semibold text-gray-800">
-                      ₹
-                      {result.totalInterest.toLocaleString("en-IN", {
-                        maximumFractionDigits: 2,
-                      })}
-                    </p>
-                  </div>
-                  <div className="p-4">
-                    <p className="text-sm text-gray-600">Total Payment</p>
-                    <p className="text-lg font-semibold text-gray-800">
-                      ₹
-                      {result.totalPayment.toLocaleString("en-IN", {
-                        maximumFractionDigits: 2,
-                      })}
-                    </p>
-                  </div>
-                </div>
-
-                {chartData && (
-                  <div className="mt-4">
-                    <h4 className="text-base sm:text-lg font-medium text-[#2D14A0] mb-3">
-                      Payment Breakdown
-                    </h4>
-                    <div className="p-4">
-                      <ChartDisplay data={chartData} type="pie" />
-                    </div>
-                  </div>
-                )}
+        <div
+          className="rounded-2xl p-6 mb-6"
+          style={{
+            background: "radial-gradient(circle at center, #8362D1, #192226)",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+          }}
+        >
+          <div className="mb-5">
+            <div className="flex justify-between items-center mb-1 text-white font-medium">
+              <label>Loan Amount</label>
+              <div className="flex items-center bg-white px-1 py-1 rounded-lg">
+                <span className="mr-1 text-[#020288]">₹</span>
+                <input
+                  type="text"
+                  className="text-[#020288] border-none w-20 text-center outline-none focus:ring-0"
+                  value={loanAmountInput}
+                  onChange={(e) => setLoanAmountInput(e.target.value)}
+                  onFocus={(e) =>
+                    setLoanAmountInput(e.target.value.replace(/[₹,\s]/g, ""))
+                  }
+                  onBlur={(e) => {
+                    parseAndSetNumericValue(
+                      setLoanAmount,
+                      e.target.value,
+                      100000,
+                      10000000
+                    );
+                  }}
+                />
               </div>
             </div>
-          )}
+            <Slider
+              value={loanAmount}
+              min={100000}
+              max={10000000}
+              step={10000}
+              onChange={(e, val) => {
+                setLoanAmount(val);
+                setLoanAmountInput(val.toLocaleString("en-IN"));
+              }}
+              sx={{
+                color: "#fff",
+                "& .MuiSlider-thumb": {
+                  backgroundImage: `url('/slider.svg')`,
+                  backgroundSize: "cover",
+                  backgroundColor: "transparent",
+                  width: 24,
+                  height: 24,
+                },
+              }}
+            />
+          </div>
+
+          <div className="mb-5">
+            <div className="flex justify-between items-center mb-1 text-white font-medium">
+              <label>Loan Tenure</label>
+              <div className="flex items-center bg-white px-1 py-1 rounded-lg">
+                <input
+                  type="text"
+                  className="text-[#020288] border-none w-20 text-center outline-none focus:ring-0"
+                  value={tenureInput}
+                  onChange={(e) => setTenureInput(e.target.value)}
+                  onFocus={(e) =>
+                    setTenureInput(e.target.value.replace(/[^0-9.]/g, ""))
+                  }
+                  onBlur={(e) => {
+                    parseAndSetNumericValue(setTenure, e.target.value, 1, 30);
+                    setTenureInput(`${tenure} yrs`);
+                  }}
+                />
+              </div>
+            </div>
+            <Slider
+              value={tenure}
+              min={1}
+              max={30}
+              step={1}
+              onChange={(e, val) => {
+                setTenure(val);
+                setTenureInput(`${val} yrs`);
+              }}
+              sx={{
+                color: "#fff",
+                "& .MuiSlider-thumb": {
+                  backgroundImage: `url('/slider.svg')`,
+                  backgroundSize: "cover",
+                  backgroundColor: "transparent",
+                  width: 24,
+                  height: 24,
+                },
+              }}
+            />
+          </div>
+
+          <div>
+            <div className="flex justify-between items-center mb-1 text-white font-medium">
+              <label>Interest Rate</label>
+              <div className="flex items-center bg-white px-1 py-1 rounded-lg">
+                <input
+                  type="text"
+                  className="text-[#020288] border-none w-16 text-center outline-none focus:ring-0"
+                  value={interestRateInput}
+                  onChange={(e) => setInterestRateInput(e.target.value)}
+                  onFocus={(e) =>
+                    setInterestRateInput(e.target.value.replace(/[^0-9.]/g, ""))
+                  }
+                  onBlur={(e) => {
+                    parseAndSetNumericValue(
+                      setInterestRate,
+                      e.target.value,
+                      1,
+                      20
+                    );
+                    setInterestRateInput(`${interestRate}%`);
+                  }}
+                />
+              </div>
+            </div>
+            <Slider
+              value={interestRate}
+              min={1}
+              max={20}
+              step={0.1}
+              onChange={(e, val) => {
+                setInterestRate(val);
+                setInterestRateInput(`${val.toFixed(1)}%`);
+              }}
+              sx={{
+                color: "#fff",
+                "& .MuiSlider-thumb": {
+                  backgroundImage: `url('/slider.svg')`,
+                  backgroundSize: "cover",
+                  backgroundColor: "transparent",
+                  width: 24,
+                  height: 24,
+                },
+              }}
+            />
+          </div>
         </div>
 
-        {schedule.length > 0 && (
-          <div className="mt-8 bg-gray-50 p-4 sm:p-6 rounded-lg overflow-x-auto">
-            <h3 className="text-lg sm:text-xl font-semibold text-[#2D14A0] mb-4">
-              Amortization Schedule (First Year)
-            </h3>
-            <table className="min-w-full divide-y divide-gray-200 text-sm">
-              <thead className="bg-[#2D14A0] text-white">
-                <tr>
-                  <th className="px-3 py-2 text-left uppercase tracking-wider">
-                    Month
-                  </th>
-                  <th className="px-3 py-2 text-left uppercase tracking-wider">
-                    EMI
-                  </th>
-                  <th className="px-3 py-2 text-left uppercase tracking-wider">
-                    Principal
-                  </th>
-                  <th className="px-3 py-2 text-left uppercase tracking-wider">
-                    Interest
-                  </th>
-                  <th className="px-3 py-2 text-left uppercase tracking-wider">
-                    Balance
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {schedule.map((row, index) => (
-                  <tr key={index}>
-                    <td className="px-3 py-2 whitespace-nowrap">{row.month}</td>
-                    <td className="px-3 py-2 whitespace-nowrap">
-                      ₹{row.emi.toFixed(2)}
-                    </td>
-                    <td className="px-3 py-2 whitespace-nowrap">
-                      ₹{row.principal.toFixed(2)}
-                    </td>
-                    <td className="px-3 py-2 whitespace-nowrap">
-                      ₹{row.interest.toFixed(2)}
-                    </td>
-                    <td className="px-3 py-2 whitespace-nowrap">
-                      ₹{row.balance.toFixed(2)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <button
+          onClick={handleCalculate}
+          className="w-full sm:mt-2 bg-[#2C178C] text-white font-bold py-3 rounded-2xl text-sm hover:opacity-90"
+        >
+          CALCULATE
+        </button>
+
+        <div className="sm:mt-6 mt-5 bg-white p-3 rounded-lg ">
+          <div className="mt-4 p-3 bg-[#F5F4F7] rounded-xl font-semibold text-sm text-[#323233] text-center">
+            In {tenure} yrs, your total payment would be
+            <br />
+            <span
+              className="text-xl font-bold p-2"
+              style={{
+                background: "linear-gradient(to right, #F04393, #320992)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              ₹
+              {result?.totalPayment.toLocaleString("en-IN", {
+                maximumFractionDigits: 0,
+              })}
+            </span>
           </div>
-        )}
+
+          <div className="py-2">
+            <div className="text-sm flex justify-between px-4 text-[#323233] my-2">
+              <span>Total Interest</span>
+              <span className="text-[#020288]">
+                ₹
+                {result?.totalInterest.toLocaleString("en-IN", {
+                  maximumFractionDigits: 2,
+                })}
+              </span>
+            </div>
+            <div className="text-sm flex justify-between px-4 text-[#323233] py-2">
+              <span>Monthly EMI</span>
+              <span className="text-[#020288]">
+                ₹
+                {result?.emi.toLocaleString("en-IN", {
+                  maximumFractionDigits: 2,
+                })}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex justify-center py-6">
+            {chartData && <ChartDisplay data={chartData} type="pie" />}
+          </div>
+        </div>
+
+        {/* Assumptions Section */}
+        <div className="sm:mt-6 mt-5 bg-white rounded-lg shadow-sm">
+          <div className="bg-[#E5E2F2] text-[#2C178C] rounded-t-lg px-4 py-2 font-semibold text-sm">
+            Assumptions & Formula
+          </div>
+          <div className="bg-white p-4 text-xs text-[#686868] space-y-2 rounded-lg">
+            <div className="flex justify-between">
+              <span>Loan Amount</span>
+              <span className="text-[#2C178C]">₹ 50,00,000</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Interest Rate</span>
+              <span className="text-[#2C178C]">8 %</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Loan Tenure</span>
+              <span className="text-[#2C178C]">10 yrs</span>
+            </div>
+
+            {/* Styled Final Amount */}
+            <div className="rounded-xl px-4 py-2 bg-[#F5F4F7] mt-3 flex justify-between items-center">
+              <span className="text-sm text-[#323233]">Final Amount</span>
+              <span
+                className="font-semibold text-sm"
+                style={{
+                  background: "linear-gradient(to right, #F04393, #320992)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                ₹ 72,79,656
+              </span>
+            </div>
+
+            {/* Formula with superscripts */}
+            <div className="mt-4 p-3 bg-[#F5F4F7] rounded-xl text-xs text-[#323233]">
+              Formula Used:{" "}
+              <span className="text-[#D20F87] font-medium">
+                EMI = [P × r × (1 + r)<sup>n</sup>] / [(1 + r)<sup>n</sup> – 1]
+              </span>
+              , where P is principal, r is monthly interest rate, and n is
+              number of months.
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

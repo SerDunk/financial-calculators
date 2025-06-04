@@ -28,7 +28,15 @@ const ChartDisplay = ({ data, type = "pie" }) => {
     responsive: true,
     plugins: {
       legend: {
-        position: "top",
+        position: "bottom",
+        labels: {
+          usePointStyle: true,
+          pointStyle: "circle",
+          font: {
+            size: 10,
+          },
+          padding: 10,
+        },
       },
       tooltip: {
         callbacks: {
@@ -63,7 +71,11 @@ const ChartDisplay = ({ data, type = "pie" }) => {
     }
   };
 
-  return <div className="w-full h-64 md:h-80">{renderChart()}</div>;
+  return (
+    <div className="w-full flex justify-center h-64 md:h-80">
+      {renderChart()}
+    </div>
+  );
 };
 
 export default ChartDisplay;
