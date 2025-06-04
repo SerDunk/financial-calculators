@@ -62,7 +62,7 @@ const MortgageCalculator = () => {
       datasets: [
         {
           data: [loanAmt, totalInterest],
-          backgroundColor: ["#583FCA", "#F04393"],
+          backgroundColor: ["#583FCA", "#FD9CD0"],
           borderWidth: 1,
         },
       ],
