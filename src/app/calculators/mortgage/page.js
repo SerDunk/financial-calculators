@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Slider } from "@mui/material";
 import ChartDisplay from "@/components/ChartDisplay";
 import {
@@ -20,12 +20,19 @@ const MortgageCalculator = () => {
   const [result, setResult] = useState(null);
   const [chartData, setChartData] = useState(null);
 
+  // This state controls displayed tenure in summary — updates only on Calculate
+  const [displayedTenure, setDisplayedTenure] = useState(tenure);
+
+  // Ref to track if user has interacted after mount
+  const userInteracted = useRef(false);
+
+  // Initialize inputs on mount only, and do initial calculation
   useEffect(() => {
     setLoanAmountInput(`${loanAmount.toLocaleString("en-IN")}`);
     setTenureInput(`${tenure} yrs`);
     setInterestRateInput(`${interestRate}%`);
     updateChart(loanAmount, tenure, interestRate);
-  }, [loanAmount, tenure, interestRate]);
+  }, []); // runs once on mount
 
   const parseAndSetNumericValue = (setter, value, min, max) => {
     const numericValue = parseFloat(value.replace(/[₹,%\syrs]/g, ""));
@@ -55,15 +62,59 @@ const MortgageCalculator = () => {
       datasets: [
         {
           data: [loanAmt, totalInterest],
-          backgroundColor: ["#AB78FF", "#FD9CD0"],
+          backgroundColor: ["#583FCA", "#F04393"],
           borderWidth: 1,
         },
       ],
     });
   };
 
+  // User input change handlers mark userInteracted true
+
+  // Loan Amount handlers
+  const handleLoanAmountSliderChange = (e, val) => {
+    userInteracted.current = true;
+    setLoanAmount(val);
+    setLoanAmountInput(val.toLocaleString("en-IN"));
+  };
+
+  const handleLoanAmountInputBlur = (e) => {
+    userInteracted.current = true;
+    parseAndSetNumericValue(setLoanAmount, e.target.value, 100000, 10000000);
+    // Update formatted input after parsing
+    setLoanAmountInput(`${loanAmount.toLocaleString("en-IN")}`);
+  };
+
+  // Tenure handlers
+  const handleTenureSliderChange = (e, val) => {
+    userInteracted.current = true;
+    setTenure(val);
+    setTenureInput(`${val} yrs`);
+  };
+
+  const handleTenureInputBlur = (e) => {
+    userInteracted.current = true;
+    parseAndSetNumericValue(setTenure, e.target.value, 1, 30);
+    setTenureInput(`${tenure} yrs`);
+  };
+
+  // Interest Rate handlers
+  const handleInterestRateSliderChange = (e, val) => {
+    userInteracted.current = true;
+    setInterestRate(val);
+    setInterestRateInput(`${val.toFixed(1)}%`);
+  };
+
+  const handleInterestRateInputBlur = (e) => {
+    userInteracted.current = true;
+    parseAndSetNumericValue(setInterestRate, e.target.value, 1, 20);
+    setInterestRateInput(`${interestRate}%`);
+  };
+
+  // Calculate button handler - updates results and chart based on current state
   const handleCalculate = () => {
     updateChart(loanAmount, tenure, interestRate);
+    setDisplayedTenure(tenure); // update tenure shown in summary only on calculate
   };
 
   return (
@@ -97,14 +148,7 @@ const MortgageCalculator = () => {
                   onFocus={(e) =>
                     setLoanAmountInput(e.target.value.replace(/[₹,\s]/g, ""))
                   }
-                  onBlur={(e) => {
-                    parseAndSetNumericValue(
-                      setLoanAmount,
-                      e.target.value,
-                      100000,
-                      10000000
-                    );
-                  }}
+                  onBlur={handleLoanAmountInputBlur}
                 />
               </div>
             </div>
@@ -113,14 +157,11 @@ const MortgageCalculator = () => {
               min={100000}
               max={10000000}
               step={10000}
-              onChange={(e, val) => {
-                setLoanAmount(val);
-                setLoanAmountInput(val.toLocaleString("en-IN"));
-              }}
+              onChange={handleLoanAmountSliderChange}
               sx={{
                 color: "#fff",
                 "& .MuiSlider-thumb": {
-                  backgroundImage: `url('/slider.svg')`,
+                  backgroundImage: "url('/slider.svg')",
                   backgroundSize: "cover",
                   backgroundColor: "transparent",
                   width: 24,
@@ -142,10 +183,7 @@ const MortgageCalculator = () => {
                   onFocus={(e) =>
                     setTenureInput(e.target.value.replace(/[^0-9.]/g, ""))
                   }
-                  onBlur={(e) => {
-                    parseAndSetNumericValue(setTenure, e.target.value, 1, 30);
-                    setTenureInput(`${tenure} yrs`);
-                  }}
+                  onBlur={handleTenureInputBlur}
                 />
               </div>
             </div>
@@ -154,14 +192,11 @@ const MortgageCalculator = () => {
               min={1}
               max={30}
               step={1}
-              onChange={(e, val) => {
-                setTenure(val);
-                setTenureInput(`${val} yrs`);
-              }}
+              onChange={handleTenureSliderChange}
               sx={{
                 color: "#fff",
                 "& .MuiSlider-thumb": {
-                  backgroundImage: `url('/slider.svg')`,
+                  backgroundImage: "url('/slider.svg')",
                   backgroundSize: "cover",
                   backgroundColor: "transparent",
                   width: 24,
@@ -183,15 +218,7 @@ const MortgageCalculator = () => {
                   onFocus={(e) =>
                     setInterestRateInput(e.target.value.replace(/[^0-9.]/g, ""))
                   }
-                  onBlur={(e) => {
-                    parseAndSetNumericValue(
-                      setInterestRate,
-                      e.target.value,
-                      1,
-                      20
-                    );
-                    setInterestRateInput(`${interestRate}%`);
-                  }}
+                  onBlur={handleInterestRateInputBlur}
                 />
               </div>
             </div>
@@ -200,14 +227,11 @@ const MortgageCalculator = () => {
               min={1}
               max={20}
               step={0.1}
-              onChange={(e, val) => {
-                setInterestRate(val);
-                setInterestRateInput(`${val.toFixed(1)}%`);
-              }}
+              onChange={handleInterestRateSliderChange}
               sx={{
                 color: "#fff",
                 "& .MuiSlider-thumb": {
-                  backgroundImage: `url('/slider.svg')`,
+                  backgroundImage: "url('/slider.svg')",
                   backgroundSize: "cover",
                   backgroundColor: "transparent",
                   width: 24,
@@ -220,14 +244,14 @@ const MortgageCalculator = () => {
 
         <button
           onClick={handleCalculate}
-          className="w-full sm:mt-2 bg-[#2C178C] text-white font-bold py-3 rounded-2xl text-sm hover:opacity-90"
+          className="w-full sm:mt-2 bg-linear-to-r from-[#583FCA] to-[#2D14A0] text-white font-bold py-3 rounded-2xl text-sm hover:opacity-90"
         >
           CALCULATE
         </button>
 
         <div className="sm:mt-6 mt-5 bg-white p-3 rounded-lg ">
           <div className="mt-4 p-3 bg-[#F5F4F7] rounded-xl font-semibold text-sm text-[#323233] text-center">
-            In {tenure} yrs, your total payment would be
+            In {displayedTenure} yrs, your total payment would be
             <br />
             <span
               className="text-xl font-bold p-2"
@@ -307,7 +331,7 @@ const MortgageCalculator = () => {
             {/* Formula with superscripts */}
             <div className="mt-4 p-3 bg-[#F5F4F7] rounded-xl text-xs text-[#323233]">
               Formula Used:{" "}
-              <span className="text-[#D20F87] font-medium">
+              <span className="text-[#F04393] font-medium">
                 EMI = [P × r × (1 + r)<sup>n</sup>] / [(1 + r)<sup>n</sup> – 1]
               </span>
               , where P is principal, r is monthly interest rate, and n is
