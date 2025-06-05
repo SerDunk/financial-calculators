@@ -118,31 +118,31 @@ const MortgageCalculator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#EFEDF4] px-5 sm:px-6 lg:px-8">
+    <div className="min-h-screen font-lexend bg-[#EFEDF4] px-5 sm:px-6 lg:px-8">
       <div className="max-w-xl mx-auto">
-        <h2 className="text-xl font-bold text-[#2D14A0] mb-2">
+        <h2 className="text-lg sm:text-xl font-bold text-[#2D14A0] mb-2">
           Mortgage Calculator
         </h2>
-        <p className="text-sm text-[#686868] mb-4">
+        <p className=" text-xs sm:text-sm text-[#686868] mb-4 ">
           Calculate your monthly EMI based on loan amount, tenure, and interest
           rate.
         </p>
 
         <div
-          className="rounded-2xl p-6 mb-6"
+          className="rounded-2xl p-6"
           style={{
-            background: "radial-gradient(circle at center, #8362D1, #192226)",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            background:
+              "radial-gradient(ellipse 113px 357px at top, #8362D1 -60%, #192226 130%)",
           }}
         >
-          <div className="mb-5">
-            <div className="flex justify-between items-center mb-1 text-white font-medium">
+          <div className="mb-1">
+            <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
               <label>Loan Amount</label>
-              <div className="flex items-center bg-white px-1 py-1 rounded-lg">
+              <div className="flex items-center text-sm bg-white px-1 py-1 rounded-lg">
                 <span className="mr-1 text-[#020288]">₹</span>
                 <input
                   type="text"
-                  className="text-[#020288] border-none w-20 text-center outline-none focus:ring-0"
+                  className="text-[#020288] text-xs border-none w-20 text-center outline-none focus:ring-0"
                   value={loanAmountInput}
                   onChange={(e) => setLoanAmountInput(e.target.value)}
                   onFocus={(e) =>
@@ -164,20 +164,20 @@ const MortgageCalculator = () => {
                   backgroundImage: "url('/slider.svg')",
                   backgroundSize: "cover",
                   backgroundColor: "transparent",
-                  width: 24,
-                  height: 24,
+                  width: 20,
+                  height: 20,
                 },
               }}
             />
           </div>
 
-          <div className="mb-5">
-            <div className="flex justify-between items-center mb-1 text-white font-medium">
+          <div className="mb-1">
+            <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
               <label>Loan Tenure</label>
               <div className="flex items-center bg-white px-1 py-1 rounded-lg">
                 <input
                   type="text"
-                  className="text-[#020288] border-none w-20 text-center outline-none focus:ring-0"
+                  className="text-[#020288] text-xs border-none w-20 text-center outline-none focus:ring-0"
                   value={tenureInput}
                   onChange={(e) => setTenureInput(e.target.value)}
                   onFocus={(e) =>
@@ -199,20 +199,20 @@ const MortgageCalculator = () => {
                   backgroundImage: "url('/slider.svg')",
                   backgroundSize: "cover",
                   backgroundColor: "transparent",
-                  width: 24,
-                  height: 24,
+                  width: 20,
+                  height: 20,
                 },
               }}
             />
           </div>
 
           <div>
-            <div className="flex justify-between items-center mb-1 text-white font-medium">
+            <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
               <label>Interest Rate</label>
               <div className="flex items-center bg-white px-1 py-1 rounded-lg">
                 <input
                   type="text"
-                  className="text-[#020288] border-none w-16 text-center outline-none focus:ring-0"
+                  className="text-[#020288] text-xs border-none w-16 text-center outline-none focus:ring-0"
                   value={interestRateInput}
                   onChange={(e) => setInterestRateInput(e.target.value)}
                   onFocus={(e) =>
@@ -234,8 +234,8 @@ const MortgageCalculator = () => {
                   backgroundImage: "url('/slider.svg')",
                   backgroundSize: "cover",
                   backgroundColor: "transparent",
-                  width: 24,
-                  height: 24,
+                  width: 20,
+                  height: 20,
                 },
               }}
             />
@@ -244,52 +244,52 @@ const MortgageCalculator = () => {
 
         <button
           onClick={handleCalculate}
-          className="w-full sm:mt-2 bg-linear-to-r from-[#583FCA] to-[#2D14A0] text-white font-bold py-3 rounded-2xl text-sm hover:opacity-90"
+          className="w-full sm:mt-2 mt-4 bg-linear-to-r from-[#583FCA] to-[#2D14A0] text-white font-bold py-3 rounded-2xl text-sm hover:opacity-90"
         >
           CALCULATE
         </button>
 
-        <div className="sm:mt-6 mt-5 bg-white p-3 rounded-lg ">
-          <div className="mt-4 p-3 bg-[#F5F4F7] rounded-xl font-semibold text-sm text-[#323233] text-center">
+        <div className="sm:mt-2 mt-4 sm:text-sm bg-white py-1 px-3 rounded-lg ">
+          <div className="mt-4 p-3 bg-[#F5F4F7] rounded-xl font-semibold text-xs text-[#323233] text-center">
             In {displayedTenure} yrs, your total payment would be
             <br />
             <span
-              className="text-xl font-bold p-2"
+              className="text-lg font-bold p-2"
               style={{
                 background: "linear-gradient(to right, #F04393, #320992)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}
             >
-              ₹
+              <span>₹ </span>
               {result?.totalPayment.toLocaleString("en-IN", {
                 maximumFractionDigits: 0,
               })}
             </span>
           </div>
 
-          <div className="py-2">
-            <div className="text-sm flex justify-between px-4 text-[#323233] my-2">
+          <div className="py-3">
+            <div className="text-xs flex justify-between px-4 text-[#323233]">
               <span>Total Interest</span>
               <span className="text-[#020288]">
-                ₹
+                <span>₹ </span>
                 {result?.totalInterest.toLocaleString("en-IN", {
-                  maximumFractionDigits: 2,
+                  maximumFractionDigits: 0,
                 })}
               </span>
             </div>
-            <div className="text-sm flex justify-between px-4 text-[#323233] py-2">
+            <div className="text-xs flex justify-between px-4 text-[#323233] py-2">
               <span>Monthly EMI</span>
               <span className="text-[#020288]">
-                ₹
+                <span>₹ </span>
                 {result?.emi.toLocaleString("en-IN", {
-                  maximumFractionDigits: 2,
+                  maximumFractionDigits: 0,
                 })}
               </span>
             </div>
           </div>
 
-          <div className="flex justify-center py-6">
+          <div className="flex justify-center py-2  ">
             {chartData && <ChartDisplay data={chartData} type="pie" />}
           </div>
         </div>

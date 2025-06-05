@@ -1,5 +1,6 @@
 import Navbar from "../components/Navbar";
 import "./globals.css";
+import { lexend } from "../../public/fonts";
 
 export const metadata = {
   title: "Financial Calculators",
@@ -8,7 +9,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className={lexend.variable}>
       <body className="bg-[#EFEDF4] min-h-screen flex flex-col">
         <Navbar />
         <main className="container mx-auto px-4 py-8 flex-grow">

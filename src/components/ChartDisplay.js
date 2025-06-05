@@ -11,6 +11,7 @@ import {
   PointElement,
   LineElement,
 } from "chart.js";
+import { lexend } from "../../public/fonts";
 
 ChartJS.register(
   ArcElement,
@@ -27,6 +28,13 @@ const ChartDisplay = ({ data, type = "pie" }) => {
   const options = {
     responsive: true,
     plugins: {
+      tooltip: {
+        enabled: true,
+        bodyFont: {
+          family: "Lexend",
+          size: 14,
+        },
+      },
       legend: {
         position: "bottom",
         labels: {

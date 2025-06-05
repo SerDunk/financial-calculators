@@ -1,9 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  --color-primary: #6b46c1;
-  --color-secondary: #f6ad55;
-  --color-accent: #9f7aea;
+}
+
+@theme {
+  --font-lexend: var("--font-lexend");
 }
 
 body {
