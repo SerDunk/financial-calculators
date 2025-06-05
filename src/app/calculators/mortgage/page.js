@@ -253,7 +253,7 @@ const MortgageCalculator = () => {
             <span
               className="text-lg font-bold p-2"
               style={{
-                background: "linear-gradient(to right, #F04393, #320992)",
+                background: "linear-gradient(to right,#320992 30%,#F04393)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}
@@ -316,7 +316,7 @@ const MortgageCalculator = () => {
               <span
                 className="font-semibold text-sm"
                 style={{
-                  background: "linear-gradient(to right, #F04393, #320992)",
+                  background: "linear-gradient(to right,#320992 30%,#F04393)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}

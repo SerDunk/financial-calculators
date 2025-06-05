@@ -1,21 +1,42 @@
+import Image from "next/image";
+import Link from "next/link";
 import CalculatorCard from "../components/CalculatorCard";
 import { calculatorData } from "@/constants/calculatorData";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#EFEDF4] py-3 font-lexend sm:py-5 px-4 sm:px-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center sm:mb-10 mb-8">
-          <h1 className="sm:text-4xl text-2xl font-bold text-[#2D14A0] mb-4">
-            Financial Calculators
+    <div className="min-h-screen bg-[#EFEDF4] px-3 font-lexend">
+      <div className="max-w-md mx-auto space-y-6">
+        {/* Header Card */}
+        <div
+          className="rounded-xl px-6 py-5 text-white relative overflow-hidden"
+          style={{
+            background:
+              "radial-gradient(ellipse 113px 357px at center, #8362D1 -60%, #192226 130%)",
+          }}
+        >
+          {/* Top-right Calculator Icon */}
+          <div className="absolute top-3 right-4 w-20 h-20">
+            <Image
+              src="/calculator.svg"
+              alt="Calculator Icon"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
+
+          <h1 className="text-lg font-semibold mb-2 z-10 relative">
+            Calculators
           </h1>
-          <p className="sm:text-lg text-md text-gray-600 max-w-2xl mx-auto">
-            Always follow your gut feelings and only after you have crunched
-            some numbers.
+          <p className="text-xs text-white z-10 w-50 relative">
+            Always follow your gut feeling—but only after you have crunched some
+            numbers.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Calculator Cards */}
+        <div className="flex flex-col gap-5">
           {calculatorData.map((calculator) => (
             <CalculatorCard
               key={calculator.id}
