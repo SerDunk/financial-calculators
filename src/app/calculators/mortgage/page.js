@@ -8,6 +8,17 @@ import {
   generateAmortizationSchedule,
 } from "@/utils/calculation";
 
+const formatShortIndianCurrency = (amount) => {
+  if (amount >= 10000000) {
+    return (amount / 10000000).toFixed(2).replace(/\.00$/, "") + " Cr";
+  } else if (amount >= 100000) {
+    return (amount / 100000).toFixed(2).replace(/\.00$/, "") + " L";
+  } else if (amount >= 1000) {
+    return (amount / 1000).toFixed(2).replace(/\.00$/, "") + " K";
+  }
+  return amount.toString();
+};
+
 const MortgageCalculator = () => {
   const [loanAmount, setLoanAmount] = useState(5000000);
   const [tenure, setTenure] = useState(10);
@@ -24,15 +35,18 @@ const MortgageCalculator = () => {
   const userInteracted = useRef(false);
 
   useEffect(() => {
-    setLoanAmountInput(`${loanAmount.toLocaleString("en-IN")}`);
+    setLoanAmountInput(
+      formatShortIndianCurrency(`${loanAmount.toLocaleString("en-IN")}`)
+    );
     setTenureInput(`${tenure} yrs`);
     setInterestRateInput(`${interestRate}%`);
     updateChart(loanAmount, tenure, interestRate);
   }, []);
 
-  // 🆕 Sync inputs with latest value
   useEffect(() => {
-    setLoanAmountInput(`${loanAmount.toLocaleString("en-IN")}`);
+    setLoanAmountInput(
+      formatShortIndianCurrency(`${loanAmount.toLocaleString("en-IN")}`)
+    );
   }, [loanAmount]);
 
   useEffect(() => {
@@ -133,8 +147,9 @@ const MortgageCalculator = () => {
         >
           {/* Loan Amount */}
           <div className="mb-1">
-            <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
+            <div className="flex text-sm justify-between items-center text-white font-medium">
               <label>Loan Amount</label>
+
               <div className="flex items-center text-xs bg-white px-1 py-1 rounded-lg">
                 <span className="text-[#020288]">₹</span>
                 <input
@@ -148,6 +163,9 @@ const MortgageCalculator = () => {
                   onBlur={handleLoanAmountInputBlur}
                 />
               </div>
+            </div>
+            <div className="text-[10px] text-white">
+              ( {formatShortIndianCurrency(loanAmount)} )
             </div>
             <Slider
               value={loanAmount}
