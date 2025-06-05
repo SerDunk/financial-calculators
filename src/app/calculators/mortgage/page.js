@@ -20,19 +20,28 @@ const MortgageCalculator = () => {
   const [result, setResult] = useState(null);
   const [chartData, setChartData] = useState(null);
 
-  // This state controls displayed tenure in summary — updates only on Calculate
   const [displayedTenure, setDisplayedTenure] = useState(tenure);
-
-  // Ref to track if user has interacted after mount
   const userInteracted = useRef(false);
 
-  // Initialize inputs on mount only, and do initial calculation
   useEffect(() => {
     setLoanAmountInput(`${loanAmount.toLocaleString("en-IN")}`);
     setTenureInput(`${tenure} yrs`);
     setInterestRateInput(`${interestRate}%`);
     updateChart(loanAmount, tenure, interestRate);
-  }, []); // runs once on mount
+  }, []);
+
+  // 🆕 Sync inputs with latest value
+  useEffect(() => {
+    setLoanAmountInput(`${loanAmount.toLocaleString("en-IN")}`);
+  }, [loanAmount]);
+
+  useEffect(() => {
+    setTenureInput(`${tenure} yrs`);
+  }, [tenure]);
+
+  useEffect(() => {
+    setInterestRateInput(`${interestRate}%`);
+  }, [interestRate]);
 
   const parseAndSetNumericValue = (setter, value, min, max) => {
     const numericValue = parseFloat(value.replace(/[₹,%\syrs]/g, ""));
@@ -69,52 +78,39 @@ const MortgageCalculator = () => {
     });
   };
 
-  // User input change handlers mark userInteracted true
-
-  // Loan Amount handlers
   const handleLoanAmountSliderChange = (e, val) => {
     userInteracted.current = true;
     setLoanAmount(val);
-    setLoanAmountInput(val.toLocaleString("en-IN"));
   };
 
   const handleLoanAmountInputBlur = (e) => {
     userInteracted.current = true;
     parseAndSetNumericValue(setLoanAmount, e.target.value, 100000, 10000000);
-    // Update formatted input after parsing
-    setLoanAmountInput(`${loanAmount.toLocaleString("en-IN")}`);
   };
 
-  // Tenure handlers
   const handleTenureSliderChange = (e, val) => {
     userInteracted.current = true;
     setTenure(val);
-    setTenureInput(`${val} yrs`);
   };
 
   const handleTenureInputBlur = (e) => {
     userInteracted.current = true;
     parseAndSetNumericValue(setTenure, e.target.value, 1, 30);
-    setTenureInput(`${tenure} yrs`);
   };
 
-  // Interest Rate handlers
   const handleInterestRateSliderChange = (e, val) => {
     userInteracted.current = true;
     setInterestRate(val);
-    setInterestRateInput(`${val.toFixed(1)}%`);
   };
 
   const handleInterestRateInputBlur = (e) => {
     userInteracted.current = true;
     parseAndSetNumericValue(setInterestRate, e.target.value, 1, 20);
-    setInterestRateInput(`${interestRate}%`);
   };
 
-  // Calculate button handler - updates results and chart based on current state
   const handleCalculate = () => {
     updateChart(loanAmount, tenure, interestRate);
-    setDisplayedTenure(tenure); // update tenure shown in summary only on calculate
+    setDisplayedTenure(tenure);
   };
 
   return (
@@ -135,14 +131,15 @@ const MortgageCalculator = () => {
               "radial-gradient(ellipse 113px 357px at center, #8362D1 -60%, #192226 130%)",
           }}
         >
+          {/* Loan Amount */}
           <div className="mb-1">
             <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
               <label>Loan Amount</label>
-              <div className="flex items-center text-sm bg-white px-1 py-1 rounded-lg">
-                <span className="mr-1 text-[#020288]">₹</span>
+              <div className="flex items-center text-xs bg-white px-1 py-1 rounded-lg">
+                <span className="text-[#020288]">₹</span>
                 <input
                   type="text"
-                  className="text-[#020288] text-xs border-none w-20 text-center outline-none focus:ring-0"
+                  className="text-[#020288] text-xs border-none w-18 text-center outline-none focus:ring-0"
                   value={loanAmountInput}
                   onChange={(e) => setLoanAmountInput(e.target.value)}
                   onFocus={(e) =>
@@ -170,6 +167,7 @@ const MortgageCalculator = () => {
             />
           </div>
 
+          {/* Tenure */}
           <div className="mb-1">
             <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
               <label>Loan Tenure</label>
@@ -204,6 +202,7 @@ const MortgageCalculator = () => {
             />
           </div>
 
+          {/* Interest Rate */}
           <div>
             <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
               <label>Interest Rate</label>
@@ -246,6 +245,7 @@ const MortgageCalculator = () => {
           CALCULATE
         </button>
 
+        {/* Output and Summary */}
         <div className="sm:mt-2 mt-4 sm:text-sm bg-white py-1 px-3 rounded-lg ">
           <div className="mt-4 p-3 bg-[#F5F4F7] rounded-xl font-semibold text-xs text-[#323233] text-center">
             In {displayedTenure} yrs, your total payment would be
@@ -286,12 +286,12 @@ const MortgageCalculator = () => {
             </div>
           </div>
 
-          <div className="flex justify-center py-2  ">
+          <div className="flex justify-center py-2">
             {chartData && <ChartDisplay data={chartData} type="pie" />}
           </div>
         </div>
 
-        {/* Assumptions Section */}
+        {/* Assumptions */}
         <div className="sm:mt-6 mt-5 bg-white rounded-lg shadow-sm">
           <div className="bg-[#E5E2F2] text-[#2C178C] rounded-t-lg px-4 py-2 font-semibold text-sm">
             Assumptions & Formula
@@ -309,8 +309,6 @@ const MortgageCalculator = () => {
               <span>Loan Tenure</span>
               <span className="text-[#2C178C]">10 yrs</span>
             </div>
-
-            {/* Styled Final Amount */}
             <div className="rounded-xl px-4 py-2 bg-[#F5F4F7] mt-3 flex justify-between items-center">
               <span className="text-sm text-[#323233]">Final Amount</span>
               <span
@@ -324,8 +322,6 @@ const MortgageCalculator = () => {
                 ₹ 72,79,656
               </span>
             </div>
-
-            {/* Formula with superscripts */}
             <div className="mt-4 p-3 bg-[#F5F4F7] rounded-xl text-xs text-[#323233]">
               Formula Used:{" "}
               <span className="text-[#F04393] font-medium">
