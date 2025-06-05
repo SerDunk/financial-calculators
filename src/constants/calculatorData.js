@@ -1,4 +1,4 @@
-import Home from "../../public/office 1.svg";
+import Home from "../../public/house-cleaning.png";
 import Image from "next/image";
 
 export const calculatorData = [

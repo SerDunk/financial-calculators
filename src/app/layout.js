@@ -10,7 +10,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={lexend.variable}>
-      <body className="bg-[#EFEDF4] min-h-screen flex flex-col">
+      <body className="bg-[#EFEDF4] min-h-screen flex flex-col justify-center">
         <Navbar />
         <main className="container mx-auto px-4 py-4 flex-grow">
           {children}

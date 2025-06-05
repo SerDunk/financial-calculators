@@ -132,7 +132,7 @@ const MortgageCalculator = () => {
           className="rounded-2xl p-6"
           style={{
             background:
-              "radial-gradient(ellipse 113px 357px at top, #8362D1 -60%, #192226 130%)",
+              "radial-gradient(ellipse 113px 357px at center, #8362D1 -60%, #192226 130%)",
           }}
         >
           <div className="mb-1">
@@ -162,10 +162,9 @@ const MortgageCalculator = () => {
                 color: "#fff",
                 "& .MuiSlider-thumb": {
                   backgroundImage: "url('/slider.svg')",
-                  backgroundSize: "cover",
-                  backgroundColor: "transparent",
-                  width: 20,
-                  height: 20,
+                  backgroundPosition: "center",
+                  width: 18,
+                  height: 18,
                 },
               }}
             />
@@ -197,10 +196,9 @@ const MortgageCalculator = () => {
                 color: "#fff",
                 "& .MuiSlider-thumb": {
                   backgroundImage: "url('/slider.svg')",
-                  backgroundSize: "cover",
-                  backgroundColor: "transparent",
-                  width: 20,
-                  height: 20,
+                  backgroundPosition: "center",
+                  width: 18,
+                  height: 18,
                 },
               }}
             />
@@ -232,10 +230,9 @@ const MortgageCalculator = () => {
                 color: "#fff",
                 "& .MuiSlider-thumb": {
                   backgroundImage: "url('/slider.svg')",
-                  backgroundSize: "cover",
-                  backgroundColor: "transparent",
-                  width: 20,
-                  height: 20,
+                  backgroundPosition: "center",
+                  width: 18,
+                  height: 18,
                 },
               }}
             />
