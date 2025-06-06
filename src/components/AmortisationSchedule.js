@@ -26,19 +26,19 @@ const AmortizationSchedule = ({ amortizationTable, yearlyAmortization }) => {
     <Table className="text-xs">
       <TableHeader>
         <TableRow className="bg-[#F5F4F7] hover:bg-[#F5F4F7]">
-          <TableHead className="text-[#323233] font-semibold px-3 py-3 text-left">
+          <TableHead className="text-[#323233] font-semibold px-2 py-3 text-center">
             Year
           </TableHead>
-          <TableHead className="text-[#323233] font-semibold px-3 py-3 text-right">
+          <TableHead className="text-[#323233] font-semibold px-2 py-3 text-center">
             Opening Balance
           </TableHead>
-          <TableHead className="text-[#323233] font-semibold px-3 py-3 text-right">
+          <TableHead className="text-[#323233] font-semibold px-2 py-3 text-center">
             Principal
           </TableHead>
-          <TableHead className="text-[#323233] font-semibold px-3 py-3 text-right">
+          <TableHead className="text-[#323233] font-semibold px-2 py-3 text-center">
             Interest
           </TableHead>
-          <TableHead className="text-[#323233] font-semibold px-3 py-3 text-right">
+          <TableHead className="text-[#323233] font-semibold px-2 py-3 text-center">
             Closing Balance
           </TableHead>
         </TableRow>
@@ -50,19 +50,19 @@ const AmortizationSchedule = ({ amortizationTable, yearlyAmortization }) => {
               key={index}
               className="border-b border-[#F5F4F7] hover:bg-[#FAFAFA] transition-colors"
             >
-              <TableCell className="px-3 py-3 text-[#323233] font-medium">
+              <TableCell className="px-2 py-3 text-[#323233] text-center font-medium">
                 {year.year}
               </TableCell>
-              <TableCell className="px-3 py-3 text-right text-[#686868]">
+              <TableCell className="px-2 py-3 text-center text-[#686868]">
                 {formatCurrency(year.startBalance)}
               </TableCell>
-              <TableCell className="px-3 py-3 text-right text-[#2C178C] font-medium">
+              <TableCell className="px-2 py-3 text-center text-[#2C178C] font-medium">
                 {formatCurrency(year.principal)}
               </TableCell>
-              <TableCell className="px-3 py-3 text-right text-[#F04393] font-medium">
+              <TableCell className="px-2 py-3 text-center text-[#F04393] font-medium">
                 {formatCurrency(year.interest)}
               </TableCell>
-              <TableCell className="px-3 py-3 text-right text-[#686868]">
+              <TableCell className="px-2 py-3 text-center text-[#686868]">
                 {formatCurrency(year.endBalance)}
               </TableCell>
             </TableRow>

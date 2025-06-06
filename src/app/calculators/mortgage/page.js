@@ -11,7 +11,6 @@ import {
 
 import AmortizationSchedule from "@/components/AmortisationSchedule";
 
-// Safe formatter
 const formatShortIndianCurrency = (amount) => {
   amount = parseInt(amount) || 0;
   if (amount >= 10000000) {
@@ -38,7 +37,6 @@ const MortgageCalculator = () => {
 
   const [displayedTenure, setDisplayedTenure] = useState(tenure);
   const [amortizationTable, setAmortizationTable] = useState([]);
-  const [showAmortization, setShowAmortization] = useState(false);
 
   useEffect(() => {
     updateChart(loanAmount, tenure, interestRate);
@@ -144,7 +142,7 @@ const MortgageCalculator = () => {
               </div>
             </div>
             <div className="text-[10px] text-white flex justify-end pt-2 px-2">
-              ({formatShortIndianCurrency(loanAmountInput)})
+              {formatShortIndianCurrency(loanAmountInput)}
             </div>
 
             <Slider
