@@ -6,7 +6,10 @@ import ChartDisplay from "@/components/ChartDisplay";
 import {
   calculateEMI,
   generateAmortizationSchedule,
+  getYearlyAmortization,
 } from "@/utils/calculation";
+
+import AmortizationSchedule from "@/components/AmortisationSchedule";
 
 // Safe formatter
 const formatShortIndianCurrency = (amount) => {
@@ -34,7 +37,8 @@ const MortgageCalculator = () => {
   const [chartData, setChartData] = useState(null);
 
   const [displayedTenure, setDisplayedTenure] = useState(tenure);
-  const userInteracted = useRef(false);
+  const [amortizationTable, setAmortizationTable] = useState([]);
+  const [showAmortization, setShowAmortization] = useState(false);
 
   useEffect(() => {
     updateChart(loanAmount, tenure, interestRate);
@@ -70,6 +74,7 @@ const MortgageCalculator = () => {
       tenureYrs,
       rate
     );
+    setAmortizationTable(amortizationSchedule);
 
     setChartData({
       labels: ["Principal", "Interest"],
@@ -87,6 +92,8 @@ const MortgageCalculator = () => {
     updateChart(loanAmount, tenure, interestRate);
     setDisplayedTenure(tenure);
   };
+
+  const yearlyAmortization = getYearlyAmortization(amortizationTable);
 
   return (
     <div className="min-h-screen font-lexend bg-[#EFEDF4] px-5 sm:px-6 lg:px-8">
@@ -312,15 +319,17 @@ const MortgageCalculator = () => {
           <div className="bg-white p-4 text-xs text-[#686868] space-y-2 rounded-lg">
             <div className="flex justify-between">
               <span>Loan Amount</span>
-              <span className="text-[#2C178C]">₹ 50,00,000</span>
+              <span className="text-[#2C178C]">
+                ₹ {loanAmount.toLocaleString("en-IN")}
+              </span>
             </div>
             <div className="flex justify-between">
               <span>Interest Rate</span>
-              <span className="text-[#2C178C]">8 %</span>
+              <span className="text-[#2C178C]">{interestRate} %</span>
             </div>
             <div className="flex justify-between">
               <span>Loan Tenure</span>
-              <span className="text-[#2C178C]">10 yrs</span>
+              <span className="text-[#2C178C]">{tenure} yrs</span>
             </div>
             <div className="rounded-xl px-4 py-2 bg-[#F5F4F7] mt-3 flex justify-between items-center">
               <span className="text-sm text-[#323233]">Final Amount</span>
@@ -332,7 +341,10 @@ const MortgageCalculator = () => {
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                ₹ 72,79,656
+                ₹{" "}
+                {result?.totalPayment?.toLocaleString("en-IN", {
+                  maximumFractionDigits: 0,
+                })}
               </span>
             </div>
             <div className="mt-4 p-3 bg-[#F5F4F7] rounded-xl text-xs text-[#323233]">
@@ -345,6 +357,12 @@ const MortgageCalculator = () => {
             </div>
           </div>
         </div>
+
+        {/* Amortization Schedule Section */}
+        <AmortizationSchedule
+          amortizationTable={amortizationTable}
+          yearlyAmortization={yearlyAmortization}
+        />
       </div>
     </div>
   );

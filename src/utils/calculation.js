@@ -12,23 +12,63 @@ export const generateAmortizationSchedule = (principal, years, rate) => {
   const months = years * 12;
   const emi = calculateEMI(principal, years, rate);
   let balance = principal;
-  const schedule = [];
+  const monthlySchedule = [];
 
   for (let i = 1; i <= months; i++) {
+    const openingBalance = balance; // Store opening balance
     const interest = balance * monthlyRate;
     const principalPayment = emi - interest;
     balance -= principalPayment;
+    const closingBalance = balance > 0 ? balance : 0;
 
-    schedule.push({
+    monthlySchedule.push({
       month: i,
-      emi,
-      principal: principalPayment,
-      interest,
-      balance: balance > 0 ? balance : 0,
+      emi: Math.round(emi),
+      principal: Math.round(principalPayment),
+      interest: Math.round(interest),
+      openingBalance: Math.round(openingBalance), // Add this property
+      closingBalance: Math.round(closingBalance), // Rename from 'balance'
+      balance: Math.round(closingBalance), // Keep this for backward compatibility if needed
     });
+
+    balance = closingBalance; // Update balance for next iteration
+    if (balance <= 0) break;
   }
 
-  return schedule;
+  return monthlySchedule;
+};
+
+export const getYearlyAmortization = (schedule) => {
+  if (!schedule || schedule.length === 0) return [];
+
+  const yearlyData = [];
+  let yearStartBalance = schedule[0]?.openingBalance || 0; // This should now work
+  let yearPrincipal = 0;
+  let yearInterest = 0;
+  let yearEndBalance = 0;
+
+  for (let i = 0; i < schedule.length; i++) {
+    const month = schedule[i];
+    yearPrincipal += month?.principal || 0;
+    yearInterest += month?.interest || 0;
+    yearEndBalance = month?.closingBalance || 0; // Now accessing correct property
+
+    if ((i + 1) % 12 === 0 || i === schedule.length - 1) {
+      yearlyData.push({
+        year: Math.ceil((i + 1) / 12),
+        startBalance: yearStartBalance,
+        principal: yearPrincipal,
+        interest: yearInterest,
+        endBalance: yearEndBalance,
+      });
+
+      yearStartBalance = yearEndBalance;
+      yearPrincipal = 0;
+      yearInterest = 0;
+    }
+  }
+
+  return yearlyData;
 };
 
 export const calculateFutureValue = (presentValue, years, rate) => {
