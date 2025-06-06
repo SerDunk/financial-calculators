@@ -86,22 +86,22 @@ const AmortizationSchedule = ({ amortizationTable, yearlyAmortization }) => {
       <Table className="text-xs">
         <TableHeader className="sticky top-0 bg-white">
           <TableRow className="bg-[#F5F4F7] hover:bg-[#F5F4F7]">
-            <TableHead className="text-[#323233] font-semibold px-3 py-3 text-left">
+            <TableHead className="text-[#323233] font-semibold px-2 py-3 text-center">
               Month
             </TableHead>
-            <TableHead className="text-[#323233] font-semibold px-3 py-3 text-right">
+            <TableHead className="text-[#323233] font-semibold px-2 py-3 text-center">
               Opening Balance
             </TableHead>
-            <TableHead className="text-[#323233] font-semibold px-3 py-3 text-right">
+            <TableHead className="text-[#323233] font-semibold px-2 py-3 text-center">
               EMI
             </TableHead>
-            <TableHead className="text-[#323233] font-semibold px-3 py-3 text-right">
+            <TableHead className="text-[#323233] font-semibold px-2 py-3 text-center">
               Principal
             </TableHead>
-            <TableHead className="text-[#323233] font-semibold px-3 py-3 text-right">
+            <TableHead className="text-[#323233] font-semibold px-2 py-3 text-center">
               Interest
             </TableHead>
-            <TableHead className="text-[#323233] font-semibold px-3 py-3 text-right">
+            <TableHead className="text-[#323233] font-semibold px-2 py-3 text-center">
               Closing Balance
             </TableHead>
           </TableRow>
@@ -111,24 +111,24 @@ const AmortizationSchedule = ({ amortizationTable, yearlyAmortization }) => {
             amortizationTable.map((month, index) => (
               <TableRow
                 key={index}
-                className="border-b border-[#F5F4F7] hover:bg-[#FAFAFA] transition-colors"
+                className="border-b border-[#F5F4F7] hover:bg-[#FAFAFA] transition-colors text-center"
               >
-                <TableCell className="px-3 py-3 text-[#323233] font-medium">
+                <TableCell className="px-2 py-3 text-[#323233] text-center font-medium">
                   {month.month}
                 </TableCell>
-                <TableCell className="px-3 py-3 text-right text-[#686868]">
+                <TableCell className="px-2 py-3 text-center text-[#686868]">
                   {formatCurrency(month.openingBalance)}
                 </TableCell>
-                <TableCell className="px-3 py-3 text-right text-[#323233] font-medium">
+                <TableCell className="px-2 py-3 text-center text-[#323233] font-medium">
                   {formatCurrency(month.emi)}
                 </TableCell>
-                <TableCell className="px-3 py-3 text-right text-[#2C178C] font-medium">
+                <TableCell className="px-2 py-3 text-center text-[#2C178C] font-medium">
                   {formatCurrency(month.principal)}
                 </TableCell>
-                <TableCell className="px-3 py-3 text-right text-[#F04393] font-medium">
+                <TableCell className="px-2 py-3 text-center text-[#F04393] font-medium">
                   {formatCurrency(month.interest)}
                 </TableCell>
-                <TableCell className="px-3 py-3 text-right text-[#686868]">
+                <TableCell className="px-2 py-3 text-center text-[#686868]">
                   {formatCurrency(month.closingBalance)}
                 </TableCell>
               </TableRow>
@@ -153,7 +153,7 @@ const AmortizationSchedule = ({ amortizationTable, yearlyAmortization }) => {
       <div className="bg-[#E5E2F2] text-[#2C178C] rounded-t-lg px-4 py-3 font-semibold text-sm flex justify-between items-center">
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="flex items-center gap-20 hover:text-[#1F0F6B] transition-colors"
+          className="flex items-center justify-between hover:text-[#1F0F6B] w-full transition-colors"
         >
           <span>Amortization Schedule</span>
           {isCollapsed ? (

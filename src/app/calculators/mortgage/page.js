@@ -96,7 +96,7 @@ const MortgageCalculator = () => {
   const yearlyAmortization = getYearlyAmortization(amortizationTable);
 
   return (
-    <div className="min-h-screen font-lexend bg-[#EFEDF4] px-5 sm:px-6 lg:px-8">
+    <div className="min-h-screen font-lexend bg-[#EFEDF4] px-2 sm:px-4 lg:px-6">
       <div className="max-w-xl mx-auto">
         <h2 className="text-lg sm:text-xl font-bold text-[#2D14A0] mb-2">
           Mortgage Calculator
@@ -312,6 +312,12 @@ const MortgageCalculator = () => {
             {chartData && <ChartDisplay data={chartData} type="pie" />}
           </div>
         </div>
+        {/* Amortization Schedule Section */}
+        <AmortizationSchedule
+          amortizationTable={amortizationTable}
+          yearlyAmortization={yearlyAmortization}
+        />
+        {/* Assumptions*/}
         <div className="sm:mt-6 mt-5 bg-white rounded-lg shadow-sm">
           <div className="bg-[#E5E2F2] text-[#2C178C] rounded-t-lg px-4 py-2 font-semibold text-sm">
             Assumptions & Formula
@@ -357,12 +363,6 @@ const MortgageCalculator = () => {
             </div>
           </div>
         </div>
-
-        {/* Amortization Schedule Section */}
-        <AmortizationSchedule
-          amortizationTable={amortizationTable}
-          yearlyAmortization={yearlyAmortization}
-        />
       </div>
     </div>
   );
