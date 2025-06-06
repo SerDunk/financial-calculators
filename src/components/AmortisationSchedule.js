@@ -153,7 +153,7 @@ const AmortizationSchedule = ({ amortizationTable, yearlyAmortization }) => {
       <div className="bg-[#E5E2F2] text-[#2C178C] rounded-t-lg px-4 py-3 font-semibold text-sm flex justify-between items-center">
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="flex items-center justify-between hover:text-[#1F0F6B] w-full transition-colors"
+          className="flex items-center justify-between w-full transition-colors cursor-pointer"
         >
           <span>Amortization Schedule</span>
           {isCollapsed ? (
