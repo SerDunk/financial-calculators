@@ -2,6 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Slider } from "@mui/material";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
 import ChartDisplay from "@/components/ChartDisplay";
 import {
   calculateEMI,
@@ -30,11 +36,14 @@ const MortgageCalculator = () => {
   // Input display states
   const [tenureInput, setTenureInput] = useState("20 yrs");
   const [interestRateInput, setInterestRateInput] = useState("8.5%");
-  const [homePriceInput, setHomePriceInput] = useState("8000000");
+  const [homePriceInput, setHomePriceInput] = useState("80,00,000");
   const [downPaymentPercentInput, setDownPaymentPercentInput] = useState("20%");
-  const [propertyTaxesInput, setPropertyTaxesInput] = useState("8000");
-  const [homeInsuranceInput, setHomeInsuranceInput] = useState("3000");
-  const [otherCostsInput, setOtherCostsInput] = useState("4000");
+  const [propertyTaxesInput, setPropertyTaxesInput] = useState("8,000");
+  const [homeInsuranceInput, setHomeInsuranceInput] = useState("3,000");
+  const [otherCostsInput, setOtherCostsInput] = useState("4,000");
+
+  // Info tooltip states
+  const [showTooltip, setShowTooltip] = useState(null);
 
   // Results and chart data - these will only update when Calculate is pressed
   const [result, setResult] = useState(null);
@@ -75,6 +84,16 @@ const MortgageCalculator = () => {
   useEffect(() => {
     setDownPaymentPercentInput(`${downPaymentPercent}%`);
   }, [downPaymentPercent]);
+
+  // Format number with Indian comma separation
+  const formatIndianNumber = (num) => {
+    return num.toLocaleString("en-IN");
+  };
+
+  // Parse formatted number back to numeric value
+  const parseFormattedNumber = (str) => {
+    return parseInt(str.replace(/[^\d]/g, "")) || 0;
+  };
 
   const parseAndSetNumericValue = (setter, value, min, max) => {
     const numericValue = parseFloat(value.replace(/[₹,%\syrs]/g, ""));
@@ -145,11 +164,11 @@ const MortgageCalculator = () => {
             costBreakdown.totalOtherCosts,
           ],
           backgroundColor: [
-            "#583FCA",
-            "#FD9CD0",
-            "#FF6B6B",
-            "#4ECDC4",
-            "#45B7D1",
+            "#AB78FF",
+            "#F4B6D2",
+            "#CAF5BD",
+            "#45D099",
+            "#97A9FF",
           ],
           borderWidth: 1,
         },
@@ -173,6 +192,69 @@ const MortgageCalculator = () => {
 
   const yearlyAmortization = getYearlyAmortization(amortizationTable);
 
+  // Info tooltip data
+  const infoData = {
+    homePrice: (
+      <>
+        <strong>Home Prices in India</strong>
+        <br />• <strong>Typical range:</strong> ₹30L - ₹5Cr
+        <br />• <strong>Mumbai/Delhi:</strong> ₹1-3Cr
+        <br />• <strong>Bangalore/Pune:</strong> ₹50L-1.5Cr
+        <br />• <strong>Tier-2 cities:</strong> ₹30-80L
+      </>
+    ),
+    downPayment: (
+      <>
+        <strong>Down Payment</strong>
+        <br />• <strong>Typical range:</strong> 10-30% of property value
+        <br />• Most banks require <strong>10-20% minimum</strong>
+        <br />• Higher down payment reduces loan amount and EMI
+      </>
+    ),
+    tenure: (
+      <>
+        <strong>Loan Tenure</strong>
+        <br />• <strong>Typical range:</strong> 10-30 years
+        <br />• <strong>Most common:</strong> 15-25 years
+        <br />• Longer tenure = lower EMI but higher total interest
+      </>
+    ),
+    interestRate: (
+      <>
+        <strong>Interest Rates</strong>
+        <br />• <strong>Current range:</strong> 8-12% p.a.
+        <br />• <strong>SBI/HDFC/ICICI:</strong> 8.5-10.5%
+        <br />• Depends on credit score and loan amount
+      </>
+    ),
+    propertyTax: (
+      <>
+        <strong>Property Tax</strong>
+        <br />• <strong>Typical range:</strong> ₹5K-50K annually
+        <br />• <strong>Mumbai:</strong> 0.5-1% of property value
+        <br />• <strong>Bangalore:</strong> ₹3-15K
+        <br />• <strong>Delhi:</strong> ₹500-5K/year
+      </>
+    ),
+    homeInsurance: (
+      <>
+        <strong>Home Insurance</strong>
+        <br />• <strong>Typical range:</strong> ₹2K-15K annually
+        <br />• <strong>Coverage:</strong> 0.1-0.5% of property value
+        <br />• <strong>Covers:</strong> Fire, earthquake, floods
+        <br />• Mandatory for most home loans
+      </>
+    ),
+    otherCosts: (
+      <>
+        <strong>Other Costs</strong>
+        <br />• <strong>Typical range:</strong> ₹2K-15K monthly
+        <br />• <strong>Maintenance:</strong> ₹2-5/sqft
+        <br />• Includes society charges, utilities, repairs
+      </>
+    ),
+  };
+
   return (
     <div className="min-h-screen font-lexend bg-[#EFEDF4] px-2 sm:px-4 lg:px-6">
       <div className="max-w-xl mx-auto">
@@ -184,7 +266,7 @@ const MortgageCalculator = () => {
           and interest rate including all associated costs.
         </p>
         <div
-          className="rounded-2xl p-6"
+          className="rounded-2xl p-6 relative"
           style={{
             background:
               "radial-gradient(ellipse 113px 357px at center, #8362D1 -60%, #192226 130%)",
@@ -192,8 +274,18 @@ const MortgageCalculator = () => {
         >
           {/* Home Price */}
           <div className="mb-1">
-            <div className="flex text-sm justify-between items-center text-white font-medium">
-              <label>Home Price</label>
+            <div className="flex text-sm justify-between items-center  text-white font-medium">
+              <div className="flex items-center gap-1.5">
+                <p>Home Price</p>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info width={12} />
+                  </TooltipTrigger>
+                  <TooltipContent className={`font-lexend text-[#666666] `}>
+                    {infoData.homePrice}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
 
               <div className="flex items-center text-xs bg-white px-1 py-1 rounded-lg">
                 <span className="text-[#020288]">₹</span>
@@ -203,44 +295,57 @@ const MortgageCalculator = () => {
                   value={homePriceInput}
                   onChange={(e) => {
                     const raw = e.target.value.replace(/[^0-9]/g, "");
-                    setHomePriceInput(raw);
+                    const formatted = raw
+                      ? formatIndianNumber(parseInt(raw))
+                      : "";
+                    setHomePriceInput(formatted);
                     setHomePrice(raw === "" ? 0 : parseInt(raw));
                   }}
                   onFocus={(e) => {
                     const raw = e.target.value.replace(/[^0-9]/g, "");
                     setHomePriceInput(raw);
                   }}
-                  onBlur={() =>
-                    parseAndSetNumericValue(
-                      setHomePrice,
-                      homePriceInput,
-                      500000,
+                  onBlur={() => {
+                    const value = parseFormattedNumber(homePriceInput);
+                    const constrainedValue = Math.min(
+                      Math.max(value, 500000),
                       50000000
-                    )
-                  }
+                    );
+                    setHomePrice(constrainedValue);
+                    setHomePriceInput(formatIndianNumber(constrainedValue));
+                  }}
                 />
               </div>
             </div>
             <div className="text-[10px] text-white flex justify-end pt-2 px-2">
-              {formatShortIndianCurrency(homePriceInput)}
+              {formatShortIndianCurrency(homePrice.toString())}
             </div>
 
             <Slider
               value={homePrice}
               min={500000}
               max={50000000}
-              step={50000}
+              step={25000}
               onChange={(e, val) => {
                 setHomePrice(val);
-                setHomePriceInput(val.toString());
+                setHomePriceInput(formatIndianNumber(val));
               }}
               sx={{
                 color: "#fff",
+                height: 6,
                 "& .MuiSlider-thumb": {
                   backgroundImage: "url('/slider.svg')",
                   backgroundPosition: "center",
                   width: 18,
                   height: 18,
+                  transition:
+                    "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                  "&:hover, &.Mui-focusVisible": {
+                    boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                  },
+                },
+                "& .MuiSlider-track": {
+                  transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
                 },
               }}
             />
@@ -249,7 +354,17 @@ const MortgageCalculator = () => {
           {/* Down Payment % */}
           <div className="mb-1">
             <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
-              <label>Down Payment</label>
+              <div className="flex items-center gap-1.5">
+                <label>Down Payment</label>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info width={12} />
+                  </TooltipTrigger>
+                  <TooltipContent className={`font-lexend text-[#666666] `}>
+                    {infoData.downPayment}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
               <div className="flex items-center bg-white px-1 py-1 rounded-lg">
                 <input
                   type="text"
@@ -280,18 +395,27 @@ const MortgageCalculator = () => {
               value={downPaymentPercent}
               min={5}
               max={50}
-              step={1}
+              step={0.5}
               onChange={(e, val) => {
                 setDownPaymentPercent(val);
                 setDownPaymentPercentInput(`${val}`);
               }}
               sx={{
                 color: "#fff",
+                height: 6,
                 "& .MuiSlider-thumb": {
                   backgroundImage: "url('/slider.svg')",
                   backgroundPosition: "center",
                   width: 18,
                   height: 18,
+                  transition:
+                    "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                  "&:hover, &.Mui-focusVisible": {
+                    boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                  },
+                },
+                "& .MuiSlider-track": {
+                  transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
                 },
               }}
             />
@@ -300,7 +424,17 @@ const MortgageCalculator = () => {
           {/* Tenure */}
           <div className="mb-1">
             <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
-              <label>Loan Tenure</label>
+              <div className="flex items-center gap-1.5">
+                <label>Loan Tenure</label>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info width={12} />
+                  </TooltipTrigger>
+                  <TooltipContent className={`font-lexend text-[#666666] `}>
+                    {infoData.tenure}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
               <div className="flex items-center bg-white px-1 py-1 rounded-lg">
                 <input
                   type="text"
@@ -324,18 +458,27 @@ const MortgageCalculator = () => {
               value={tenure}
               min={1}
               max={30}
-              step={1}
+              step={0.5}
               onChange={(e, val) => {
                 setTenure(val);
                 setTenureInput(`${val}`);
               }}
               sx={{
                 color: "#fff",
+                height: 6,
                 "& .MuiSlider-thumb": {
                   backgroundImage: "url('/slider.svg')",
                   backgroundPosition: "center",
                   width: 18,
                   height: 18,
+                  transition:
+                    "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                  "&:hover, &.Mui-focusVisible": {
+                    boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                  },
+                },
+                "& .MuiSlider-track": {
+                  transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
                 },
               }}
             />
@@ -344,7 +487,17 @@ const MortgageCalculator = () => {
           {/* Interest Rate */}
           <div className="mb-1">
             <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
-              <label>Interest Rate</label>
+              <div className="flex items-center gap-1.5">
+                <label>Interest Rate</label>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info width={12} />
+                  </TooltipTrigger>
+                  <TooltipContent className={`font-lexend text-[#666666] `}>
+                    {infoData.interestRate}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
               <div className="flex items-center bg-white px-1 py-1 rounded-lg">
                 <input
                   type="text"
@@ -373,18 +526,27 @@ const MortgageCalculator = () => {
               value={interestRate}
               min={1}
               max={20}
-              step={0.1}
+              step={0.05}
               onChange={(e, val) => {
                 setInterestRate(val);
                 setInterestRateInput(`${val}`);
               }}
               sx={{
                 color: "#fff",
+                height: 6,
                 "& .MuiSlider-thumb": {
                   backgroundImage: "url('/slider.svg')",
                   backgroundPosition: "center",
                   width: 18,
                   height: 18,
+                  transition:
+                    "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                  "&:hover, &.Mui-focusVisible": {
+                    boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                  },
+                },
+                "& .MuiSlider-track": {
+                  transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
                 },
               }}
             />
@@ -393,7 +555,17 @@ const MortgageCalculator = () => {
           {/* Property Taxes */}
           <div className="mb-1">
             <div className="flex text-sm justify-between items-center text-white font-medium">
-              <label>Property Taxes (Annual)</label>
+              <div className="flex items-center gap-1.5">
+                <label>Property Taxes (Annual)</label>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info width={12} />
+                  </TooltipTrigger>
+                  <TooltipContent className={`font-lexend text-[#666666] `}>
+                    {infoData.propertyTax}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
 
               <div className="flex items-center text-xs bg-white px-1 py-1 rounded-lg">
                 <span className="text-[#020288]">₹</span>
@@ -403,44 +575,57 @@ const MortgageCalculator = () => {
                   value={propertyTaxesInput}
                   onChange={(e) => {
                     const raw = e.target.value.replace(/[^0-9]/g, "");
-                    setPropertyTaxesInput(raw);
+                    const formatted = raw
+                      ? formatIndianNumber(parseInt(raw))
+                      : "";
+                    setPropertyTaxesInput(formatted);
                     setPropertyTaxes(raw === "" ? 0 : parseInt(raw));
                   }}
                   onFocus={(e) => {
                     const raw = e.target.value.replace(/[^0-9]/g, "");
                     setPropertyTaxesInput(raw);
                   }}
-                  onBlur={() =>
-                    parseAndSetNumericValue(
-                      setPropertyTaxes,
-                      propertyTaxesInput,
-                      0,
+                  onBlur={() => {
+                    const value = parseFormattedNumber(propertyTaxesInput);
+                    const constrainedValue = Math.min(
+                      Math.max(value, 0),
                       500000
-                    )
-                  }
+                    );
+                    setPropertyTaxes(constrainedValue);
+                    setPropertyTaxesInput(formatIndianNumber(constrainedValue));
+                  }}
                 />
               </div>
             </div>
             <div className="text-[10px] text-white flex justify-end pt-2 px-2">
-              {formatShortIndianCurrency(propertyTaxesInput)}
+              {formatShortIndianCurrency(propertyTaxes.toString())}
             </div>
 
             <Slider
               value={propertyTaxes}
               min={0}
               max={50000}
-              step={1000}
+              step={500}
               onChange={(e, val) => {
                 setPropertyTaxes(val);
-                setPropertyTaxesInput(val.toString());
+                setPropertyTaxesInput(formatIndianNumber(val));
               }}
               sx={{
                 color: "#fff",
+                height: 6,
                 "& .MuiSlider-thumb": {
                   backgroundImage: "url('/slider.svg')",
                   backgroundPosition: "center",
                   width: 18,
                   height: 18,
+                  transition:
+                    "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                  "&:hover, &.Mui-focusVisible": {
+                    boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                  },
+                },
+                "& .MuiSlider-track": {
+                  transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
                 },
               }}
             />
@@ -449,7 +634,17 @@ const MortgageCalculator = () => {
           {/* Home Insurance */}
           <div className="mb-1">
             <div className="flex text-sm justify-between items-center text-white font-medium">
-              <label>Home Insurance (Annual)</label>
+              <div className="flex items-center gap-1.5">
+                <label>Home Insurance (Annual)</label>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info width={12} />
+                  </TooltipTrigger>
+                  <TooltipContent className={`font-lexend text-[#666666] `}>
+                    {infoData.homeInsurance}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
 
               <div className="flex items-center text-xs bg-white px-1 py-1 rounded-lg">
                 <span className="text-[#020288]">₹</span>
@@ -459,44 +654,57 @@ const MortgageCalculator = () => {
                   value={homeInsuranceInput}
                   onChange={(e) => {
                     const raw = e.target.value.replace(/[^0-9]/g, "");
-                    setHomeInsuranceInput(raw);
+                    const formatted = raw
+                      ? formatIndianNumber(parseInt(raw))
+                      : "";
+                    setHomeInsuranceInput(formatted);
                     setHomeInsurance(raw === "" ? 0 : parseInt(raw));
                   }}
                   onFocus={(e) => {
                     const raw = e.target.value.replace(/[^0-9]/g, "");
                     setHomeInsuranceInput(raw);
                   }}
-                  onBlur={() =>
-                    parseAndSetNumericValue(
-                      setHomeInsurance,
-                      homeInsuranceInput,
-                      0,
+                  onBlur={() => {
+                    const value = parseFormattedNumber(homeInsuranceInput);
+                    const constrainedValue = Math.min(
+                      Math.max(value, 0),
                       100000
-                    )
-                  }
+                    );
+                    setHomeInsurance(constrainedValue);
+                    setHomeInsuranceInput(formatIndianNumber(constrainedValue));
+                  }}
                 />
               </div>
             </div>
             <div className="text-[10px] text-white flex justify-end pt-2 px-2">
-              {formatShortIndianCurrency(homeInsuranceInput)}
+              {formatShortIndianCurrency(homeInsurance.toString())}
             </div>
 
             <Slider
               value={homeInsurance}
               min={0}
               max={50000}
-              step={500}
+              step={250}
               onChange={(e, val) => {
                 setHomeInsurance(val);
-                setHomeInsuranceInput(val.toString());
+                setHomeInsuranceInput(formatIndianNumber(val));
               }}
               sx={{
                 color: "#fff",
+                height: 6,
                 "& .MuiSlider-thumb": {
                   backgroundImage: "url('/slider.svg')",
                   backgroundPosition: "center",
                   width: 18,
                   height: 18,
+                  transition:
+                    "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                  "&:hover, &.Mui-focusVisible": {
+                    boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                  },
+                },
+                "& .MuiSlider-track": {
+                  transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
                 },
               }}
             />
@@ -505,7 +713,17 @@ const MortgageCalculator = () => {
           {/* Other Costs */}
           <div>
             <div className="flex text-sm justify-between items-center text-white font-medium">
-              <label>Other Costs (Monthly)</label>
+              <div className="flex items-center gap-1.5">
+                <label>Other Costs (Monthly)</label>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info width={12} />
+                  </TooltipTrigger>
+                  <TooltipContent className={`font-lexend text-[#666666] `}>
+                    {infoData.otherCosts}
+                  </TooltipContent>
+                </Tooltip>
+              </div>
 
               <div className="flex items-center text-xs bg-white px-1 py-1 rounded-lg">
                 <span className="text-[#020288]">₹</span>
@@ -515,44 +733,57 @@ const MortgageCalculator = () => {
                   value={otherCostsInput}
                   onChange={(e) => {
                     const raw = e.target.value.replace(/[^0-9]/g, "");
-                    setOtherCostsInput(raw);
+                    const formatted = raw
+                      ? formatIndianNumber(parseInt(raw))
+                      : "";
+                    setOtherCostsInput(formatted);
                     setOtherCosts(raw === "" ? 0 : parseInt(raw));
                   }}
                   onFocus={(e) => {
                     const raw = e.target.value.replace(/[^0-9]/g, "");
                     setOtherCostsInput(raw);
                   }}
-                  onBlur={() =>
-                    parseAndSetNumericValue(
-                      setOtherCosts,
-                      otherCostsInput,
-                      0,
+                  onBlur={() => {
+                    const value = parseFormattedNumber(otherCostsInput);
+                    const constrainedValue = Math.min(
+                      Math.max(value, 0),
                       50000
-                    )
-                  }
+                    );
+                    setOtherCosts(constrainedValue);
+                    setOtherCostsInput(formatIndianNumber(constrainedValue));
+                  }}
                 />
               </div>
             </div>
             <div className="text-[10px] text-white flex justify-end pt-2 px-2">
-              {formatShortIndianCurrency(otherCostsInput)}
+              {formatShortIndianCurrency(otherCosts.toString())}
             </div>
 
             <Slider
               value={otherCosts}
               min={0}
               max={50000}
-              step={500}
+              step={250}
               onChange={(e, val) => {
                 setOtherCosts(val);
-                setOtherCostsInput(val.toString());
+                setOtherCostsInput(formatIndianNumber(val));
               }}
               sx={{
                 color: "#fff",
+                height: 6,
                 "& .MuiSlider-thumb": {
                   backgroundImage: "url('/slider.svg')",
                   backgroundPosition: "center",
                   width: 18,
                   height: 18,
+                  transition:
+                    "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                  "&:hover, &.Mui-focusVisible": {
+                    boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                  },
+                },
+                "& .MuiSlider-track": {
+                  transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
                 },
               }}
             />
