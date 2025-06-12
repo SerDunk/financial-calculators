@@ -828,108 +828,238 @@ const MortgageCalculator = () => {
         </button>
 
         {/* Output + Chart */}
-        <div className="sm:mt-2 mt-4 sm:text-sm bg-white py-1 px-3 rounded-lg">
-          <div className="mt-4 py-3 bg-[#F5F4F7] rounded-xl font-semibold text-xs text-[#323233] text-center">
-            Loan Amount
-            <br />
-            <span
-              className="text-lg font-bold p-2"
-              style={{
-                background: "linear-gradient(to right,#320992 30%,#F04393)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              ₹{" "}
-              {loanAmount?.toLocaleString("en-IN", {
-                maximumFractionDigits: 0,
-              })}
-            </span>
-            <div className="mt-2 p-3 bg-[#F5F4F7] rounded-xl font-semibold text-xs text-[#323233] text-center">
-              Total Monthly Payment
-              <br />
-              <span
-                className="text-lg font-bold p-2"
+        {/* Output + Chart */}
+        <div className="sm:mt-2 mt-4 sm:text-sm bg-white py-4 px-4 rounded-lg">
+          {/* Main Summary Cards */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            {/* Down Payment Card */}
+            <div className="bg-[#F5F4F7] rounded-xl p-3 text-center">
+              <div className="text-xs text-[#666666] font-medium mb-1">
+                Down Payment
+              </div>
+              <div
+                className="text-lg font-bold"
                 style={{
                   background: "linear-gradient(to right,#320992 30%,#F04393)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                ₹{" "}
+                ₹
+                {((homePrice * downPaymentPercent) / 100)?.toLocaleString(
+                  "en-IN",
+                  {
+                    maximumFractionDigits: 0,
+                  }
+                )}
+              </div>
+            </div>
+
+            {/* Loan Amount Card */}
+            <div className="bg-[#F5F4F7] rounded-xl p-3 text-center">
+              <div className="text-xs text-[#666666] font-medium mb-1">
+                Loan Amount
+              </div>
+              <div
+                className="text-lg font-bold"
+                style={{
+                  background: "linear-gradient(to right,#320992 30%,#F04393)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                ₹
+                {loanAmount?.toLocaleString("en-IN", {
+                  maximumFractionDigits: 0,
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Monthly Payment Breakdown */}
+          <div className="bg-[#F5F4F7] rounded-xl p-4 mb-4">
+            <div className="text-center mb-3">
+              <div className="text-xs text-[#666666] font-medium mb-1">
+                Your Monthly Payment
+              </div>
+              <div
+                className="text-2xl font-bold"
+                style={{
+                  background: "linear-gradient(to right,#320992 30%,#F04393)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                ₹
                 {result?.totalMonthlyPayment?.toLocaleString("en-IN", {
                   maximumFractionDigits: 0,
                 })}
-              </span>
+              </div>
+              <div className="text-xs text-[#666666] mt-1">per month</div>
             </div>
-            <div className="p-3 font-semibold text-xs text-[#323233] text-center">
-              In {displayedTenure} yrs, your total cost would be
-              <br />
-              <span
-                className="text-lg font-bold p-2"
+
+            {/* Monthly Breakdown */}
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between items-center py-1">
+                <span className="text-[#323233] flex items-center">
+                  <div className="w-2 h-2 bg-[#AB78FF] rounded-full mr-2"></div>
+                  Loan EMI
+                </span>
+                <span className="text-[#020288] font-medium">
+                  ₹
+                  {result?.emi?.toLocaleString("en-IN", {
+                    maximumFractionDigits: 0,
+                  })}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-1">
+                <span className="text-[#323233] flex items-center">
+                  <div className="w-2 h-2 bg-[#CAF5BD] rounded-full mr-2"></div>
+                  Property Tax
+                </span>
+                <span className="text-[#020288] font-medium">
+                  ₹
+                  {result?.monthlyPropertyTax?.toLocaleString("en-IN", {
+                    maximumFractionDigits: 0,
+                  })}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-1">
+                <span className="text-[#323233] flex items-center">
+                  <div className="w-2 h-2 bg-[#45D099] rounded-full mr-2"></div>
+                  Home Insurance
+                </span>
+                <span className="text-[#020288] font-medium">
+                  ₹
+                  {result?.monthlyHomeInsurance?.toLocaleString("en-IN", {
+                    maximumFractionDigits: 0,
+                  })}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-1">
+                <span className="text-[#323233] flex items-center">
+                  <div className="w-2 h-2 bg-[#97A9FF] rounded-full mr-2"></div>
+                  Other Costs
+                </span>
+                <span className="text-[#020288] font-medium">
+                  ₹
+                  {result?.monthlyOtherCosts?.toLocaleString("en-IN", {
+                    maximumFractionDigits: 0,
+                  })}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Total Cost Over Loan Term */}
+          <div className="bg-[#F5F4F7] rounded-xl p-4 mb-4">
+            <div className="text-center mb-3">
+              <div className="text-xs text-[#666666] font-medium mb-1">
+                Total Cost Over {displayedTenure} Years
+              </div>
+              <div
+                className="text-xl font-bold"
                 style={{
                   background: "linear-gradient(to right,#320992 30%,#F04393)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                ₹{" "}
+                ₹
                 {result?.totalCost?.toLocaleString("en-IN", {
                   maximumFractionDigits: 0,
                 })}
-              </span>
+              </div>
+            </div>
+
+            {/* Total Cost Breakdown */}
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between items-center py-1">
+                <span className="text-[#323233] flex items-center">
+                  <div className="w-2 h-2 bg-[#AB78FF] rounded-full mr-2"></div>
+                  Principal Amount
+                </span>
+                <span className="text-[#020288] font-medium">
+                  ₹
+                  {loanAmount?.toLocaleString("en-IN", {
+                    maximumFractionDigits: 0,
+                  })}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-1">
+                <span className="text-[#323233] flex items-center">
+                  <div className="w-2 h-2 bg-[#F4B6D2] rounded-full mr-2"></div>
+                  Total Interest
+                </span>
+                <span className="text-[#020288] font-medium">
+                  ₹
+                  {result?.totalInterest?.toLocaleString("en-IN", {
+                    maximumFractionDigits: 0,
+                  })}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-1">
+                <span className="text-[#323233] flex items-center">
+                  <div className="w-2 h-2 bg-[#CAF5BD] rounded-full mr-2"></div>
+                  Total Property Tax
+                </span>
+                <span className="text-[#020288] font-medium">
+                  ₹
+                  {result?.totalPropertyTax?.toLocaleString("en-IN", {
+                    maximumFractionDigits: 0,
+                  })}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-1">
+                <span className="text-[#323233] flex items-center">
+                  <div className="w-2 h-2 bg-[#45D099] rounded-full mr-2"></div>
+                  Total Home Insurance
+                </span>
+                <span className="text-[#020288] font-medium">
+                  ₹
+                  {result?.totalHomeInsurance?.toLocaleString("en-IN", {
+                    maximumFractionDigits: 0,
+                  })}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-1">
+                <span className="text-[#323233] flex items-center">
+                  <div className="w-2 h-2 bg-[#97A9FF] rounded-full mr-2"></div>
+                  Total Other Costs
+                </span>
+                <span className="text-[#020288] font-medium">
+                  ₹
+                  {result?.totalOtherCosts?.toLocaleString("en-IN", {
+                    maximumFractionDigits: 0,
+                  })}
+                </span>
+              </div>
             </div>
           </div>
 
-          <div className="py-4 flex flex-col gap-1">
-            <div className="text-xs flex justify-between px-4 text-[#323233]">
-              <span>Loan EMI</span>
-              <span className="text-[#020288]">
-                ₹{" "}
-                {result?.emi?.toLocaleString("en-IN", {
-                  maximumFractionDigits: 0,
-                })}
-              </span>
-            </div>
-            <div className="text-xs flex justify-between px-4 text-[#323233] py-1">
-              <span>Property Tax (Monthly)</span>
-              <span className="text-[#020288]">
-                ₹{" "}
-                {result?.monthlyPropertyTax?.toLocaleString("en-IN", {
-                  maximumFractionDigits: 0,
-                })}
-              </span>
-            </div>
-            <div className="text-xs flex justify-between px-4 text-[#323233] py-1">
-              <span>Home Insurance (Monthly)</span>
-              <span className="text-[#020288]">
-                ₹{" "}
-                {result?.monthlyHomeInsurance?.toLocaleString("en-IN", {
-                  maximumFractionDigits: 0,
-                })}
-              </span>
-            </div>
-            <div className="text-xs flex justify-between px-4 text-[#323233] py-1">
-              <span>Other Costs (Monthly)</span>
-              <span className="text-[#020288]">
-                ₹{" "}
-                {result?.monthlyOtherCosts?.toLocaleString("en-IN", {
-                  maximumFractionDigits: 0,
-                })}
-              </span>
-            </div>
-            <hr className="my-2 mx-4" />
-            <div className="text-xs flex justify-between px-4 text-[#323233] font-semibold">
-              <span>Total Interest (Loan Only)</span>
-              <span className="text-[#020288]">
-                ₹{" "}
-                {result?.totalInterest?.toLocaleString("en-IN", {
-                  maximumFractionDigits: 0,
-                })}
-              </span>
+          {/* Loan Summary */}
+          <div className="bg-[#F5F4F7] rounded-xl p-4 mb-4">
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              <div className="text-center">
+                <div className="text-[#666666] font-medium mb-1">
+                  Interest Rate
+                </div>
+                <div className="text-[#020288] font-bold text-sm">
+                  {interestRate}% p.a.
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-[#666666] font-medium mb-1">
+                  Loan Tenure
+                </div>
+                <div className="text-[#020288] font-bold text-sm">
+                  {displayedTenure} years
+                </div>
+              </div>
             </div>
           </div>
 
+          {/* Chart */}
           <div className="flex justify-center py-2">
             {chartData && <ChartDisplay data={chartData} type="pie" />}
           </div>
