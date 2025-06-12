@@ -7,10 +7,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Info } from "lucide-react";
 import ChartDisplay from "@/components/ChartDisplay";
 import {
-  calculateEMI,
   calculateTotalCostBreakdown,
   generateAmortizationSchedule,
   getYearlyAmortization,
@@ -277,14 +281,16 @@ const MortgageCalculator = () => {
             <div className="flex text-sm justify-between items-center  text-white font-medium">
               <div className="flex items-center gap-1.5">
                 <p>Home Price</p>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Info width={12} />
-                  </TooltipTrigger>
-                  <TooltipContent className={`font-lexend text-[#666666] `}>
+                <Popover>
+                  <PopoverTrigger>
+                    <Info width={15} />
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className={`text-xs border-[#666666] font-lexend`}
+                  >
                     {infoData.homePrice}
-                  </TooltipContent>
-                </Tooltip>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               <div className="flex items-center text-xs bg-white px-1 py-1 rounded-lg">
@@ -356,14 +362,16 @@ const MortgageCalculator = () => {
             <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
               <div className="flex items-center gap-1.5">
                 <label>Down Payment</label>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Info width={12} />
-                  </TooltipTrigger>
-                  <TooltipContent className={`font-lexend text-[#666666] `}>
+                <Popover>
+                  <PopoverTrigger>
+                    <Info width={15} />
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className={`text-xs border-[#666666] font-lexend`}
+                  >
                     {infoData.downPayment}
-                  </TooltipContent>
-                </Tooltip>
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="flex items-center bg-white px-1 py-1 rounded-lg">
                 <input
@@ -426,14 +434,16 @@ const MortgageCalculator = () => {
             <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
               <div className="flex items-center gap-1.5">
                 <label>Loan Tenure</label>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Info width={12} />
-                  </TooltipTrigger>
-                  <TooltipContent className={`font-lexend text-[#666666] `}>
+                <Popover>
+                  <PopoverTrigger>
+                    <Info width={15} />
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className={`text-xs border-[#666666] font-lexend`}
+                  >
                     {infoData.tenure}
-                  </TooltipContent>
-                </Tooltip>
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="flex items-center bg-white px-1 py-1 rounded-lg">
                 <input
@@ -489,14 +499,16 @@ const MortgageCalculator = () => {
             <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
               <div className="flex items-center gap-1.5">
                 <label>Interest Rate</label>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Info width={12} />
-                  </TooltipTrigger>
-                  <TooltipContent className={`font-lexend text-[#666666] `}>
+                <Popover>
+                  <PopoverTrigger>
+                    <Info width={15} />
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className={`text-xs border-[#666666] font-lexend`}
+                  >
                     {infoData.interestRate}
-                  </TooltipContent>
-                </Tooltip>
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="flex items-center bg-white px-1 py-1 rounded-lg">
                 <input
@@ -557,14 +569,16 @@ const MortgageCalculator = () => {
             <div className="flex text-sm justify-between items-center text-white font-medium">
               <div className="flex items-center gap-1.5">
                 <label>Property Taxes (Annual)</label>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Info width={12} />
-                  </TooltipTrigger>
-                  <TooltipContent className={`font-lexend text-[#666666] `}>
+                <Popover>
+                  <PopoverTrigger>
+                    <Info width={15} />
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className={`text-xs border-[#666666] font-lexend`}
+                  >
                     {infoData.propertyTax}
-                  </TooltipContent>
-                </Tooltip>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               <div className="flex items-center text-xs bg-white px-1 py-1 rounded-lg">
@@ -634,16 +648,18 @@ const MortgageCalculator = () => {
           {/* Home Insurance */}
           <div className="mb-1">
             <div className="flex text-sm justify-between items-center text-white font-medium">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 <label>Home Insurance (Annual)</label>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Info width={12} />
-                  </TooltipTrigger>
-                  <TooltipContent className={`font-lexend text-[#666666] `}>
+                <Popover>
+                  <PopoverTrigger>
+                    <Info width={15} />
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className={`text-xs border-[#666666] font-lexend`}
+                  >
                     {infoData.homeInsurance}
-                  </TooltipContent>
-                </Tooltip>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               <div className="flex items-center text-xs bg-white px-1 py-1 rounded-lg">
@@ -713,16 +729,18 @@ const MortgageCalculator = () => {
           {/* Other Costs */}
           <div>
             <div className="flex text-sm justify-between items-center text-white font-medium">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 <label>Other Costs (Monthly)</label>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Info width={12} />
-                  </TooltipTrigger>
-                  <TooltipContent className={`font-lexend text-[#666666] `}>
+                <Popover>
+                  <PopoverTrigger>
+                    <Info width={15} />
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className={`text-xs border-[#666666] font-lexend`}
+                  >
                     {infoData.otherCosts}
-                  </TooltipContent>
-                </Tooltip>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               <div className="flex items-center text-xs bg-white px-1 py-1 rounded-lg">
