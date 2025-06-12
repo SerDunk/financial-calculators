@@ -2,11 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Slider } from "@mui/material";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+
 import {
   Popover,
   PopoverContent,
@@ -45,9 +41,6 @@ const MortgageCalculator = () => {
   const [propertyTaxesInput, setPropertyTaxesInput] = useState("8,000");
   const [homeInsuranceInput, setHomeInsuranceInput] = useState("3,000");
   const [otherCostsInput, setOtherCostsInput] = useState("4,000");
-
-  // Info tooltip states
-  const [showTooltip, setShowTooltip] = useState(null);
 
   // Results and chart data - these will only update when Calculate is pressed
   const [result, setResult] = useState(null);
@@ -399,6 +392,26 @@ const MortgageCalculator = () => {
                 />
               </div>
             </div>
+
+            {/* Down Payment and Loan Amount Display */}
+            <div className="flex justify-between items-center text-[10px]  pt-2 px-2 mb-2">
+              <div className="flex flex-col gap-2">
+                <span className="text-white">Down Payment</span>
+                <span className="font-medium bg-white text-[#2D14A0] px-2 py-1 rounded-md">
+                  ₹
+                  {formatShortIndianCurrency(
+                    ((homePrice * downPaymentPercent) / 100).toString()
+                  )}
+                </span>
+              </div>
+              <div className="flex flex-col gap-2">
+                <span className="text-white">Loan Amount</span>
+                <span className="font-medium bg-white text-[#2D14A0] px-2 py-1 rounded-md">
+                  ₹{formatShortIndianCurrency(loanAmount.toString())}
+                </span>
+              </div>
+            </div>
+
             <Slider
               value={downPaymentPercent}
               min={5}
