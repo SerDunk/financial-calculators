@@ -269,18 +269,20 @@ export const calculateBuyVsRent = ({
   }
 
   const downPayment = homePrice * (downPaymentPercent / 100);
-  const loanAmount = Math.max(0, homePrice - downPayment);
+  const loanAmount = homePrice - downPayment;
+  const loanTermMonths = loanTerm * 12;
   const monthlyRate = interestRate / 100 / 12;
-  const months = loanTerm * 12;
+  const comparisonMonths = comparisonPeriod * 12;
 
-  let monthlyEMI = 0;
-  if (monthlyRate > 0 && months > 0) {
-    const rateFactor = Math.pow(1 + monthlyRate, months);
-    monthlyEMI = (loanAmount * monthlyRate * rateFactor) / (rateFactor - 1);
-  }
+  const emi =
+    monthlyRate > 0
+      ? (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, loanTermMonths)) /
+        (Math.pow(1 + monthlyRate, loanTermMonths) - 1)
+      : 0;
 
-  const totalEMIPaid = Math.min(comparisonPeriod, loanTerm) * 12 * monthlyEMI;
-  const totalMaintenanceCost =
+  const monthsToConsider = Math.min(loanTermMonths, comparisonMonths);
+  const totalEMIPaid = emi * monthsToConsider;
+  const totalMaintenance =
     homePrice * (maintenancePercent / 100) * comparisonPeriod;
   const totalPropertyTax =
     homePrice * (propertyTaxPercent / 100) * comparisonPeriod;
@@ -288,45 +290,135 @@ export const calculateBuyVsRent = ({
     homePrice * Math.pow(1 + homeAppreciation / 100, comparisonPeriod);
   const sellingCost = futureHomeValue * (sellingCostPercent / 100);
 
-  const totalBuyingExpenses =
+  const totalBuyingCost =
     downPayment +
     totalEMIPaid +
-    totalMaintenanceCost +
+    totalMaintenance +
     totalPropertyTax +
     sellingCost;
-  const netProfitFromHome = futureHomeValue - totalBuyingExpenses;
+  const netHomeProfit = futureHomeValue - totalBuyingCost;
 
+  // Rent Calculations
   let totalRentPaid = 0;
   let currentRent = monthlyRent;
-  for (let year = 1; year <= comparisonPeriod; year++) {
+  for (let i = 1; i <= comparisonPeriod; i++) {
     totalRentPaid += currentRent * 12;
     currentRent *= 1 + rentIncreasePercent / 100;
   }
 
-  const investmentReturn =
-    downPayment *
-      Math.pow(1 + investmentReturnPercent / 100, comparisonPeriod) -
-    downPayment;
-  const totalRentCostAdjusted = totalRentPaid - investmentReturn;
+  const investmentGrowth =
+    downPayment * Math.pow(1 + investmentReturnPercent / 100, comparisonPeriod);
+  const investmentReturn = investmentGrowth - downPayment;
 
-  const decision = netProfitFromHome > totalRentCostAdjusted ? "BUY" : "RENT";
-  const savings = Math.abs(netProfitFromHome - totalRentCostAdjusted);
+  const adjustedRentCost = totalRentPaid - investmentReturn;
+
+  const decision = netHomeProfit > adjustedRentCost ? "BUY" : "RENT";
+  const savings = Math.abs(netHomeProfit - adjustedRentCost);
 
   return {
     loanAmount,
-    monthlyEMI,
-    totalBuyingExpenses,
+    monthlyEMI: emi,
     totalEMIPaid,
-    totalMaintenanceCost,
+    totalMaintenance,
     totalPropertyTax,
+    totalBuyingCost,
     futureHomeValue,
     sellingCost,
-    netProfitFromHome,
+    netHomeProfit,
     totalRentPaid,
     investmentReturn,
-    totalRentCostAdjusted,
+    adjustedRentCost,
+    downPayment,
+    comparisonPeriod,
     decision,
     savings,
+  };
+};
+
+// Updated calculateBuyVsRentBreakdown function - replace this in your calculation.js file
+
+export const calculateBuyVsRentBreakdown = (
+  homePrice,
+  downPaymentPercent,
+  interestRate,
+  loanTerm,
+  maintenancePercent,
+  propertyTaxPercent,
+  homeAppreciation,
+  sellingCostPercent,
+  monthlyRent,
+  rentIncreasePercent,
+  investmentReturnPercent,
+  comparisonPeriod
+) => {
+  // Calculate loan details
+  const downPayment = homePrice * (downPaymentPercent / 100);
+  const loanAmount = homePrice - downPayment;
+
+  // Calculate EMI using the loan amount, not home price
+  const loanEMI = calculateEMI(loanAmount, loanTerm, interestRate);
+  const totalLoanPayments = loanEMI * loanTerm * 12;
+  const totalInterest = totalLoanPayments - loanAmount;
+
+  // Calculate other costs
+  const totalMaintenance =
+    homePrice * (maintenancePercent / 100) * comparisonPeriod;
+  const totalPropertyTax =
+    homePrice * (propertyTaxPercent / 100) * comparisonPeriod;
+  const totalSellingCost = homePrice * (sellingCostPercent / 100);
+
+  // Calculate rent costs
+  const totalRentPaid = calculateTotalRent(
+    monthlyRent,
     comparisonPeriod,
+    rentIncreasePercent
+  );
+
+  // Calculate home appreciation and equity
+  const futureHomeValue =
+    homePrice * Math.pow(1 + homeAppreciation / 100, comparisonPeriod);
+  const remainingLoanBalance = Math.max(
+    0,
+    loanAmount -
+      (loanEMI * Math.min(comparisonPeriod * 12, loanTerm * 12) - totalInterest)
+  );
+  const netHomeEquity =
+    futureHomeValue - remainingLoanBalance - totalSellingCost;
+
+  // Calculate investment returns for rent scenario
+  const investmentReturn =
+    downPayment * Math.pow(1 + investmentReturnPercent / 100, comparisonPeriod);
+
+  // Calculate total costs
+  const totalBuyingCost =
+    downPayment +
+    totalLoanPayments +
+    totalMaintenance +
+    totalPropertyTax +
+    totalSellingCost;
+
+  return {
+    homePrice,
+    downPayment,
+    loanAmount,
+    loanEMI,
+    totalInterest,
+    totalLoanPayments,
+    totalMaintenance,
+    totalPropertyTax,
+    totalSellingCost,
+    totalBuyingCost,
+    totalRentPaid,
+    futureHomeValue,
+    netHomeEquity,
+    investmentReturn,
+    monthlyMaintenance: totalMaintenance / (comparisonPeriod * 12),
+    monthlyPropertyTax: totalPropertyTax / (comparisonPeriod * 12),
+    monthlySellingCost: totalSellingCost / (comparisonPeriod * 12),
+    monthlyRentPaid: totalRentPaid / (comparisonPeriod * 12),
+    totalMonthlyPayment:
+      loanEMI +
+      totalMaintenance / (comparisonPeriod * 12) +
+      totalPropertyTax / (comparisonPeriod * 12),
   };
 };

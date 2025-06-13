@@ -2,16 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { Slider } from "@mui/material";
-import { tipData, headingData } from "@/constants/displayData";
-
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Info } from "lucide-react";
-import { calculateBuyVsRent } from "@/utils/calculation";
-import { formatShortIndianCurrency } from "@/utils/formatting";
+import { calculateBuyVsRentBreakdown } from "@/utils/calculation";
 import Heading from "@/components/Heading";
 
 const BuyVsRentCalculator = () => {
@@ -40,23 +37,21 @@ const BuyVsRentCalculator = () => {
   const [investmentReturnPercentInput, setInvestmentReturnPercentInput] =
     useState("12%");
   const [comparisonPeriodInput, setComparisonPeriodInput] = useState("10 yrs");
-  const [maintenancePercentInput, setMaintenancePercentInput] = useState("1%");
-  const [propertyTaxPercentInput, setPropertyTaxPercentInput] =
-    useState("0.1%");
 
   // Results - these will only update when Calculate is pressed
   const [result, setResult] = useState(null);
 
-  // Initialize with default calculation on component mount
+  // Calculation functions
+
   useEffect(() => {
-    // Calculate initial values with defaults
     const initialLoanAmount = homePrice * (1 - downPaymentPercent / 100);
     const initialDownPayment = homePrice * (downPaymentPercent / 100);
     setLoanAmount(initialLoanAmount);
     setDownPaymentAmount(initialDownPayment);
 
+    // Perform initial calculation with default values
     performCalculations();
-  }, []); // Empty dependency array - only run once on mount
+  }, []); // Empty dependency array to run only once on mount
 
   // Update loan amount and down payment when home price or down payment percent changes
   useEffect(() => {
@@ -96,6 +91,18 @@ const BuyVsRentCalculator = () => {
     return num.toLocaleString("en-IN");
   };
 
+  const formatShortIndianCurrency = (amount) => {
+    const num = parseInt(amount);
+    if (num >= 10000000) {
+      return `${(num / 10000000).toFixed(1)}Cr`;
+    } else if (num >= 100000) {
+      return `${(num / 100000).toFixed(1)}L`;
+    } else if (num >= 1000) {
+      return `${(num / 1000).toFixed(1)}K`;
+    }
+    return num.toString();
+  };
+
   // Parse formatted number back to numeric value
   const parseFormattedNumber = (str) => {
     return parseInt(str.replace(/[^\d]/g, "")) || 0;
@@ -113,20 +120,58 @@ const BuyVsRentCalculator = () => {
 
   // Separate function to perform calculations
   const performCalculations = () => {
-    const calculationResult = calculateBuyVsRent({
+    const breakdown = calculateBuyVsRentBreakdown(
       homePrice,
       downPaymentPercent,
       interestRate,
       loanTerm,
-      homeAppreciation: 7, // Assuming 7% appreciation
-      sellingCostPercent: 2, // Assuming 2% selling cost
+      0.5,
+      0.7,
+      7,
+      2,
       monthlyRent,
       rentIncreasePercent,
       investmentReturnPercent,
-      comparisonPeriod,
-    });
+      comparisonPeriod
+    );
 
-    setResult(calculationResult);
+    if (!breakdown) return;
+
+    const netBuyGain = breakdown.netHomeEquity - breakdown.totalBuyingCost;
+    const netRentGain = breakdown.investmentReturn;
+    const betterOption = netBuyGain > netRentGain ? "Buying" : "Renting";
+
+    setResult({
+      loanAmount: breakdown.loanAmount,
+      monthlyEMI: breakdown.loanEMI,
+      downPayment: breakdown.downPayment,
+      totalEMIs: breakdown.totalLoanPayments,
+      totalTax: breakdown.totalPropertyTax,
+      totalOther: breakdown.totalMaintenance + breakdown.totalSellingCost,
+      totalHomeCost: breakdown.totalBuyingCost,
+      totalRentPaid: breakdown.totalRentPaid,
+      netBuyGain: netBuyGain,
+      netRentGain: netRentGain,
+      totalMonthlyOutflowBuy: breakdown.totalMonthlyPayment,
+      totalMonthlyOutflowRent: breakdown.monthlyRentPaid,
+      comparisonPeriod: comparisonPeriod,
+      decision: betterOption,
+      savings: Math.abs(netBuyGain - netRentGain),
+      betterOption,
+      displayedTenure: comparisonPeriod,
+      chartData: [
+        {
+          name: "Buy - Cost",
+          value: breakdown.totalBuyingCost,
+          color: "#AB78FF",
+        },
+        {
+          name: "Rent - Cost",
+          value: breakdown.totalRentPaid,
+          color: "#F4B6D2",
+        },
+      ],
+    });
   };
 
   // Handle Calculate button click
@@ -141,6 +186,8 @@ const BuyVsRentCalculator = () => {
           header="Buy vs Rent Calculator"
           desc="Compare the financial impact of buying vs renting to make an informed decision"
         />
+
+        {/* SLIDERS SECTION ABSTRACTED - Insert your slider components here */}
         <div
           className="rounded-2xl p-6 relative"
           style={{
@@ -751,6 +798,151 @@ const BuyVsRentCalculator = () => {
                 },
               }}
             />
+          </div>
+        </div>
+
+        <button
+          onClick={handleCalculate}
+          className="w-full sm:mt-2 mt-4 bg-gradient-to-r from-[#583FCA] to-[#2D14A0] text-white font-bold py-3 rounded-2xl text-sm hover:opacity-90"
+        >
+          CALCULATE
+        </button>
+
+        <div className="sm:mt-2 mt-4 sm:text-sm bg-white py-4 px-4 rounded-lg">
+          {/* Main Summary Cards */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            {/* Down Payment */}
+            <div className="bg-[#F5F4F7] rounded-xl p-3 text-center">
+              <div className="text-xs text-[#666666] font-medium mb-1">
+                Down Payment
+              </div>
+              <div className="text-md sm:text-lg font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+                ₹{Math.round(result?.downPayment || 0).toLocaleString("en-IN")}
+              </div>
+            </div>
+
+            {/* Total Rent Paid */}
+            <div className="bg-[#F5F4F7] rounded-xl p-3 text-center">
+              <div className="text-xs text-[#666666] font-medium mb-1">
+                Total Rent Paid
+              </div>
+              <div className="text-md sm:text-lg font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+                ₹
+                {Math.round(result?.totalRentPaid || 0).toLocaleString("en-IN")}
+              </div>
+            </div>
+          </div>
+
+          {/* Total Cost & Value Over Tenure */}
+          <div className="bg-[#F5F4F7] rounded-xl p-4 mb-4">
+            <div className="text-center mb-3">
+              <div className="text-xs text-[#666666] font-medium mb-1">
+                Home Cost Over {result?.displayedTenure || comparisonPeriod}{" "}
+                Years
+              </div>
+              <div className="text-xl font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+                ₹
+                {Math.round(result?.totalHomeCost || 0).toLocaleString("en-IN")}
+              </div>
+            </div>
+
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between items-center py-1">
+                <span className="text-[#323233] flex items-center">
+                  <div className="w-2 h-2 bg-[#AB78FF] rounded-full mr-2"></div>
+                  Total EMIs Paid
+                </span>
+                <span className="text-[#020288] font-medium">
+                  ₹{Math.round(result?.totalEMIs || 0).toLocaleString("en-IN")}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-1">
+                <span className="text-[#323233] flex items-center">
+                  <div className="w-2 h-2 bg-[#CAF5BD] rounded-full mr-2"></div>
+                  Property Tax
+                </span>
+                <span className="text-[#020288] font-medium">
+                  ₹{Math.round(result?.totalTax || 0).toLocaleString("en-IN")}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-1">
+                <span className="text-[#323233] flex items-center">
+                  <div className="w-2 h-2 bg-[#45D099] rounded-full mr-2"></div>
+                  Maintenance + Insurance
+                </span>
+                <span className="text-[#020288] font-medium">
+                  ₹{Math.round(result?.totalOther || 0).toLocaleString("en-IN")}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Wealth Comparison */}
+          <div className="bg-[#F5F4F7] rounded-xl p-4 mb-4">
+            <div className="text-center mb-3">
+              <div className="text-xs text-[#666666] font-medium mb-1">
+                Net Gain from Buying vs Renting
+              </div>
+              <div className="text-xl font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+                ₹
+                {Math.abs(
+                  (result?.netBuyGain || 0) - (result?.netRentGain || 0)
+                ).toLocaleString("en-IN")}
+              </div>
+              <div className="text-xs text-[#666666] mt-1">
+                {result?.betterOption || "Buying"} is more practical over{" "}
+                {result?.displayedTenure || comparisonPeriod} years
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              <div className="text-center">
+                <div className="text-[#666666] font-medium mb-1">
+                  Net Wealth (Buy)
+                </div>
+                <div className="text-[#020288] font-bold text-sm">
+                  ₹{Math.round(result?.netBuyGain || 0).toLocaleString("en-IN")}
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-[#666666] font-medium mb-1">
+                  Net Wealth (Rent)
+                </div>
+                <div className="text-[#020288] font-bold text-sm">
+                  ₹
+                  {Math.round(result?.netRentGain || 0).toLocaleString("en-IN")}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Chart Placeholder */}
+          <div className="flex justify-center py-2">
+            <div className="bg-[#F5F4F7] rounded-xl p-4 w-full text-center">
+              <div className="text-xs text-[#666666] mb-2">
+                Cost Comparison Chart
+              </div>
+              <div className="grid grid-cols-2 gap-4 text-xs">
+                <div className="flex items-center justify-center">
+                  <div className="w-3 h-3 bg-[#AB78FF] rounded-full mr-2"></div>
+                  <span>
+                    Buy Cost: ₹
+                    {formatShortIndianCurrency(
+                      (result?.chartData?.[0]?.value || 0).toString()
+                    )}
+                  </span>
+                </div>
+                <div className="flex items-center justify-center">
+                  <div className="w-3 h-3 bg-[#F4B6D2] rounded-full mr-2"></div>
+                  <span>
+                    Rent Cost: ₹
+                    {formatShortIndianCurrency(
+                      (result?.chartData?.[1]?.value || 0).toString()
+                    )}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
