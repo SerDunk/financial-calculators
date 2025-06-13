@@ -5,7 +5,7 @@ import { calculatorData } from "@/constants/calculatorData";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#EFEDF4] px-3 font-lexend">
+    <div className="min-h-screen bg-[#EFEDF4] px-3 xs:px-0 font-lexend">
       <div className="max-w-md mx-auto space-y-6">
         {/* Header Card */}
         <div
