@@ -1,10 +1,10 @@
 import Link from "next/link";
 
-const CalculatorCard = ({ title, description, icon, link, status }) => {
+const CalculatorCard = ({ title, description, icon, link }) => {
   return (
     <Link href={link}>
       <div
-        className={`rounded-xl flex items-center justify-between py-4 px-4 font-lexend w-full cursor-pointer h-24 drop-shadow-xl hover:drop-shadow-2xl transition-all duration-200`}
+        className={`rounded-xl flex items-center justify-between py-4  px-4 font-lexend w-full cursor-pointer h-24 drop-shadow-xl hover:drop-shadow-2xl transition-all duration-200`}
         style={{
           background: "linear-gradient(to right, #E3E3E3, #FFFFFF)",
         }}
