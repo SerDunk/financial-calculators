@@ -1,3 +1,7 @@
+import Image from "next/image";
+import RentHouse from "../../public/house-for-sale.png";
+import BuyHouse from "../../public/mortgage.png";
+
 const BuyVsRentResults = ({ result, comparisonPeriod }) => {
   if (!result) return null;
 
@@ -18,9 +22,23 @@ const BuyVsRentResults = ({ result, comparisonPeriod }) => {
               result?.betterOption === "Buying" ? "#AB78FF" : "#97A9FF",
           }}
         >
-          <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
             <div className="text-2xl">
-              {result?.betterOption === "Buying" ? "🏠" : "🏘️"}
+              {result?.betterOption === "Buying" ? (
+                <Image
+                  src={BuyHouse}
+                  width={80}
+                  height={80}
+                  alt="Bought House"
+                />
+              ) : (
+                <Image
+                  src={RentHouse}
+                  width={80}
+                  height={80}
+                  alt="Rented House"
+                />
+              )}
             </div>
           </div>
         </div>
@@ -52,7 +70,14 @@ const BuyVsRentResults = ({ result, comparisonPeriod }) => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
               <div className="w-10 h-10 bg-[#AB78FF] rounded-xl flex items-center justify-center mr-3">
-                <span className="text-white text-lg">🏠</span>
+                <span className="text-white text-lg">
+                  <Image
+                    src={BuyHouse}
+                    width={30}
+                    height={30}
+                    alt="Bought House"
+                  />
+                </span>
               </div>
               <div>
                 <h3 className="font-semibold text-[#320992]">Buying</h3>
@@ -120,7 +145,14 @@ const BuyVsRentResults = ({ result, comparisonPeriod }) => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
               <div className="w-10 h-10 bg-[#97A9FF] rounded-xl flex items-center justify-center mr-3">
-                <span className="text-white text-lg">🏘️</span>
+                <span className="text-white text-lg">
+                  <Image
+                    src={RentHouse}
+                    width={30}
+                    height={30}
+                    alt="Rented House"
+                  />
+                </span>
               </div>
               <div>
                 <h3 className="font-semibold text-[#3B82F6]">Renting</h3>

@@ -1,4 +1,5 @@
 import Home from "../../public/house-cleaning.png";
+import HouseBOR from "../../public/house.png";
 import Image from "next/image";
 
 const FAQIcon = () => (
@@ -41,7 +42,7 @@ export const calculatorData = [
     id: 2,
     title: "Buy vs Rent",
     description: "Compare the long-term cost of buying a home vs renting",
-    icon: "🏡",
+    icon: <Image src={HouseBOR} alt="House Sale" />,
     link: "/calculators/buy-vs-rent",
   },
   {
