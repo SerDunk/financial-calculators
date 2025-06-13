@@ -10,6 +10,8 @@ import {
 import { Info } from "lucide-react";
 import { calculateBuyVsRentBreakdown } from "@/utils/calculation";
 import Heading from "@/components/Heading";
+import BuyVsRentResults from "@/components/BuyVsRentResult";
+import BuyVsRentAssumptions from "@/components/AssumptionsBVR";
 
 const BuyVsRentCalculator = () => {
   // State for all calculator inputs
@@ -808,143 +810,10 @@ const BuyVsRentCalculator = () => {
           CALCULATE
         </button>
 
-        <div className="sm:mt-2 mt-4 sm:text-sm bg-white py-4 px-4 rounded-lg">
-          {/* Main Summary Cards */}
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            {/* Down Payment */}
-            <div className="bg-[#F5F4F7] rounded-xl p-3 text-center">
-              <div className="text-xs text-[#666666] font-medium mb-1">
-                Down Payment
-              </div>
-              <div className="text-md sm:text-lg font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
-                ₹{Math.round(result?.downPayment || 0).toLocaleString("en-IN")}
-              </div>
-            </div>
-
-            {/* Total Rent Paid */}
-            <div className="bg-[#F5F4F7] rounded-xl p-3 text-center">
-              <div className="text-xs text-[#666666] font-medium mb-1">
-                Total Rent Paid
-              </div>
-              <div className="text-md sm:text-lg font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
-                ₹
-                {Math.round(result?.totalRentPaid || 0).toLocaleString("en-IN")}
-              </div>
-            </div>
-          </div>
-
-          {/* Total Cost & Value Over Tenure */}
-          <div className="bg-[#F5F4F7] rounded-xl p-4 mb-4">
-            <div className="text-center mb-3">
-              <div className="text-xs text-[#666666] font-medium mb-1">
-                Home Cost Over {result?.displayedTenure || comparisonPeriod}{" "}
-                Years
-              </div>
-              <div className="text-xl font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
-                ₹
-                {Math.round(result?.totalHomeCost || 0).toLocaleString("en-IN")}
-              </div>
-            </div>
-
-            <div className="space-y-2 text-xs">
-              <div className="flex justify-between items-center py-1">
-                <span className="text-[#323233] flex items-center">
-                  <div className="w-2 h-2 bg-[#AB78FF] rounded-full mr-2"></div>
-                  Total EMIs Paid
-                </span>
-                <span className="text-[#020288] font-medium">
-                  ₹{Math.round(result?.totalEMIs || 0).toLocaleString("en-IN")}
-                </span>
-              </div>
-              <div className="flex justify-between items-center py-1">
-                <span className="text-[#323233] flex items-center">
-                  <div className="w-2 h-2 bg-[#CAF5BD] rounded-full mr-2"></div>
-                  Property Tax
-                </span>
-                <span className="text-[#020288] font-medium">
-                  ₹{Math.round(result?.totalTax || 0).toLocaleString("en-IN")}
-                </span>
-              </div>
-              <div className="flex justify-between items-center py-1">
-                <span className="text-[#323233] flex items-center">
-                  <div className="w-2 h-2 bg-[#45D099] rounded-full mr-2"></div>
-                  Maintenance + Insurance
-                </span>
-                <span className="text-[#020288] font-medium">
-                  ₹{Math.round(result?.totalOther || 0).toLocaleString("en-IN")}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Wealth Comparison */}
-          <div className="bg-[#F5F4F7] rounded-xl p-4 mb-4">
-            <div className="text-center mb-3">
-              <div className="text-xs text-[#666666] font-medium mb-1">
-                Net Gain from Buying vs Renting
-              </div>
-              <div className="text-xl font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
-                ₹
-                {Math.abs(
-                  (result?.netBuyGain || 0) - (result?.netRentGain || 0)
-                ).toLocaleString("en-IN")}
-              </div>
-              <div className="text-xs text-[#666666] mt-1">
-                {result?.betterOption || "Buying"} is more practical over{" "}
-                {result?.displayedTenure || comparisonPeriod} years
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 text-xs">
-              <div className="text-center">
-                <div className="text-[#666666] font-medium mb-1">
-                  Net Wealth (Buy)
-                </div>
-                <div className="text-[#020288] font-bold text-sm">
-                  ₹{Math.round(result?.netBuyGain || 0).toLocaleString("en-IN")}
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-[#666666] font-medium mb-1">
-                  Net Wealth (Rent)
-                </div>
-                <div className="text-[#020288] font-bold text-sm">
-                  ₹
-                  {Math.round(result?.netRentGain || 0).toLocaleString("en-IN")}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Chart Placeholder */}
-          <div className="flex justify-center py-2">
-            <div className="bg-[#F5F4F7] rounded-xl p-4 w-full text-center">
-              <div className="text-xs text-[#666666] mb-2">
-                Cost Comparison Chart
-              </div>
-              <div className="grid grid-cols-2 gap-4 text-xs">
-                <div className="flex items-center justify-center">
-                  <div className="w-3 h-3 bg-[#AB78FF] rounded-full mr-2"></div>
-                  <span>
-                    Buy Cost: ₹
-                    {formatShortIndianCurrency(
-                      (result?.chartData?.[0]?.value || 0).toString()
-                    )}
-                  </span>
-                </div>
-                <div className="flex items-center justify-center">
-                  <div className="w-3 h-3 bg-[#F4B6D2] rounded-full mr-2"></div>
-                  <span>
-                    Rent Cost: ₹
-                    {formatShortIndianCurrency(
-                      (result?.chartData?.[1]?.value || 0).toString()
-                    )}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Decision Header */}
+        <BuyVsRentResults result={result} comparisonPeriod={comparisonPeriod} />
+        {/* Chart Placeholder */}
+        <BuyVsRentAssumptions />
       </div>
     </div>
   );
