@@ -480,7 +480,7 @@ const MortgageCalculator = () => {
             <Slider
               value={tenure}
               min={1}
-              max={30}
+              max={50}
               step={0.5}
               onChange={(e, val) => {
                 setTenure(val);
@@ -581,7 +581,10 @@ const MortgageCalculator = () => {
           <div className="mb-1">
             <div className="flex text-sm justify-between items-center text-white font-medium">
               <div className="flex items-center gap-1.5">
-                <label>Property Taxes (Annual)</label>
+                <label>
+                  <div>Property Taxes</div>
+                  (Annual)
+                </label>
                 <Popover>
                   <PopoverTrigger>
                     <Info width={15} />
@@ -661,8 +664,10 @@ const MortgageCalculator = () => {
           {/* Home Insurance */}
           <div className="mb-1">
             <div className="flex text-sm justify-between items-center text-white font-medium">
-              <div className="flex items-center gap-1">
-                <label>Home Insurance (Annual)</label>
+              <div className="flex items-center gap-1.5">
+                <label>
+                  <div>Home Insurance</div> (Annual)
+                </label>
                 <Popover>
                   <PopoverTrigger>
                     <Info width={15} />
@@ -742,8 +747,10 @@ const MortgageCalculator = () => {
           {/* Other Costs */}
           <div>
             <div className="flex text-sm justify-between items-center text-white font-medium">
-              <div className="flex items-center gap-1">
-                <label>Other Costs (Monthly)</label>
+              <div className="flex items-center gap-1.5">
+                <label>
+                  <div>Other Costs</div> (Monthly)
+                </label>
                 <Popover>
                   <PopoverTrigger>
                     <Info width={15} />
@@ -828,7 +835,6 @@ const MortgageCalculator = () => {
         </button>
 
         {/* Output + Chart */}
-        {/* Output + Chart */}
         <div className="sm:mt-2 mt-4 sm:text-sm bg-white py-4 px-4 rounded-lg">
           {/* Main Summary Cards */}
           <div className="grid grid-cols-2 gap-3 mb-4">
@@ -838,7 +844,7 @@ const MortgageCalculator = () => {
                 Down Payment
               </div>
               <div
-                className="text-lg font-bold"
+                className="text-md sm:text-lg font-bold"
                 style={{
                   background: "linear-gradient(to right,#320992 30%,#F04393)",
                   WebkitBackgroundClip: "text",
@@ -861,7 +867,7 @@ const MortgageCalculator = () => {
                 Loan Amount
               </div>
               <div
-                className="text-lg font-bold"
+                className="text-md sm:text-lg font-bold"
                 style={{
                   background: "linear-gradient(to right,#320992 30%,#F04393)",
                   WebkitBackgroundClip: "text",

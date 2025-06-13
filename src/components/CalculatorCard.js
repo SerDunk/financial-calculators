@@ -4,9 +4,7 @@ const CalculatorCard = ({ title, description, icon, link, status }) => {
   return (
     <Link href={link}>
       <div
-        className={`rounded-xl flex items-center justify-between py-4 px-4 font-lexend w-full cursor-pointer h-24 drop-shadow-xl hover:drop-shadow-2xl transition-all duration-200 ${
-          status === "disabled" ? "opacity-50 cursor-not-allowed" : ""
-        }`}
+        className={`rounded-xl flex items-center justify-between py-4 px-4 font-lexend w-full cursor-pointer h-24 drop-shadow-xl hover:drop-shadow-2xl transition-all duration-200`}
         style={{
           background: "linear-gradient(to right, #E3E3E3, #FFFFFF)",
         }}

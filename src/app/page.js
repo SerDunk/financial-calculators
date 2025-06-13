@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+
 import CalculatorCard from "../components/CalculatorCard";
 import { calculatorData } from "@/constants/calculatorData";
 

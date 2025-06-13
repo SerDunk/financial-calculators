@@ -11,10 +11,10 @@ export default function Assumptions() {
 
       {/* Tab Navigation */}
       <div className="bg-white border-b border-[#E5E2F2]">
-        <div className="flex">
+        <div className="flex sm:justify-around">
           <button
             onClick={() => setActiveTab("methodology")}
-            className={`px-4 py-3 text-xs font-medium transition-colors ${
+            className={`px-3  py-3 text-xs font-medium transition-colors ${
               activeTab === "methodology"
                 ? "text-[#2C178C] border-b-2 border-[#2C178C]"
                 : "text-[#686868] hover:text-[#2C178C]"
@@ -24,7 +24,7 @@ export default function Assumptions() {
           </button>
           <button
             onClick={() => setActiveTab("formulas")}
-            className={`px-4 py-3 text-xs font-medium transition-colors ${
+            className={`px-3 py-3 text-xs font-medium transition-colors ${
               activeTab === "formulas"
                 ? "text-[#2C178C] border-b-2 border-[#2C178C]"
                 : "text-[#686868] hover:text-[#2C178C]"
@@ -34,7 +34,7 @@ export default function Assumptions() {
           </button>
           <button
             onClick={() => setActiveTab("assumptions")}
-            className={`px-4 py-3 text-xs font-medium transition-colors ${
+            className={`px-3 py-3 text-xs font-medium transition-colors ${
               activeTab === "assumptions"
                 ? "text-[#2C178C] border-b-2 border-[#2C178C]"
                 : "text-[#686868] hover:text-[#2C178C]"

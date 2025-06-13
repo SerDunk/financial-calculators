@@ -65,11 +65,4 @@ export const calculatorData = [
     icon: "✈️",
     link: "/calculators/vacation-planning",
   },
-  {
-    id: "faq",
-    title: "FAQ",
-    description: "Common questions about data security & privacy",
-    icon: <FAQIcon />,
-    link: "/faq",
-  },
 ];
