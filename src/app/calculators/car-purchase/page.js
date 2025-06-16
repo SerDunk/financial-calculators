@@ -93,7 +93,7 @@ const CarPurchaseCalculator = () => {
           desc="Understand your financing details for buying a car"
         />
 
-        <div className="rounded-2xl p-6 relative">
+        <div className="rounded-2xl p-6 relative bg-white">
           {/* Vehicle Price */}
           <div className="mb-1">
             <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">

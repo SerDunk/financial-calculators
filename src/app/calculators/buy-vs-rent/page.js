@@ -191,7 +191,7 @@ const BuyVsRentCalculator = () => {
         />
 
         {/* SLIDERS SECTION ABSTRACTED - Insert your slider components here */}
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           <div
             className="rounded-2xl p-6 relative"
             style={{
@@ -526,7 +526,7 @@ const BuyVsRentCalculator = () => {
             }}
           >
             <h2 className="text-white text-base font-semibold mb-3">Renting</h2>
-            <div className="flex flex-col gap-3 ml-2">
+            <div className="flex flex-col gap-2 ml-2">
               {/* Monthly Rent */}
               <div className="mb-1">
                 <div className="flex text-sm justify-between items-center text-white font-medium">
