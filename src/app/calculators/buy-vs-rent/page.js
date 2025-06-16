@@ -191,630 +191,652 @@ const BuyVsRentCalculator = () => {
         />
 
         {/* SLIDERS SECTION ABSTRACTED - Insert your slider components here */}
-        <div
-          className="rounded-2xl p-6 relative"
-          style={{
-            background:
-              "radial-gradient(ellipse 113px 357px at center, #8362D1 -60%, #192226 130%)",
-          }}
-        >
-          <h2 className="text-white text-base font-semibold mt-4 mb-1">
-            Buying
-          </h2>
-          <div className="flex flex-col gap-4 mt-3 ml-2">
-            {/* Home Price */}
-            <div className="mb-1">
-              <div className="flex text-sm justify-between items-center text-white font-medium">
-                <div className="flex items-center gap-1.5">
-                  <p>Home Price</p>
-                  <Popover>
-                    <PopoverTrigger>
-                      <Info width={15} />
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className={`text-xs border-[#666666] font-lexend`}
-                    >
-                      The total price of the home you're considering to buy
-                    </PopoverContent>
-                  </Popover>
+        <div className="flex flex-col gap-3">
+          <div
+            className="rounded-2xl p-6 relative"
+            style={{
+              background:
+                "radial-gradient(ellipse 113px 357px at center, #8362D1 -60%, #192226 130%)",
+            }}
+          >
+            <h2 className="text-white text-base font-semibold mb-3">Buying</h2>
+            <div className="flex flex-col gap-4 mt-3 ml-2">
+              {/* Home Price */}
+              <div className="mb-1">
+                <div className="flex text-sm justify-between items-center text-white font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <p>Home Price</p>
+                    <Popover>
+                      <PopoverTrigger>
+                        <Info width={15} />
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className={`text-xs border-[#666666] font-lexend`}
+                      >
+                        The total price of the home you're considering to buy
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div className="flex items-center text-xs bg-white px-1 py-1 rounded-lg">
+                    <span className="text-[#020288]">₹</span>
+                    <input
+                      type="text"
+                      className="text-[#020288] text-xs border-none w-18 text-center outline-none focus:ring-0"
+                      value={homePriceInput}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^0-9]/g, "");
+                        const formatted = raw
+                          ? formatIndianNumber(parseInt(raw))
+                          : "";
+                        setHomePriceInput(formatted);
+                        setHomePrice(raw === "" ? 0 : parseInt(raw));
+                      }}
+                      onFocus={(e) => {
+                        const raw = e.target.value.replace(/[^0-9]/g, "");
+                        setHomePriceInput(raw);
+                      }}
+                      onBlur={() => {
+                        const value = parseFormattedNumber(homePriceInput);
+                        const constrainedValue = Math.min(
+                          Math.max(value, 500000),
+                          50000000
+                        );
+                        setHomePrice(constrainedValue);
+                        setHomePriceInput(formatIndianNumber(constrainedValue));
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="text-[10px] text-white flex justify-end pt-2 px-2">
+                  {formatShortIndianCurrency(homePrice.toString())}
                 </div>
 
-                <div className="flex items-center text-xs bg-white px-1 py-1 rounded-lg">
-                  <span className="text-[#020288]">₹</span>
-                  <input
-                    type="text"
-                    className="text-[#020288] text-xs border-none w-18 text-center outline-none focus:ring-0"
-                    value={homePriceInput}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/[^0-9]/g, "");
-                      const formatted = raw
-                        ? formatIndianNumber(parseInt(raw))
-                        : "";
-                      setHomePriceInput(formatted);
-                      setHomePrice(raw === "" ? 0 : parseInt(raw));
-                    }}
-                    onFocus={(e) => {
-                      const raw = e.target.value.replace(/[^0-9]/g, "");
-                      setHomePriceInput(raw);
-                    }}
-                    onBlur={() => {
-                      const value = parseFormattedNumber(homePriceInput);
-                      const constrainedValue = Math.min(
-                        Math.max(value, 500000),
-                        50000000
-                      );
-                      setHomePrice(constrainedValue);
-                      setHomePriceInput(formatIndianNumber(constrainedValue));
-                    }}
-                  />
-                </div>
-              </div>
-              <div className="text-[10px] text-white flex justify-end pt-2 px-2">
-                {formatShortIndianCurrency(homePrice.toString())}
-              </div>
-
-              <Slider
-                value={homePrice}
-                min={500000}
-                max={50000000}
-                step={25000}
-                onChange={(e, val) => {
-                  setHomePrice(val);
-                  setHomePriceInput(formatIndianNumber(val));
-                }}
-                sx={{
-                  color: "#fff",
-                  height: 6,
-                  "& .MuiSlider-thumb": {
-                    backgroundImage: "url('/slider.svg')",
-                    backgroundPosition: "center",
-                    width: 18,
-                    height: 18,
-                    transition:
-                      "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                    "&:hover, &.Mui-focusVisible": {
-                      boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                <Slider
+                  value={homePrice}
+                  min={500000}
+                  max={50000000}
+                  step={25000}
+                  onChange={(e, val) => {
+                    setHomePrice(val);
+                    setHomePriceInput(formatIndianNumber(val));
+                  }}
+                  sx={{
+                    color: "#fff",
+                    height: 6,
+                    "& .MuiSlider-thumb": {
+                      backgroundImage: "url('/slider.svg')",
+                      backgroundPosition: "center",
+                      width: 18,
+                      height: 18,
+                      transition:
+                        "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                      "&:hover, &.Mui-focusVisible": {
+                        boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                      },
                     },
-                  },
-                  "& .MuiSlider-track": {
-                    transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                  },
-                }}
-              />
-            </div>
-
-            {/* Down Payment % */}
-            <div className="mb-1">
-              <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
-                <div className="flex items-center gap-1.5">
-                  <label>Down Payment</label>
-                  <Popover>
-                    <PopoverTrigger>
-                      <Info width={15} />
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className={`text-xs border-[#666666] font-lexend`}
-                    >
-                      Percentage of home price you'll pay upfront
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="flex items-center bg-white px-1 py-1 rounded-lg">
-                  <input
-                    type="text"
-                    className="text-[#020288] text-xs border-none w-16 text-center outline-none focus:ring-0"
-                    value={downPaymentPercentInput}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/[^0-9.]/g, "");
-                      setDownPaymentPercentInput(raw);
-                      setDownPaymentPercent(raw === "" ? 0 : parseFloat(raw));
-                    }}
-                    onFocus={(e) =>
-                      setDownPaymentPercentInput(
-                        e.target.value.replace(/[^0-9.]/g, "")
-                      )
-                    }
-                    onBlur={() =>
-                      parseAndSetNumericValue(
-                        setDownPaymentPercent,
-                        downPaymentPercentInput,
-                        5,
-                        50
-                      )
-                    }
-                  />
-                </div>
-              </div>
-
-              {/* Down Payment and Loan Amount Display */}
-              <div className="flex justify-between items-center text-[10px] pt-2 px-2 mb-2">
-                <div className="flex flex-col gap-2">
-                  <span className="text-white">Down Payment</span>
-                  <span className="font-medium bg-white text-[#2D14A0] px-2 py-1 rounded-md">
-                    ₹{formatShortIndianCurrency(downPaymentAmount.toString())}
-                  </span>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <span className="text-white">Loan Amount</span>
-                  <span className="font-medium bg-white text-[#2D14A0] px-2 py-1 rounded-md">
-                    ₹{formatShortIndianCurrency(loanAmount.toString())}
-                  </span>
-                </div>
-              </div>
-
-              <Slider
-                value={downPaymentPercent}
-                min={5}
-                max={50}
-                step={0.5}
-                onChange={(e, val) => {
-                  setDownPaymentPercent(val);
-                  setDownPaymentPercentInput(`${val}`);
-                }}
-                sx={{
-                  color: "#fff",
-                  height: 6,
-                  "& .MuiSlider-thumb": {
-                    backgroundImage: "url('/slider.svg')",
-                    backgroundPosition: "center",
-                    width: 18,
-                    height: 18,
-                    transition:
-                      "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                    "&:hover, &.Mui-focusVisible": {
-                      boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                    "& .MuiSlider-track": {
+                      transition:
+                        "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
                     },
-                  },
-                  "& .MuiSlider-track": {
-                    transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                  },
-                }}
-              />
-            </div>
-
-            {/* Interest Rate */}
-            <div className="mb-1">
-              <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
-                <div className="flex items-center gap-1.5">
-                  <label>Housing Loan Interest</label>
-                  <Popover>
-                    <PopoverTrigger>
-                      <Info width={15} />
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className={`text-xs border-[#666666] font-lexend`}
-                    >
-                      Annual interest rate on your home loan
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="flex items-center bg-white px-1 py-1 rounded-lg">
-                  <input
-                    type="text"
-                    className="text-[#020288] text-xs border-none w-16 text-center outline-none focus:ring-0"
-                    value={interestRateInput}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/[^0-9.]/g, "");
-                      setInterestRateInput(raw);
-                      setInterestRate(raw === "" ? 0 : parseFloat(raw));
-                    }}
-                    onFocus={(e) =>
-                      setInterestRateInput(
-                        e.target.value.replace(/[^0-9.]/g, "")
-                      )
-                    }
-                    onBlur={() =>
-                      parseAndSetNumericValue(
-                        setInterestRate,
-                        interestRateInput,
-                        1,
-                        20
-                      )
-                    }
-                  />
-                </div>
+                  }}
+                />
               </div>
-              <Slider
-                value={interestRate}
-                min={1}
-                max={20}
-                step={0.05}
-                onChange={(e, val) => {
-                  setInterestRate(val);
-                  setInterestRateInput(`${val}`);
-                }}
-                sx={{
-                  color: "#fff",
-                  height: 6,
-                  "& .MuiSlider-thumb": {
-                    backgroundImage: "url('/slider.svg')",
-                    backgroundPosition: "center",
-                    width: 18,
-                    height: 18,
-                    transition:
-                      "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                    "&:hover, &.Mui-focusVisible": {
-                      boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
-                    },
-                  },
-                  "& .MuiSlider-track": {
-                    transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                  },
-                }}
-              />
-            </div>
 
-            {/* Loan Tenure */}
-            <div className="mb-1">
-              <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
-                <div className="flex items-center gap-1.5">
-                  <label>Loan Tenure</label>
-                  <Popover>
-                    <PopoverTrigger>
-                      <Info width={15} />
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className={`text-xs border-[#666666] font-lexend`}
-                    >
-                      Duration of your home loan in years
-                    </PopoverContent>
-                  </Popover>
+              {/* Down Payment % */}
+              <div className="mb-1">
+                <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <label>Down Payment</label>
+                    <Popover>
+                      <PopoverTrigger>
+                        <Info width={15} />
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className={`text-xs border-[#666666] font-lexend`}
+                      >
+                        Percentage of home price you'll pay upfront
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="flex items-center bg-white px-1 py-1 rounded-lg">
+                    <input
+                      type="text"
+                      className="text-[#020288] text-xs border-none w-16 text-center outline-none focus:ring-0"
+                      value={downPaymentPercentInput}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^0-9.]/g, "");
+                        setDownPaymentPercentInput(raw);
+                        setDownPaymentPercent(raw === "" ? 0 : parseFloat(raw));
+                      }}
+                      onFocus={(e) =>
+                        setDownPaymentPercentInput(
+                          e.target.value.replace(/[^0-9.]/g, "")
+                        )
+                      }
+                      onBlur={() =>
+                        parseAndSetNumericValue(
+                          setDownPaymentPercent,
+                          downPaymentPercentInput,
+                          5,
+                          50
+                        )
+                      }
+                    />
+                  </div>
                 </div>
-                <div className="flex items-center bg-white px-1 py-1 rounded-lg">
-                  <input
-                    type="text"
-                    className="text-[#020288] text-xs border-none w-20 text-center outline-none focus:ring-0"
-                    value={loanTermInput}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/[^0-9]/g, "");
-                      setLoanTermInput(raw);
-                      setLoanTerm(raw === "" ? 0 : parseInt(raw));
-                    }}
-                    onFocus={(e) =>
-                      setLoanTermInput(e.target.value.replace(/[^0-9]/g, ""))
-                    }
-                    onBlur={() =>
-                      parseAndSetNumericValue(setLoanTerm, loanTermInput, 1, 30)
-                    }
-                  />
+
+                {/* Down Payment and Loan Amount Display */}
+                <div className="flex justify-between items-center text-[10px] pt-2 px-2 mb-2">
+                  <div className="flex flex-col gap-2">
+                    <span className="text-white">Down Payment</span>
+                    <span className="font-medium bg-white text-[#2D14A0] px-2 py-1 rounded-md">
+                      ₹{formatShortIndianCurrency(downPaymentAmount.toString())}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <span className="text-white">Loan Amount</span>
+                    <span className="font-medium bg-white text-[#2D14A0] px-2 py-1 rounded-md">
+                      ₹{formatShortIndianCurrency(loanAmount.toString())}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <Slider
-                value={loanTerm}
-                min={1}
-                max={30}
-                step={0.5}
-                onChange={(e, val) => {
-                  setLoanTerm(val);
-                  setLoanTermInput(`${val}`);
-                }}
-                sx={{
-                  color: "#fff",
-                  height: 6,
-                  "& .MuiSlider-thumb": {
-                    backgroundImage: "url('/slider.svg')",
-                    backgroundPosition: "center",
-                    width: 18,
-                    height: 18,
-                    transition:
-                      "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                    "&:hover, &.Mui-focusVisible": {
-                      boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+
+                <Slider
+                  value={downPaymentPercent}
+                  min={5}
+                  max={50}
+                  step={0.5}
+                  onChange={(e, val) => {
+                    setDownPaymentPercent(val);
+                    setDownPaymentPercentInput(`${val}`);
+                  }}
+                  sx={{
+                    color: "#fff",
+                    height: 6,
+                    "& .MuiSlider-thumb": {
+                      backgroundImage: "url('/slider.svg')",
+                      backgroundPosition: "center",
+                      width: 18,
+                      height: 18,
+                      transition:
+                        "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                      "&:hover, &.Mui-focusVisible": {
+                        boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                      },
                     },
-                  },
-                  "& .MuiSlider-track": {
-                    transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                  },
-                }}
-              />
+                    "& .MuiSlider-track": {
+                      transition:
+                        "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                    },
+                  }}
+                />
+              </div>
+
+              {/* Interest Rate */}
+              <div className="mb-1">
+                <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <label>Housing Loan Interest</label>
+                    <Popover>
+                      <PopoverTrigger>
+                        <Info width={15} />
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className={`text-xs border-[#666666] font-lexend`}
+                      >
+                        Annual interest rate on your home loan
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="flex items-center bg-white px-1 py-1 rounded-lg">
+                    <input
+                      type="text"
+                      className="text-[#020288] text-xs border-none w-16 text-center outline-none focus:ring-0"
+                      value={interestRateInput}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^0-9.]/g, "");
+                        setInterestRateInput(raw);
+                        setInterestRate(raw === "" ? 0 : parseFloat(raw));
+                      }}
+                      onFocus={(e) =>
+                        setInterestRateInput(
+                          e.target.value.replace(/[^0-9.]/g, "")
+                        )
+                      }
+                      onBlur={() =>
+                        parseAndSetNumericValue(
+                          setInterestRate,
+                          interestRateInput,
+                          1,
+                          20
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+                <Slider
+                  value={interestRate}
+                  min={1}
+                  max={20}
+                  step={0.05}
+                  onChange={(e, val) => {
+                    setInterestRate(val);
+                    setInterestRateInput(`${val}`);
+                  }}
+                  sx={{
+                    color: "#fff",
+                    height: 6,
+                    "& .MuiSlider-thumb": {
+                      backgroundImage: "url('/slider.svg')",
+                      backgroundPosition: "center",
+                      width: 18,
+                      height: 18,
+                      transition:
+                        "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                      "&:hover, &.Mui-focusVisible": {
+                        boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                      },
+                    },
+                    "& .MuiSlider-track": {
+                      transition:
+                        "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                    },
+                  }}
+                />
+              </div>
+
+              {/* Loan Tenure */}
+              <div className="mb-1">
+                <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <label>Loan Tenure</label>
+                    <Popover>
+                      <PopoverTrigger>
+                        <Info width={15} />
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className={`text-xs border-[#666666] font-lexend`}
+                      >
+                        Duration of your home loan in years
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="flex items-center bg-white px-1 py-1 rounded-lg">
+                    <input
+                      type="text"
+                      className="text-[#020288] text-xs border-none w-20 text-center outline-none focus:ring-0"
+                      value={loanTermInput}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^0-9]/g, "");
+                        setLoanTermInput(raw);
+                        setLoanTerm(raw === "" ? 0 : parseInt(raw));
+                      }}
+                      onFocus={(e) =>
+                        setLoanTermInput(e.target.value.replace(/[^0-9]/g, ""))
+                      }
+                      onBlur={() =>
+                        parseAndSetNumericValue(
+                          setLoanTerm,
+                          loanTermInput,
+                          1,
+                          30
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+                <Slider
+                  value={loanTerm}
+                  min={1}
+                  max={30}
+                  step={0.5}
+                  onChange={(e, val) => {
+                    setLoanTerm(val);
+                    setLoanTermInput(`${val}`);
+                  }}
+                  sx={{
+                    color: "#fff",
+                    height: 6,
+                    "& .MuiSlider-thumb": {
+                      backgroundImage: "url('/slider.svg')",
+                      backgroundPosition: "center",
+                      width: 18,
+                      height: 18,
+                      transition:
+                        "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                      "&:hover, &.Mui-focusVisible": {
+                        boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                      },
+                    },
+                    "& .MuiSlider-track": {
+                      transition:
+                        "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                    },
+                  }}
+                />
+              </div>
             </div>
           </div>
-          <h2 className="text-white text-base font-semibold mt-6 mb-3">
-            Renting
-          </h2>
-          <div className="flex flex-col gap-3 ml-2">
-            {/* Monthly Rent */}
-            <div className="mb-1">
-              <div className="flex text-sm justify-between items-center text-white font-medium">
-                <div className="flex items-center gap-1.5">
-                  <label>Monthly Rent</label>
-                  <Popover>
-                    <PopoverTrigger>
-                      <Info width={15} />
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className={`text-xs border-[#666666] font-lexend`}
-                    >
-                      Current monthly rent for a similar property
-                    </PopoverContent>
-                  </Popover>
+          <div
+            className="rounded-2xl p-6 relative"
+            style={{
+              background:
+                "radial-gradient(ellipse 113px 357px at center, #8362D1 -60%, #192226 130%)",
+            }}
+          >
+            <h2 className="text-white text-base font-semibold mb-3">Renting</h2>
+            <div className="flex flex-col gap-3 ml-2">
+              {/* Monthly Rent */}
+              <div className="mb-1">
+                <div className="flex text-sm justify-between items-center text-white font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <label>Monthly Rent</label>
+                    <Popover>
+                      <PopoverTrigger>
+                        <Info width={15} />
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className={`text-xs border-[#666666] font-lexend`}
+                      >
+                        Current monthly rent for a similar property
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  <div className="flex items-center text-xs bg-white px-1 py-1 rounded-lg">
+                    <span className="text-[#020288]">₹</span>
+                    <input
+                      type="text"
+                      className="text-[#020288] text-xs border-none w-18 text-center outline-none focus:ring-0"
+                      value={monthlyRentInput}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^0-9]/g, "");
+                        const formatted = raw
+                          ? formatIndianNumber(parseInt(raw))
+                          : "";
+                        setMonthlyRentInput(formatted);
+                        setMonthlyRent(raw === "" ? 0 : parseInt(raw));
+                      }}
+                      onFocus={(e) => {
+                        const raw = e.target.value.replace(/[^0-9]/g, "");
+                        setMonthlyRentInput(raw);
+                      }}
+                      onBlur={() => {
+                        const value = parseFormattedNumber(monthlyRentInput);
+                        const constrainedValue = Math.min(
+                          Math.max(value, 1000),
+                          200000
+                        );
+                        setMonthlyRent(constrainedValue);
+                        setMonthlyRentInput(
+                          formatIndianNumber(constrainedValue)
+                        );
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="text-[10px] text-white flex justify-end pt-2 px-2">
+                  {formatShortIndianCurrency(monthlyRent.toString())}
                 </div>
 
-                <div className="flex items-center text-xs bg-white px-1 py-1 rounded-lg">
-                  <span className="text-[#020288]">₹</span>
-                  <input
-                    type="text"
-                    className="text-[#020288] text-xs border-none w-18 text-center outline-none focus:ring-0"
-                    value={monthlyRentInput}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/[^0-9]/g, "");
-                      const formatted = raw
-                        ? formatIndianNumber(parseInt(raw))
-                        : "";
-                      setMonthlyRentInput(formatted);
-                      setMonthlyRent(raw === "" ? 0 : parseInt(raw));
-                    }}
-                    onFocus={(e) => {
-                      const raw = e.target.value.replace(/[^0-9]/g, "");
-                      setMonthlyRentInput(raw);
-                    }}
-                    onBlur={() => {
-                      const value = parseFormattedNumber(monthlyRentInput);
-                      const constrainedValue = Math.min(
-                        Math.max(value, 1000),
-                        200000
-                      );
-                      setMonthlyRent(constrainedValue);
-                      setMonthlyRentInput(formatIndianNumber(constrainedValue));
-                    }}
-                  />
-                </div>
-              </div>
-              <div className="text-[10px] text-white flex justify-end pt-2 px-2">
-                {formatShortIndianCurrency(monthlyRent.toString())}
-              </div>
-
-              <Slider
-                value={monthlyRent}
-                min={1000}
-                max={200000}
-                step={1000}
-                onChange={(e, val) => {
-                  setMonthlyRent(val);
-                  setMonthlyRentInput(formatIndianNumber(val));
-                }}
-                sx={{
-                  color: "#fff",
-                  height: 6,
-                  "& .MuiSlider-thumb": {
-                    backgroundImage: "url('/slider.svg')",
-                    backgroundPosition: "center",
-                    width: 18,
-                    height: 18,
-                    transition:
-                      "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                    "&:hover, &.Mui-focusVisible": {
-                      boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                <Slider
+                  value={monthlyRent}
+                  min={1000}
+                  max={200000}
+                  step={1000}
+                  onChange={(e, val) => {
+                    setMonthlyRent(val);
+                    setMonthlyRentInput(formatIndianNumber(val));
+                  }}
+                  sx={{
+                    color: "#fff",
+                    height: 6,
+                    "& .MuiSlider-thumb": {
+                      backgroundImage: "url('/slider.svg')",
+                      backgroundPosition: "center",
+                      width: 18,
+                      height: 18,
+                      transition:
+                        "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                      "&:hover, &.Mui-focusVisible": {
+                        boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                      },
                     },
-                  },
-                  "& .MuiSlider-track": {
-                    transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                  },
-                }}
-              />
-            </div>
-
-            {/* Rent Increase % */}
-            <div className="mb-1">
-              <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
-                <div className="flex items-center gap-1.5">
-                  <label>Annual Rent Increase</label>
-                  <Popover>
-                    <PopoverTrigger>
-                      <Info width={15} />
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className={`text-xs border-[#666666] font-lexend`}
-                    >
-                      Expected annual percentage increase in rent
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="flex items-center bg-white px-1 py-1 rounded-lg">
-                  <input
-                    type="text"
-                    className="text-[#020288] text-xs border-none w-16 text-center outline-none focus:ring-0"
-                    value={rentIncreasePercentInput}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/[^0-9.]/g, "");
-                      setRentIncreasePercentInput(raw);
-                      setRentIncreasePercent(raw === "" ? 0 : parseFloat(raw));
-                    }}
-                    onFocus={(e) =>
-                      setRentIncreasePercentInput(
-                        e.target.value.replace(/[^0-9.]/g, "")
-                      )
-                    }
-                    onBlur={() =>
-                      parseAndSetNumericValue(
-                        setRentIncreasePercent,
-                        rentIncreasePercentInput,
-                        0,
-                        15
-                      )
-                    }
-                  />
-                </div>
-              </div>
-              <Slider
-                value={rentIncreasePercent}
-                min={0}
-                max={15}
-                step={0.1}
-                onChange={(e, val) => {
-                  setRentIncreasePercent(val);
-                  setRentIncreasePercentInput(`${val}`);
-                }}
-                sx={{
-                  color: "#fff",
-                  height: 6,
-                  "& .MuiSlider-thumb": {
-                    backgroundImage: "url('/slider.svg')",
-                    backgroundPosition: "center",
-                    width: 18,
-                    height: 18,
-                    transition:
-                      "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                    "&:hover, &.Mui-focusVisible": {
-                      boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                    "& .MuiSlider-track": {
+                      transition:
+                        "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
                     },
-                  },
-                  "& .MuiSlider-track": {
-                    transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                  },
-                }}
-              />
-            </div>
-
-            {/* Investment Return % */}
-            <div className="mb-1">
-              <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
-                <div className="flex items-center gap-1.5">
-                  <label>Investment Return</label>
-                  <Popover>
-                    <PopoverTrigger>
-                      <Info width={15} />
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className={`text-xs border-[#666666] font-lexend`}
-                    >
-                      Expected annual return on investing your down payment
-                      savings
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="flex items-center bg-white px-1 py-1 rounded-lg">
-                  <input
-                    type="text"
-                    className="text-[#020288] text-xs border-none w-16 text-center outline-none focus:ring-0"
-                    value={investmentReturnPercentInput}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/[^0-9.]/g, "");
-                      setInvestmentReturnPercentInput(raw);
-                      setInvestmentReturnPercent(
-                        raw === "" ? 0 : parseFloat(raw)
-                      );
-                    }}
-                    onFocus={(e) =>
-                      setInvestmentReturnPercentInput(
-                        e.target.value.replace(/[^0-9.]/g, "")
-                      )
-                    }
-                    onBlur={() =>
-                      parseAndSetNumericValue(
-                        setInvestmentReturnPercent,
-                        investmentReturnPercentInput,
-                        1,
-                        25
-                      )
-                    }
-                  />
-                </div>
+                  }}
+                />
               </div>
-              <Slider
-                value={investmentReturnPercent}
-                min={1}
-                max={25}
-                step={0.1}
-                onChange={(e, val) => {
-                  setInvestmentReturnPercent(val);
-                  setInvestmentReturnPercentInput(`${val}`);
-                }}
-                sx={{
-                  color: "#fff",
-                  height: 6,
-                  "& .MuiSlider-thumb": {
-                    backgroundImage: "url('/slider.svg')",
-                    backgroundPosition: "center",
-                    width: 18,
-                    height: 18,
-                    transition:
-                      "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                    "&:hover, &.Mui-focusVisible": {
-                      boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
-                    },
-                  },
-                  "& .MuiSlider-track": {
-                    transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                  },
-                }}
-              />
-            </div>
 
-            {/* Comparison Period */}
-            <div className="mb-1">
-              <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
-                <div className="flex items-center gap-1.5">
-                  <label>Comparison Period</label>
-                  <Popover>
-                    <PopoverTrigger>
-                      <Info width={15} />
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className={`text-xs border-[#666666] font-lexend`}
-                    >
-                      Number of years to compare buying vs renting
-                    </PopoverContent>
-                  </Popover>
+              {/* Rent Increase % */}
+              <div className="mb-1">
+                <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <label>Annual Rent Increase</label>
+                    <Popover>
+                      <PopoverTrigger>
+                        <Info width={15} />
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className={`text-xs border-[#666666] font-lexend`}
+                      >
+                        Expected annual percentage increase in rent
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="flex items-center bg-white px-1 py-1 rounded-lg">
+                    <input
+                      type="text"
+                      className="text-[#020288] text-xs border-none w-16 text-center outline-none focus:ring-0"
+                      value={rentIncreasePercentInput}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^0-9.]/g, "");
+                        setRentIncreasePercentInput(raw);
+                        setRentIncreasePercent(
+                          raw === "" ? 0 : parseFloat(raw)
+                        );
+                      }}
+                      onFocus={(e) =>
+                        setRentIncreasePercentInput(
+                          e.target.value.replace(/[^0-9.]/g, "")
+                        )
+                      }
+                      onBlur={() =>
+                        parseAndSetNumericValue(
+                          setRentIncreasePercent,
+                          rentIncreasePercentInput,
+                          0,
+                          15
+                        )
+                      }
+                    />
+                  </div>
                 </div>
-                <div className="flex items-center bg-white px-1 py-1 rounded-lg">
-                  <input
-                    type="text"
-                    className="text-[#020288] text-xs border-none w-20 text-center outline-none focus:ring-0"
-                    value={comparisonPeriodInput}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/[^0-9]/g, "");
-                      setComparisonPeriodInput(raw);
-                      setComparisonPeriod(raw === "" ? 0 : parseInt(raw));
-                    }}
-                    onFocus={(e) =>
-                      setComparisonPeriodInput(
-                        e.target.value.replace(/[^0-9]/g, "")
-                      )
-                    }
-                    onBlur={() =>
-                      parseAndSetNumericValue(
-                        setComparisonPeriod,
-                        comparisonPeriodInput,
-                        1,
-                        50
-                      )
-                    }
-                  />
-                </div>
-              </div>
-              <Slider
-                value={comparisonPeriod}
-                min={1}
-                max={50}
-                step={1}
-                onChange={(e, val) => {
-                  setComparisonPeriod(val);
-                  setComparisonPeriodInput(`${val}`);
-                }}
-                sx={{
-                  color: "#fff",
-                  height: 6,
-                  "& .MuiSlider-thumb": {
-                    backgroundImage: "url('/slider.svg')",
-                    backgroundPosition: "center",
-                    width: 18,
-                    height: 18,
-                    transition:
-                      "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                    "&:hover, &.Mui-focusVisible": {
-                      boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                <Slider
+                  value={rentIncreasePercent}
+                  min={0}
+                  max={15}
+                  step={0.1}
+                  onChange={(e, val) => {
+                    setRentIncreasePercent(val);
+                    setRentIncreasePercentInput(`${val}`);
+                  }}
+                  sx={{
+                    color: "#fff",
+                    height: 6,
+                    "& .MuiSlider-thumb": {
+                      backgroundImage: "url('/slider.svg')",
+                      backgroundPosition: "center",
+                      width: 18,
+                      height: 18,
+                      transition:
+                        "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                      "&:hover, &.Mui-focusVisible": {
+                        boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                      },
                     },
-                  },
-                  "& .MuiSlider-track": {
-                    transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                  },
-                }}
-              />
+                    "& .MuiSlider-track": {
+                      transition:
+                        "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                    },
+                  }}
+                />
+              </div>
+
+              {/* Investment Return % */}
+              <div className="mb-1">
+                <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <label>Investment Return</label>
+                    <Popover>
+                      <PopoverTrigger>
+                        <Info width={15} />
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className={`text-xs border-[#666666] font-lexend`}
+                      >
+                        Expected annual return on investing your down payment
+                        savings
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="flex items-center bg-white px-1 py-1 rounded-lg">
+                    <input
+                      type="text"
+                      className="text-[#020288] text-xs border-none w-16 text-center outline-none focus:ring-0"
+                      value={investmentReturnPercentInput}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^0-9.]/g, "");
+                        setInvestmentReturnPercentInput(raw);
+                        setInvestmentReturnPercent(
+                          raw === "" ? 0 : parseFloat(raw)
+                        );
+                      }}
+                      onFocus={(e) =>
+                        setInvestmentReturnPercentInput(
+                          e.target.value.replace(/[^0-9.]/g, "")
+                        )
+                      }
+                      onBlur={() =>
+                        parseAndSetNumericValue(
+                          setInvestmentReturnPercent,
+                          investmentReturnPercentInput,
+                          1,
+                          25
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+                <Slider
+                  value={investmentReturnPercent}
+                  min={1}
+                  max={25}
+                  step={0.1}
+                  onChange={(e, val) => {
+                    setInvestmentReturnPercent(val);
+                    setInvestmentReturnPercentInput(`${val}`);
+                  }}
+                  sx={{
+                    color: "#fff",
+                    height: 6,
+                    "& .MuiSlider-thumb": {
+                      backgroundImage: "url('/slider.svg')",
+                      backgroundPosition: "center",
+                      width: 18,
+                      height: 18,
+                      transition:
+                        "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                      "&:hover, &.Mui-focusVisible": {
+                        boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                      },
+                    },
+                    "& .MuiSlider-track": {
+                      transition:
+                        "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                    },
+                  }}
+                />
+              </div>
+
+              {/* Comparison Period */}
+              <div className="mb-1">
+                <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
+                  <div className="flex items-center gap-1.5">
+                    <label>Comparison Period</label>
+                    <Popover>
+                      <PopoverTrigger>
+                        <Info width={15} />
+                      </PopoverTrigger>
+                      <PopoverContent
+                        className={`text-xs border-[#666666] font-lexend`}
+                      >
+                        Number of years to compare buying vs renting
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="flex items-center bg-white px-1 py-1 rounded-lg">
+                    <input
+                      type="text"
+                      className="text-[#020288] text-xs border-none w-20 text-center outline-none focus:ring-0"
+                      value={comparisonPeriodInput}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^0-9]/g, "");
+                        setComparisonPeriodInput(raw);
+                        setComparisonPeriod(raw === "" ? 0 : parseInt(raw));
+                      }}
+                      onFocus={(e) =>
+                        setComparisonPeriodInput(
+                          e.target.value.replace(/[^0-9]/g, "")
+                        )
+                      }
+                      onBlur={() =>
+                        parseAndSetNumericValue(
+                          setComparisonPeriod,
+                          comparisonPeriodInput,
+                          1,
+                          50
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+                <Slider
+                  value={comparisonPeriod}
+                  min={1}
+                  max={50}
+                  step={1}
+                  onChange={(e, val) => {
+                    setComparisonPeriod(val);
+                    setComparisonPeriodInput(`${val}`);
+                  }}
+                  sx={{
+                    color: "#fff",
+                    height: 6,
+                    "& .MuiSlider-thumb": {
+                      backgroundImage: "url('/slider.svg')",
+                      backgroundPosition: "center",
+                      width: 18,
+                      height: 18,
+                      transition:
+                        "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                      "&:hover, &.Mui-focusVisible": {
+                        boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                      },
+                    },
+                    "& .MuiSlider-track": {
+                      transition:
+                        "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                    },
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
-
         <button
           onClick={handleCalculate}
           className="w-full sm:mt-2 mt-4 bg-gradient-to-r from-[#583FCA] to-[#2D14A0] text-white font-bold py-3 rounded-2xl text-sm hover:opacity-90"

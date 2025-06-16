@@ -47,18 +47,19 @@ export const calculatorData = [
   },
   {
     id: 3,
-    title: "Home Investment",
-    description: "Calculate potential returns from real estate investment",
-    icon: "💰",
-    link: "/calculators/home-investment",
-  },
-  {
-    id: 4,
     title: "Car Purchase",
     description: "Calculate your car loan EMI and total cost of ownership",
     icon: "🚗",
     link: "/calculators/car-purchase",
   },
+  {
+    id: 4,
+    title: "Home Investment",
+    description: "Calculate potential returns from real estate investment",
+    icon: "💰",
+    link: "/calculators/home-investment",
+  },
+  ,
   {
     id: 5,
     title: "Vacation Planning",
