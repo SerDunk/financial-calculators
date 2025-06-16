@@ -62,11 +62,6 @@ export default function BuyVsRentAssumptions() {
                   security deposit interest, and assumed investment gains on
                   savings.
                 </p>
-                <p>
-                  • <strong>Net Gain:</strong> The difference in wealth after
-                  tenure—positive means buying is better, negative means renting
-                  is better.
-                </p>
               </div>
             </div>
 
@@ -91,6 +86,33 @@ export default function BuyVsRentAssumptions() {
                   <div className="w-2 h-2 bg-[#97A9FF] rounded-full mr-2"></div>
                   <span>Home Value at Exit</span>
                 </div>
+              </div>
+            </div>
+            <div className="bg-gradient-to-r from-[#F8F6FF] to-[#FFF5FA] p-3 rounded-xl border border-[#E5E2F2]">
+              <div className="text-xs font-semibold text-[#2C178C] mb-2">
+                🧾 What Is Net Gain?
+              </div>
+              <div className="text-xs text-[#323233] space-y-2">
+                <p>
+                  Net Gain (or Net Wealth) is the difference in your total
+                  wealth at the end of the chosen time period between buying and
+                  renting.
+                </p>
+                <p>
+                  It's calculated by comparing the resale value of the home (if
+                  bought) minus all home-related expenses, with the invested
+                  value of savings (if rented) minus rent paid.
+                </p>
+                <p>
+                  <strong>
+                    Net Gain = Wealth from Renting – Wealth from Buying
+                  </strong>
+                </p>
+                <p>
+                  A positive Net Gain means renting gives you more wealth over
+                  time; a negative value means buying results in greater
+                  long-term wealth.
+                </p>
               </div>
             </div>
           </div>

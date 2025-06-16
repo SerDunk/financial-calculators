@@ -49,8 +49,8 @@ const BuyVsRentResults = ({ result, comparisonPeriod }) => {
           Save{" "}
           <span className="bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent font-semibold">
             ₹
-            {Math.abs(
-              (result?.netBuyGain || 0) - (result?.netRentGain || 0)
+            {Math.round(
+              Math.abs((result?.netBuyGain || 0) - (result?.netRentGain || 0))
             ).toLocaleString("en-IN")}
           </span>{" "}
           over {result?.displayedTenure || comparisonPeriod} years
