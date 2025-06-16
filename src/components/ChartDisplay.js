@@ -11,7 +11,6 @@ import {
   PointElement,
   LineElement,
 } from "chart.js";
-import { lexend } from "../../public/fonts";
 
 ChartJS.register(
   ArcElement,
