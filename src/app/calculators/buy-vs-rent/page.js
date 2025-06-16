@@ -12,6 +12,7 @@ import { calculateBuyVsRentBreakdown } from "@/utils/calculation";
 import Heading from "@/components/Heading";
 import BuyVsRentResults from "@/components/BuyVsRentResult";
 import BuyVsRentAssumptions from "@/components/AssumptionsBVR";
+import BuyVsRentGraph from "@/components/BuyVsRentGraph";
 
 const BuyVsRentCalculator = () => {
   // State for all calculator inputs
@@ -823,6 +824,7 @@ const BuyVsRentCalculator = () => {
 
         {/* Decision Header */}
         <BuyVsRentResults result={result} comparisonPeriod={comparisonPeriod} />
+        <BuyVsRentGraph result={result} />
         {/* Chart Placeholder */}
         <BuyVsRentAssumptions />
       </div>
