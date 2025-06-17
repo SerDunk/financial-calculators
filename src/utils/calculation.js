@@ -150,7 +150,6 @@ export const calculateCarLoanDetails = ({
   salesTaxPercent,
   otherFees = 0,
 }) => {
-  // Input validation
   if (
     [
       vehiclePrice,
@@ -164,38 +163,31 @@ export const calculateCarLoanDetails = ({
     return null;
   }
 
-  // Calculate down payment amount
+  // Correct taxable amount (after incentive/trade-in)
+  const taxableAmount = vehiclePrice - cashIncentive - tradeInValue;
+  const salesTaxAmount = (taxableAmount * salesTaxPercent) / 100;
+
+  // Down payment on original vehicle price
   const downPaymentAmount = (vehiclePrice * downPaymentPercent) / 100;
 
-  // Calculate loan amount after down payment, incentives, and trade-in
+  // Net loan required
   const loanAmount = Math.max(
     0,
-    vehiclePrice - downPaymentAmount - cashIncentive - tradeInValue
+    taxableAmount + salesTaxAmount + otherFees - downPaymentAmount
   );
 
-  // Calculate sales tax on the vehicle price
-  const salesTaxAmount = (vehiclePrice * salesTaxPercent) / 100;
-
-  // Calculate total vehicle cost including tax and fees
-  const totalVehicleCost = vehiclePrice + salesTaxAmount + otherFees;
-
-  // Calculate EMI if there's a loan amount
+  // Monthly EMI
   const monthlyEMI =
     loanAmount > 0 ? calculateEMI(loanAmount, loanTerm, interestRate) : 0;
 
-  // Calculate total loan payments and interest
+  // Loan totals
   const totalLoanPayments = monthlyEMI * loanTerm * 12;
   const totalInterest = totalLoanPayments - loanAmount;
 
-  // Calculate total upfront cost (down payment + tax + fees - incentives/trade-in)
-  const totalUpfrontCost =
-    downPaymentAmount +
-    salesTaxAmount +
-    otherFees -
-    cashIncentive -
-    tradeInValue;
+  // Total upfront cost = Down payment + fees - incentives/trade + tax
+  const totalUpfrontCost = downPaymentAmount + otherFees + salesTaxAmount;
 
-  // Calculate total cost of ownership
+  // Final total cost
   const totalCostOfOwnership = totalUpfrontCost + totalLoanPayments;
 
   return {
@@ -210,11 +202,11 @@ export const calculateCarLoanDetails = ({
     cashIncentive,
     tradeInValue,
     totalUpfrontCost,
-    totalVehicleCost,
     totalCostOfOwnership,
+    totalVehicleCost: vehiclePrice + salesTaxAmount + otherFees,
     loanTerm,
     interestRate,
-    effectiveVehiclePrice: vehiclePrice - cashIncentive - tradeInValue, // Net vehicle price after incentives
+    effectiveVehiclePrice: taxableAmount,
   };
 };
 
@@ -236,7 +228,7 @@ export const calculateCarPurchaseBreakdown = ({
   loanTerm,
   cashIncentive = 0,
   tradeInValue = 0,
-  salesTaxPercent,
+  salesTaxPercent = 0.18,
   otherFees = 0,
 }) => {
   const loanDetails = calculateCarLoanDetails({

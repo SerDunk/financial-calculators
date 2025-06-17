@@ -11,7 +11,7 @@ import { Info } from "lucide-react";
 import Heading from "@/components/Heading";
 import { calculateCarPurchaseBreakdown } from "@/utils/calculation";
 import CarPurchaseResult from "@/components/CarPurchaseResult";
-// import CarPurchaseAssumptions from "@/components/AssumptionsCar";
+import CarPurchaseAssumptions from "@/components/AssumptionsCar";
 // import CarPurchaseGraph from "@/components/CarPurchaseGraph";
 
 const CarPurchaseCalculator = () => {
@@ -622,8 +622,7 @@ const CarPurchaseCalculator = () => {
             />
           </div>
 
-          {/* <CarPurchaseGraph result={result} />
-          <CarPurchaseAssumptions /> */}
+          {/* <CarPurchaseGraph result={result} /> */}
         </div>
         <button
           onClick={handleCalculate}
@@ -632,6 +631,7 @@ const CarPurchaseCalculator = () => {
           CALCULATE
         </button>
         <CarPurchaseResult result={result} />
+        {/* <CarPurchaseAssumptions /> */}
       </div>
     </div>
   );
