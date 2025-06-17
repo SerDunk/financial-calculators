@@ -568,6 +568,7 @@ const CarPurchaseCalculator = () => {
           CALCULATE
         </button>
         <CarPurchaseResult result={result} />
+        <CarPurchaseAssumptions />
       </div>
     </div>
   );
