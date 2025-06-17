@@ -1,5 +1,6 @@
 import Home from "../../public/house-cleaning.png";
 import HouseBOR from "../../public/house.png";
+import Car from "../../public/accept-car.png";
 import Image from "next/image";
 
 const FAQIcon = () => (
@@ -49,7 +50,7 @@ export const calculatorData = [
     id: 3,
     title: "Car Purchase",
     description: "Calculate your car loan EMI and total cost of ownership",
-    icon: "🚗",
+    icon: <Image src={Car} alt="Car" />,
     link: "/calculators/car-purchase",
   },
   {
