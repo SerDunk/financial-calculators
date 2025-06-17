@@ -22,7 +22,6 @@ const CarPurchaseCalculator = () => {
   const [loanTerm, setLoanTerm] = useState(5);
   const [cashIncentive, setCashIncentive] = useState(0);
   const [tradeInValue, setTradeInValue] = useState(0);
-  const [salesTaxPercent, setSalesTaxPercent] = useState(18);
   const [otherFees, setOtherFees] = useState(50000);
 
   // Derived amounts
@@ -76,10 +75,6 @@ const CarPurchaseCalculator = () => {
     () => setDownPaymentPercentInput(`${downPaymentPercent}%`),
     [downPaymentPercent]
   );
-  useEffect(
-    () => setSalesTaxPercentInput(`${salesTaxPercent}%`),
-    [salesTaxPercent]
-  );
 
   // Initial trigger
   useEffect(() => handleCalculate(), []);
@@ -96,7 +91,7 @@ const CarPurchaseCalculator = () => {
       loanTerm,
       cashIncentive,
       tradeInValue,
-      salesTaxPercent,
+
       otherFees,
     });
 
@@ -500,64 +495,6 @@ const CarPurchaseCalculator = () => {
           </div>
 
           {/* Sales Tax % */}
-          <div className="mb-1">
-            <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
-              <div className="flex items-center gap-1.5">
-                <label>Sales Tax %</label>
-                <Popover>
-                  <PopoverTrigger>
-                    <Info width={15} />
-                  </PopoverTrigger>
-                  <PopoverContent className="text-xs border-[#666666]">
-                    GST on the car
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="flex bg-[#EAE9F0] px-1 py-1 rounded-lg">
-                <input
-                  type="text"
-                  className="text-[#020288] text-xs w-16 text-center border-none outline-none focus:ring-0"
-                  value={salesTaxPercentInput}
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/[^0-9.]/g, "");
-                    setSalesTaxPercentInput(raw);
-                    setSalesTaxPercent(raw ? +raw : 0);
-                  }}
-                  onBlur={() =>
-                    parseAndSet(setSalesTaxPercent, salesTaxPercentInput, 0, 50)
-                  }
-                />
-              </div>
-            </div>
-            <Slider
-              value={salesTaxPercent}
-              min={0}
-              max={50}
-              step={1}
-              onChange={(e, val) => {
-                setSalesTaxPercent(val);
-                setSalesTaxPercentInput(`${val}`);
-              }}
-              sx={{
-                color: "#020288",
-                height: 6,
-                "& .MuiSlider-thumb": {
-                  backgroundImage: "url('/slider.svg')",
-                  backgroundPosition: "center",
-                  width: 18,
-                  height: 18,
-                  transition:
-                    "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                  "&:hover, &.Mui-focusVisible": {
-                    boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
-                  },
-                },
-                "& .MuiSlider-track": {
-                  transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                },
-              }}
-            />
-          </div>
 
           {/* Other Fees */}
           <div className="mb-1">
@@ -631,7 +568,6 @@ const CarPurchaseCalculator = () => {
           CALCULATE
         </button>
         <CarPurchaseResult result={result} />
-        {/* <CarPurchaseAssumptions /> */}
       </div>
     </div>
   );

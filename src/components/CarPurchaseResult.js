@@ -64,7 +64,7 @@ const CarPurchaseResult = ({ result }) => {
   const totalEMIPayments = monthlyEMI * loanTerm * 12;
 
   return (
-    <div className="sm:mt-2 mt-4 sm:text-sm bg-white py-6 px-5 rounded-2xl shadow-lg">
+    <div className="sm:mt-2 mt-2 sm:text-sm bg-white py-6 px-5 rounded-2xl shadow-lg">
       {/* Header */}
       <div className="text-center mb-6">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-3 bg-[#AB78FF]">
