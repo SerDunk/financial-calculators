@@ -135,6 +135,241 @@ export const getYearlyAmortization = (schedule) => {
   return yearlyData;
 };
 
+// =====================================================
+// CAR PURCHASE CALCULATION FUNCTIONS
+// =====================================================
+
+// Calculate car loan details including EMI, interest, and total costs
+export const calculateCarLoanDetails = ({
+  vehiclePrice,
+  downPaymentPercent,
+  interestRate,
+  loanTerm,
+  cashIncentive = 0,
+  tradeInValue = 0,
+  salesTaxPercent,
+  otherFees = 0,
+}) => {
+  // Input validation
+  if (
+    [
+      vehiclePrice,
+      downPaymentPercent,
+      interestRate,
+      loanTerm,
+      salesTaxPercent,
+    ].some((val) => isNaN(val) || val < 0)
+  ) {
+    console.error("Invalid input detected in calculateCarLoanDetails");
+    return null;
+  }
+
+  // Calculate down payment amount
+  const downPaymentAmount = (vehiclePrice * downPaymentPercent) / 100;
+
+  // Calculate loan amount after down payment, incentives, and trade-in
+  const loanAmount = Math.max(
+    0,
+    vehiclePrice - downPaymentAmount - cashIncentive - tradeInValue
+  );
+
+  // Calculate sales tax on the vehicle price
+  const salesTaxAmount = (vehiclePrice * salesTaxPercent) / 100;
+
+  // Calculate total vehicle cost including tax and fees
+  const totalVehicleCost = vehiclePrice + salesTaxAmount + otherFees;
+
+  // Calculate EMI if there's a loan amount
+  const monthlyEMI =
+    loanAmount > 0 ? calculateEMI(loanAmount, loanTerm, interestRate) : 0;
+
+  // Calculate total loan payments and interest
+  const totalLoanPayments = monthlyEMI * loanTerm * 12;
+  const totalInterest = totalLoanPayments - loanAmount;
+
+  // Calculate total upfront cost (down payment + tax + fees - incentives/trade-in)
+  const totalUpfrontCost =
+    downPaymentAmount +
+    salesTaxAmount +
+    otherFees -
+    cashIncentive -
+    tradeInValue;
+
+  // Calculate total cost of ownership
+  const totalCostOfOwnership = totalUpfrontCost + totalLoanPayments;
+
+  return {
+    vehiclePrice,
+    downPaymentAmount,
+    loanAmount,
+    monthlyEMI,
+    totalLoanPayments,
+    totalInterest,
+    salesTaxAmount,
+    otherFees,
+    cashIncentive,
+    tradeInValue,
+    totalUpfrontCost,
+    totalVehicleCost,
+    totalCostOfOwnership,
+    loanTerm,
+    interestRate,
+    effectiveVehiclePrice: vehiclePrice - cashIncentive - tradeInValue, // Net vehicle price after incentives
+  };
+};
+
+// Generate car loan amortization schedule
+export const generateCarLoanAmortization = (
+  loanAmount,
+  loanTerm,
+  interestRate
+) => {
+  if (loanAmount <= 0) return [];
+  return generateAmortizationSchedule(loanAmount, loanTerm, interestRate);
+};
+
+// Calculate comprehensive car purchase breakdown with monthly costs
+export const calculateCarPurchaseBreakdown = ({
+  vehiclePrice,
+  downPaymentPercent,
+  interestRate,
+  loanTerm,
+  cashIncentive = 0,
+  tradeInValue = 0,
+  salesTaxPercent,
+  otherFees = 0,
+}) => {
+  const loanDetails = calculateCarLoanDetails({
+    vehiclePrice,
+    downPaymentPercent,
+    interestRate,
+    loanTerm,
+    cashIncentive,
+    tradeInValue,
+    salesTaxPercent,
+    otherFees,
+  });
+
+  if (!loanDetails) return null;
+
+  // Calculate monthly breakdown
+  const monthlyTax = loanDetails.salesTaxAmount / (loanTerm * 12);
+  const monthlyFees = otherFees / (loanTerm * 12);
+  const monthlyIncentiveSavings = cashIncentive / (loanTerm * 12);
+  const monthlyTradeInValue = tradeInValue / (loanTerm * 12);
+
+  // Calculate savings from incentives and trade-in
+  const totalSavings = cashIncentive + tradeInValue;
+  const monthlySavings = totalSavings / (loanTerm * 12);
+
+  return {
+    ...loanDetails,
+    monthlyTax,
+    monthlyFees,
+    monthlyIncentiveSavings,
+    monthlyTradeInValue,
+    monthlySavings,
+    totalSavings,
+
+    // Summary metrics
+    loanToValueRatio: (loanDetails.loanAmount / vehiclePrice) * 100,
+    effectiveInterestRate:
+      loanDetails.loanAmount > 0
+        ? (loanDetails.totalInterest / loanDetails.loanAmount / loanTerm) * 100
+        : 0,
+
+    // Payment breakdown
+    paymentBreakdown: {
+      principal: loanDetails.loanAmount,
+      interest: loanDetails.totalInterest,
+      downPayment: loanDetails.downPaymentAmount,
+      tax: loanDetails.salesTaxAmount,
+      fees: otherFees,
+      savings: -totalSavings, // Negative because it reduces cost
+    },
+  };
+};
+
+// Calculate car affordability based on income and debt ratios
+export const calculateCarAffordability = (
+  monthlyIncome,
+  existingMonthlyDebts = 0,
+  maxDebtToIncomeRatio = 28, // 28% is conservative for car loans
+  vehiclePrice,
+  downPaymentPercent,
+  interestRate,
+  loanTerm
+) => {
+  const maxMonthlyPayment =
+    (monthlyIncome * maxDebtToIncomeRatio) / 100 - existingMonthlyDebts;
+
+  const carDetails = calculateCarLoanDetails({
+    vehiclePrice,
+    downPaymentPercent,
+    interestRate,
+    loanTerm,
+    cashIncentive: 0,
+    tradeInValue: 0,
+    salesTaxPercent: 0,
+    otherFees: 0,
+  });
+
+  const isAffordable = carDetails
+    ? carDetails.monthlyEMI <= maxMonthlyPayment
+    : false;
+  const monthlyDifference = carDetails
+    ? maxMonthlyPayment - carDetails.monthlyEMI
+    : 0;
+
+  return {
+    monthlyIncome,
+    existingMonthlyDebts,
+    maxMonthlyPayment,
+    actualMonthlyPayment: carDetails?.monthlyEMI || 0,
+    isAffordable,
+    monthlyDifference,
+    affordabilityPercentage: carDetails
+      ? (carDetails.monthlyEMI / maxMonthlyPayment) * 100
+      : 0,
+    recommendedMaxVehiclePrice:
+      maxMonthlyPayment > 0
+        ? calculateMaxVehiclePrice(
+            maxMonthlyPayment,
+            downPaymentPercent,
+            interestRate,
+            loanTerm
+          )
+        : 0,
+  };
+};
+
+// Helper function to calculate maximum vehicle price based on monthly payment capacity
+const calculateMaxVehiclePrice = (
+  maxMonthlyPayment,
+  downPaymentPercent,
+  interestRate,
+  loanTerm
+) => {
+  const monthlyRate = interestRate / 100 / 12;
+  const months = loanTerm * 12;
+
+  // Calculate maximum loan amount based on monthly payment capacity
+  const maxLoanAmount =
+    monthlyRate > 0
+      ? (maxMonthlyPayment * (Math.pow(1 + monthlyRate, months) - 1)) /
+        (monthlyRate * Math.pow(1 + monthlyRate, months))
+      : maxMonthlyPayment * months;
+
+  // Calculate maximum vehicle price considering down payment
+  const maxVehiclePrice = maxLoanAmount / (1 - downPaymentPercent / 100);
+
+  return Math.max(0, maxVehiclePrice);
+};
+
+// =====================================================
+// EXISTING FUNCTIONS (UNCHANGED)
+// =====================================================
+
 // Keep existing functions for other calculators
 export const calculateFutureValue = (presentValue, years, rate) => {
   return presentValue * Math.pow(1 + rate / 100, years);

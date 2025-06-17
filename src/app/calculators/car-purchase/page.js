@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/popover";
 import { Info } from "lucide-react";
 import Heading from "@/components/Heading";
-// import CarPurchaseResults from "@/components/CarPurchaseResults";
+import { calculateCarPurchaseBreakdown } from "@/utils/calculation";
+import CarPurchaseResult from "@/components/CarPurchaseResult";
 // import CarPurchaseAssumptions from "@/components/AssumptionsCar";
 // import CarPurchaseGraph from "@/components/CarPurchaseGraph";
 
@@ -57,13 +58,16 @@ const CarPurchaseCalculator = () => {
     setter(isNaN(num) ? min : Math.min(Math.max(num, min), max));
   };
 
-  // Calculate derived loan/down-payment
+  // Calculate derived loan/down-payment and trigger calculation
   useEffect(() => {
     const dpAmt = (vehiclePrice * downPaymentPercent) / 100;
     const loanAmt = vehiclePrice - dpAmt - cashIncentive - tradeInValue;
     setDownPaymentAmount(dpAmt);
     setLoanAmount(loanAmt);
-  }, [vehiclePrice, downPaymentPercent, cashIncentive, tradeInValue]);
+
+    // Auto-calculate results when inputs change
+    calculate();
+  }, []);
 
   // Display updates
   useEffect(() => setLoanTermInput(`${loanTerm} yrs`), [loanTerm]);
@@ -78,11 +82,25 @@ const CarPurchaseCalculator = () => {
   );
 
   // Initial trigger
-  useEffect(() => calculate(), []);
+  useEffect(() => handleCalculate(), []);
+
+  const handleCalculate = () => {
+    calculate();
+  };
 
   const calculate = () => {
-    // placeholder logic
-    setResult({ dummy: true });
+    const calculationResult = calculateCarPurchaseBreakdown({
+      vehiclePrice,
+      downPaymentPercent,
+      interestRate,
+      loanTerm,
+      cashIncentive,
+      tradeInValue,
+      salesTaxPercent,
+      otherFees,
+    });
+
+    setResult(calculationResult);
   };
 
   return (
@@ -542,7 +560,6 @@ const CarPurchaseCalculator = () => {
           </div>
 
           {/* Other Fees */}
-          {/* Other Fees */}
           <div className="mb-1">
             <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
               <div className="flex items-center gap-1.5">
@@ -605,16 +622,16 @@ const CarPurchaseCalculator = () => {
             />
           </div>
 
-          {/* <CarPurchaseResults result={result} />
-          <CarPurchaseGraph result={result} />
+          {/* <CarPurchaseGraph result={result} />
           <CarPurchaseAssumptions /> */}
         </div>
         <button
-          onClick={calculate}
+          onClick={handleCalculate}
           className="w-full mt-2 bg-gradient-to-r from-[#583FCA] to-[#2D14A0] text-white font-bold py-3 rounded-2xl text-sm hover:opacity-90"
         >
           CALCULATE
         </button>
+        <CarPurchaseResult result={result} />
       </div>
     </div>
   );
