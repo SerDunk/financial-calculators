@@ -1,14 +1,5 @@
 // Updated calculation functions for mortgage calculator
 
-export const calculateEMI = (principal, years, rate) => {
-  const monthlyRate = rate / 100 / 12;
-  const months = years * 12;
-  return (
-    (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) /
-    (Math.pow(1 + monthlyRate, months) - 1)
-  );
-};
-
 // New function to calculate total monthly payment including all costs
 export const calculateTotalMonthlyPayment = (
   principal,
@@ -648,4 +639,267 @@ export const calculateBuyVsRentBreakdown = (
       totalMaintenance / (comparisonPeriod * 12) +
       totalPropertyTax / (comparisonPeriod * 12),
   };
+};
+
+//Home Investment Calculator
+// Helper function to calculate EMI (Equated Monthly Installment)
+const calculateEMI = (principal, rate, tenure) => {
+  const monthlyRate = rate / 100 / 12;
+  const months = tenure * 12;
+
+  if (monthlyRate === 0) {
+    return principal / months;
+  }
+
+  const emi =
+    (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) /
+    (Math.pow(1 + monthlyRate, months) - 1);
+
+  return emi;
+};
+
+// Helper function to calculate compound interest
+const calculateCompoundInterest = (principal, rate, time) => {
+  return principal * Math.pow(1 + rate / 100, time);
+};
+
+// Helper function to calculate total interest paid over loan tenure
+const calculateTotalInterest = (emi, tenure, principal) => {
+  const totalPayment = emi * tenure * 12;
+  return totalPayment - principal;
+};
+
+// Helper function to calculate rental yield
+const calculateRentalYield = (annualRent, propertyPrice) => {
+  return (annualRent / propertyPrice) * 100;
+};
+
+// Helper function to calculate net cash flow per year
+const calculateNetCashFlow = (annualRent, emi, annualMaintenance) => {
+  const annualEMI = emi * 12;
+  return annualRent - annualEMI - annualMaintenance;
+};
+
+// Helper function to calculate break-even point (years)
+const calculateBreakEvenPoint = (totalInitialInvestment, netAnnualCashFlow) => {
+  if (netAnnualCashFlow <= 0) {
+    return null; // No break-even if cash flow is negative
+  }
+  return totalInitialInvestment / netAnnualCashFlow;
+};
+
+// Helper function to calculate ROI after a certain period
+const calculateROI = (currentValue, initialInvestment) => {
+  return ((currentValue - initialInvestment) / initialInvestment) * 100;
+};
+
+// Helper function to calculate future value of rental income with growth
+const calculateFutureRentalValue = (monthlyRent, years, growthRate = 3) => {
+  const annualRent = monthlyRent * 12;
+  return calculateCompoundInterest(annualRent, growthRate, years);
+};
+
+// Main calculation function
+export const calculateHomeInvestmentBreakdown = ({
+  propertyPrice,
+  downPaymentPercent,
+  interestRate,
+  loanTerm,
+  annualMaintenance,
+  propertyAppreciationRate,
+  monthlyRentalIncome,
+  registrationFees,
+}) => {
+  // Basic calculations
+  const downPaymentAmount = (propertyPrice * downPaymentPercent) / 100;
+  const loanAmount = propertyPrice - downPaymentAmount;
+  const totalInitialInvestment = downPaymentAmount + registrationFees;
+
+  // EMI calculations
+  const monthlyEMI = calculateEMI(loanAmount, interestRate, loanTerm);
+  const totalInterestPaid = calculateTotalInterest(
+    monthlyEMI,
+    loanTerm,
+    loanAmount
+  );
+  const totalAmountPaid = loanAmount + totalInterestPaid;
+
+  // Rental calculations
+  const annualRentalIncome = monthlyRentalIncome * 12;
+  const rentalYield = calculateRentalYield(annualRentalIncome, propertyPrice);
+  const netAnnualCashFlow = calculateNetCashFlow(
+    annualRentalIncome,
+    monthlyEMI,
+    annualMaintenance
+  );
+  const monthlyNetCashFlow = netAnnualCashFlow / 12;
+
+  // Property appreciation
+  const propertyValueAfterLoanTerm = calculateCompoundInterest(
+    propertyPrice,
+    propertyAppreciationRate,
+    loanTerm
+  );
+
+  // Break-even analysis
+  const breakEvenPoint = calculateBreakEvenPoint(
+    totalInitialInvestment,
+    netAnnualCashFlow
+  );
+
+  // ROI calculations
+  const totalEquityAfterLoanTerm = propertyValueAfterLoanTerm; // Assuming loan is fully paid
+  const totalRentalIncomeOverTerm = annualRentalIncome * loanTerm;
+  const totalMaintenanceOverTerm = annualMaintenance * loanTerm;
+  const netRentalIncomeOverTerm =
+    totalRentalIncomeOverTerm - totalMaintenanceOverTerm;
+
+  // Total returns
+  const capitalGains = propertyValueAfterLoanTerm - propertyPrice;
+  const totalReturns = capitalGains + netRentalIncomeOverTerm;
+  const totalInvested = totalInitialInvestment + totalAmountPaid;
+  const overallROI = calculateROI(totalReturns + propertyPrice, totalInvested);
+
+  // Annualized ROI
+  const annualizedROI =
+    (Math.pow(1 + overallROI / 100, 1 / loanTerm) - 1) * 100;
+
+  // Year-wise breakdown for the first 10 years or loan term (whichever is less)
+  const yearlyBreakdown = [];
+  const analysisYears = Math.min(10, loanTerm);
+
+  for (let year = 1; year <= analysisYears; year++) {
+    const propertyValueThisYear = calculateCompoundInterest(
+      propertyPrice,
+      propertyAppreciationRate,
+      year
+    );
+    const totalRentalToDate = annualRentalIncome * year;
+    const totalMaintenanceToDate = annualMaintenance * year;
+    const totalEMIPaidToDate = monthlyEMI * 12 * year;
+    const netCashFlowToDate =
+      totalRentalToDate - totalMaintenanceToDate - totalEMIPaidToDate;
+    const equityBuilt =
+      totalEMIPaidToDate - (totalInterestPaid * year) / loanTerm;
+
+    yearlyBreakdown.push({
+      year,
+      propertyValue: propertyValueThisYear,
+      totalRentalIncome: totalRentalToDate,
+      totalMaintenance: totalMaintenanceToDate,
+      totalEMIPaid: totalEMIPaidToDate,
+      netCashFlow: netCashFlowToDate,
+      equityBuilt: Math.max(0, equityBuilt),
+      totalEquity: propertyValueThisYear,
+    });
+  }
+
+  // Cash-on-cash return (first year)
+  const cashOnCashReturn = (netAnnualCashFlow / totalInitialInvestment) * 100;
+
+  // Loan-to-value ratio
+  const loanToValue = (loanAmount / propertyPrice) * 100;
+
+  return {
+    // Basic Info
+    propertyPrice,
+    downPaymentAmount,
+    loanAmount,
+    registrationFees,
+    totalInitialInvestment,
+    loanToValue,
+
+    // EMI Details
+    monthlyEMI,
+    totalInterestPaid,
+    totalAmountPaid,
+
+    // Rental Income
+    monthlyRentalIncome,
+    annualRentalIncome,
+    rentalYield,
+    monthlyNetCashFlow,
+    netAnnualCashFlow,
+
+    // Property Appreciation
+    propertyValueAfterLoanTerm,
+    capitalGains,
+
+    // Returns Analysis
+    overallROI,
+    annualizedROI,
+    cashOnCashReturn,
+    breakEvenPoint,
+
+    // Totals
+    totalReturns,
+    totalInvested,
+    netRentalIncomeOverTerm,
+
+    // Yearly Analysis
+    yearlyBreakdown,
+
+    // Additional Metrics
+    totalCostOfOwnership:
+      totalAmountPaid + totalInitialInvestment + annualMaintenance * loanTerm,
+
+    // Investment summary
+    summary: {
+      isPositiveCashFlow: netAnnualCashFlow > 0,
+      isProfitable: overallROI > 0,
+      paybackPeriod: breakEvenPoint,
+      recommendationScore: calculateRecommendationScore(
+        overallROI,
+        rentalYield,
+        netAnnualCashFlow > 0 ? 1 : 0,
+        propertyAppreciationRate
+      ),
+    },
+  };
+};
+
+// Helper function to calculate a recommendation score (0-100)
+const calculateRecommendationScore = (
+  roi,
+  rentalYield,
+  cashFlowPositive,
+  appreciationRate
+) => {
+  let score = 50; // Base score
+
+  // ROI component (30% weight)
+  if (roi > 15) score += 15;
+  else if (roi > 10) score += 10;
+  else if (roi > 5) score += 5;
+  else if (roi < 0) score -= 20;
+
+  // Rental yield component (25% weight)
+  if (rentalYield > 6) score += 12;
+  else if (rentalYield > 4) score += 8;
+  else if (rentalYield > 2) score += 4;
+  else if (rentalYield < 1) score -= 10;
+
+  // Cash flow component (25% weight)
+  if (cashFlowPositive) score += 12;
+  else score -= 15;
+
+  // Appreciation component (20% weight)
+  if (appreciationRate > 8) score += 10;
+  else if (appreciationRate > 5) score += 6;
+  else if (appreciationRate > 3) score += 3;
+  else if (appreciationRate < 2) score -= 5;
+
+  return Math.max(0, Math.min(100, Math.round(score)));
+};
+
+// Export individual helper functions if needed elsewhere
+export {
+  calculateEMI,
+  calculateCompoundInterest,
+  calculateTotalInterest,
+  calculateRentalYield,
+  calculateNetCashFlow,
+  calculateBreakEvenPoint,
+  calculateROI,
+  calculateFutureRentalValue,
 };

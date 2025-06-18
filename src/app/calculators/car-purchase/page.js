@@ -35,7 +35,6 @@ const CarPurchaseCalculator = () => {
   const [loanTermInput, setLoanTermInput] = useState("5 yrs");
   const [cashIncentiveInput, setCashIncentiveInput] = useState("0");
   const [tradeInValueInput, setTradeInValueInput] = useState("0");
-  const [salesTaxPercentInput, setSalesTaxPercentInput] = useState("18%");
   const [otherFeesInput, setOtherFeesInput] = useState("50,000");
 
   // Results
