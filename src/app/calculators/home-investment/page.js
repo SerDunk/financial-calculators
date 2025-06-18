@@ -10,8 +10,8 @@ import {
 import { Info } from "lucide-react";
 import Heading from "@/components/Heading";
 import { calculateHomeInvestmentBreakdown } from "@/utils/calculation";
-// import HomeInvestmentResult from "@/components/HomeInvestmentResult";
-// import HomeInvestmentAssumptions from "@/components/AssumptionsHome";
+import HomeInvestmentResult from "@/components/HomeInvestmentResult";
+import HomeInvestmentAssumptions from "@/components/HomeInvestmentAssumptions";
 // import HomeInvestmentGraph from "@/components/HomeInvestmentGraph";
 
 const HomeInvestmentCalculator = () => {
@@ -644,8 +644,8 @@ const HomeInvestmentCalculator = () => {
         >
           CALCULATE
         </button>
-        {/* <HomeInvestmentResult result={result} />
-        <HomeInvestmentAssumptions /> */}
+        <HomeInvestmentResult result={result} />
+        {/* <HomeInvestmentAssumptions /> */}
       </div>
     </div>
   );
