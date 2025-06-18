@@ -645,7 +645,7 @@ const HomeInvestmentCalculator = () => {
           CALCULATE
         </button>
         <HomeInvestmentResult result={result} />
-        {/* <HomeInvestmentAssumptions /> */}
+        <HomeInvestmentAssumptions />
       </div>
     </div>
   );
