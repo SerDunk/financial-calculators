@@ -90,7 +90,6 @@ const CarPurchaseCalculator = () => {
       loanTerm,
       cashIncentive,
       tradeInValue,
-
       otherFees,
     });
 
@@ -143,6 +142,10 @@ const CarPurchaseCalculator = () => {
                 />
               </div>
             </div>
+            <div className="text-[10px] text-[#020288] flex justify-end pt-2 px-2">
+              {formatShortIndianCurrency(vehiclePrice.toString())}
+            </div>
+
             <Slider
               value={vehiclePrice}
               min={100000}
@@ -389,16 +392,23 @@ const CarPurchaseCalculator = () => {
                   value={cashIncentiveInput}
                   onChange={(e) => {
                     const raw = e.target.value.replace(/[^0-9]/g, "");
-                    setCashIncentiveInput(raw);
+                    setCashIncentiveInput(raw ? formatIndianNumber(+raw) : "");
                     setCashIncentive(raw ? +raw : 0);
                   }}
+                  onFocus={(e) =>
+                    setCashIncentiveInput(e.target.value.replace(/[^0-9]/g, ""))
+                  }
                   onBlur={() => {
-                    const v = parseFormattedNumber(cashIncentiveInput);
-                    setCashIncentive(v);
-                    setCashIncentiveInput(formatIndianNumber(v));
+                    const val = parseFormattedNumber(cashIncentiveInput);
+                    const cons = Math.min(Math.max(val, 0), 500000);
+                    setCashIncentive(cons);
+                    setCashIncentiveInput(formatIndianNumber(cons));
                   }}
                 />
               </div>
+            </div>
+            <div className="text-[10px] text-[#020288] flex justify-end pt-2 px-2">
+              {formatShortIndianCurrency(cashIncentive.toString())}
             </div>
             <Slider
               value={cashIncentive}
@@ -407,7 +417,7 @@ const CarPurchaseCalculator = () => {
               step={5000}
               onChange={(e, val) => {
                 setCashIncentive(val);
-                setCashIncentiveInput(`${val}`);
+                setCashIncentiveInput(formatIndianNumber(val));
               }}
               sx={{
                 color: "#020288",
@@ -452,17 +462,25 @@ const CarPurchaseCalculator = () => {
                   value={tradeInValueInput}
                   onChange={(e) => {
                     const raw = e.target.value.replace(/[^0-9]/g, "");
-                    setTradeInValueInput(raw);
+                    setTradeInValueInput(raw ? formatIndianNumber(+raw) : "");
                     setTradeInValue(raw ? +raw : 0);
                   }}
+                  onFocus={(e) =>
+                    setTradeInValueInput(e.target.value.replace(/[^0-9]/g, ""))
+                  }
                   onBlur={() => {
-                    const v = parseFormattedNumber(tradeInValueInput);
-                    setTradeInValue(v);
-                    setTradeInValueInput(formatIndianNumber(v));
+                    const val = parseFormattedNumber(tradeInValueInput);
+                    const cons = Math.min(Math.max(val, 0), 3000000);
+                    setTradeInValue(cons);
+                    setTradeInValueInput(formatIndianNumber(cons));
                   }}
                 />
               </div>
             </div>
+            <div className="text-[10px] text-[#020288] flex justify-end pt-2 px-2">
+              {formatShortIndianCurrency(tradeInValue.toString())}
+            </div>
+
             <Slider
               value={tradeInValue}
               min={0}
@@ -470,7 +488,7 @@ const CarPurchaseCalculator = () => {
               step={5000}
               onChange={(e, val) => {
                 setTradeInValue(val);
-                setTradeInValueInput(`${val}`);
+                setTradeInValueInput(formatIndianNumber(val));
               }}
               sx={{
                 color: "#020288",
@@ -492,8 +510,6 @@ const CarPurchaseCalculator = () => {
               }}
             />
           </div>
-
-          {/* Sales Tax % */}
 
           {/* Other Fees */}
           <div className="mb-1">
@@ -527,6 +543,9 @@ const CarPurchaseCalculator = () => {
                   }}
                 />
               </div>
+            </div>
+            <div className="text-[10px] text-[#020288] flex justify-end pt-2 px-2">
+              {formatShortIndianCurrency(otherFees.toString())}
             </div>
             <Slider
               value={otherFees}

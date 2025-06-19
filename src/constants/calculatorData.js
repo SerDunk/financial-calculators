@@ -1,6 +1,7 @@
 import Home from "../../public/house-cleaning.png";
 import HouseBOR from "../../public/house.png";
 import Car from "../../public/accept-car.png";
+import Invest from "../../public/benefit.png";
 import Image from "next/image";
 
 const FAQIcon = () => (
@@ -57,7 +58,7 @@ export const calculatorData = [
     id: 4,
     title: "Home Investment",
     description: "Calculate potential returns from real estate investment",
-    icon: "💰",
+    icon: <Image src={Invest} alt="Investment" />,
     link: "/calculators/home-investment",
   },
   ,

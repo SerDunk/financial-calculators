@@ -153,6 +153,9 @@ const HomeInvestmentCalculator = () => {
                 />
               </div>
             </div>
+            <div className="text-[10px] text-[#020288] flex justify-end pt-2 px-2">
+              {formatShortIndianCurrency(propertyPrice.toString())}
+            </div>
             <Slider
               value={propertyPrice}
               min={500000}
@@ -410,6 +413,9 @@ const HomeInvestmentCalculator = () => {
                 />
               </div>
             </div>
+            <div className="text-[10px] text-[#020288] flex justify-end pt-2 px-2">
+              {formatShortIndianCurrency(annualMaintenance.toString())}
+            </div>
             <Slider
               value={annualMaintenance}
               min={0}
@@ -444,7 +450,7 @@ const HomeInvestmentCalculator = () => {
           <div className="mb-1">
             <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
               <div className="flex items-center gap-1.5">
-                <label>Property Appreciation (%)</label>
+                <label className="w-30">Property Appreciation (%)</label>
                 <Popover>
                   <PopoverTrigger>
                     <Info width={15} />
@@ -513,8 +519,8 @@ const HomeInvestmentCalculator = () => {
           {/* Monthly Rental Income */}
           <div className="mb-1">
             <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
-              <div className="flex items-center gap-1.5">
-                <label>Monthly Rental Income</label>
+              <div className="flex items-center">
+                <label className="w-30">Monthly Rental Income</label>
                 <Popover>
                   <PopoverTrigger>
                     <Info width={15} />
@@ -542,6 +548,9 @@ const HomeInvestmentCalculator = () => {
                   }}
                 />
               </div>
+            </div>
+            <div className="text-[10px] text-[#020288] flex justify-end pt-2 px-2">
+              {formatShortIndianCurrency(monthlyRentalIncome.toString())}
             </div>
             <Slider
               value={monthlyRentalIncome}
@@ -605,6 +614,9 @@ const HomeInvestmentCalculator = () => {
                   }}
                 />
               </div>
+            </div>
+            <div className="text-[10px] text-[#020288] flex justify-end pt-2 px-2">
+              {formatShortIndianCurrency(registrationFees.toString())}
             </div>
             <Slider
               value={registrationFees}

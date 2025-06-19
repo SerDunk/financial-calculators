@@ -3,15 +3,9 @@ import {
   Home,
   Calculator,
   TrendingUp,
-  DollarSign,
   PieChart,
   CreditCard,
   FileText,
-  Target,
-  ArrowUpRight,
-  ArrowDownRight,
-  Banknote,
-  Building,
 } from "lucide-react";
 
 const HomeInvestmentResult = ({ result }) => {
@@ -27,11 +21,6 @@ const HomeInvestmentResult = ({ result }) => {
     if (num >= 100000) return `₹${(num / 100000).toFixed(1)}L`;
     if (num >= 1000) return `₹${(num / 1000).toFixed(1)}K`;
     return `₹${num}`;
-  };
-
-  const formatPercentage = (value) => {
-    if (!value) return "0%";
-    return `${value.toFixed(1)}%`;
   };
 
   if (!result) {
@@ -78,430 +67,353 @@ const HomeInvestmentResult = ({ result }) => {
     appreciationRate = 5,
   } = result;
 
-  // Calculate returns breakdown
+  // Calculate total cost of ownership
+  const totalCostOfOwnershipCalc =
+    totalAmountPaid + (downPaymentAmount || 0) + (registrationFees || 0);
+
+  // Calculate total rental income over loan term
   const totalRentalIncome = annualRentalIncome * loanTerm;
-  const netRentalIncome = totalRentalIncome - monthlyEMI * 12 * loanTerm;
-  const totalReturnsValue = capitalGains + totalRentalIncome;
 
-  // Calculate percentages for returns breakdown
-  const capitalGainsPercent = (capitalGains / totalReturnsValue) * 100;
-  const rentalIncomePercent = (totalRentalIncome / totalReturnsValue) * 100;
+  // Calculate net returns after all costs
+  const netReturnsAfterCosts =
+    propertyValueAfterLoanTerm + totalRentalIncome - totalCostOfOwnershipCalc;
 
-  // Calculate percentages for breakdown
-  const principalPercent = (loanAmount / totalCostOfOwnership) * 100;
-  const interestPercent = (totalInterestPaid / totalCostOfOwnership) * 100;
-  const downPaymentPercent = (downPaymentAmount / totalCostOfOwnership) * 100;
-  const registrationPercent = (registrationFees / totalCostOfOwnership) * 100;
-
+  // Check if investment is cash flow positive
   const isPositiveFlow = monthlyNetCashFlow > 0;
-  const isProfitable = overallROI > 0;
+  const isTotallyProfitable = netReturnsAfterCosts > 0;
 
   return (
     <div className="sm:mt-2 mt-2 sm:text-sm bg-white py-6 px-5 rounded-2xl shadow-lg">
       {/* Header */}
       <div className="text-center mb-6">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-3 bg-[#97A9FF]">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-3 bg-[#AB78FF]">
           <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-            <Home className="text-[#97A9FF]" size={24} />
+            <Home className="text-[#AB78FF]" size={24} />
           </div>
         </div>
         <h2 className="text-2xl font-semibold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent mb-2">
-          Property Investment Analysis
+          Your Property Investment Summary
         </h2>
         <p className="text-sm text-[#666666]">
           Monthly EMI of{" "}
           <span className="bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent font-semibold">
             {formatIndianCurrency(monthlyEMI)}
           </span>{" "}
-          with {isPositiveFlow ? "positive" : "negative"} cash flow of{" "}
-          <span
-            className={`font-semibold ${
-              isPositiveFlow ? "text-[#4A7C59]" : "text-red-600"
-            }`}
-          >
-            {formatIndianCurrency(Math.abs(monthlyNetCashFlow))}
-          </span>
+          for {loanTerm} years
         </p>
       </div>
 
-      {/* Key Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        {/* Property Value */}
-        <div className="rounded-2xl p-5 border-2 border-gray-200 bg-gray-50">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 bg-[#97A9FF] rounded-xl flex items-center justify-center">
-              <Building className="text-white" size={20} />
-            </div>
-            <ArrowUpRight className="text-[#4A7C59]" size={16} />
-          </div>
-          <div className="space-y-2">
-            <p className="text-xs text-[#666666] font-medium">Current Value</p>
-            <p className="text-xl font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
-              {formatShortCurrency(propertyPrice)}
-            </p>
-            <p className="text-xs text-[#666666]">Future Value</p>
-            <p className="text-lg font-semibold text-[#4A7C59]">
-              {formatShortCurrency(propertyValueAfterLoanTerm)}
-            </p>
-          </div>
-        </div>
-
-        {/* Investment Amount */}
-        <div className="rounded-2xl p-5 border-2 border-gray-200 bg-gray-50">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 bg-[#97A9FF] rounded-xl flex items-center justify-center">
-              <CreditCard className="text-white" size={20} />
-            </div>
-            <DollarSign className="text-[#97A9FF]" size={16} />
-          </div>
-          <div className="space-y-2">
-            <p className="text-xs text-[#666666] font-medium">
-              Initial Investment
-            </p>
-            <p className="text-xl font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
-              {formatShortCurrency(totalInitialInvestment)}
-            </p>
-            <p className="text-xs text-[#666666]">Down Payment</p>
-            <p className="text-lg font-semibold text-[#5A7FC7]">
-              {formatShortCurrency(downPaymentAmount)}
-            </p>
-          </div>
-        </div>
-
-        {/* ROI */}
-        <div className="rounded-2xl p-5 border-2 border-gray-200 bg-gray-50">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 bg-[#97A9FF] rounded-xl flex items-center justify-center">
-              <TrendingUp className="text-white" size={20} />
-            </div>
-            {isProfitable ? (
-              <ArrowUpRight className="text-[#4A7C59]" size={16} />
-            ) : (
-              <ArrowDownRight className="text-red-600" size={16} />
-            )}
-          </div>
-          <div className="space-y-2">
-            <p className="text-xs text-[#666666] font-medium">Overall ROI</p>
-            <p
-              className={`text-xl font-bold ${
-                isProfitable ? "text-[#4A7C59]" : "text-red-600"
-              }`}
-            >
-              {formatPercentage(overallROI)}
-            </p>
-            <p className="text-xs text-[#666666]">Annualized ROI</p>
-            <p
-              className={`text-lg font-semibold ${
-                annualizedROI > 0 ? "text-[#4A7C59]" : "text-red-600"
-              }`}
-            >
-              {formatPercentage(annualizedROI)}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Cash Flow and Performance Analysis */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        {/* Monthly Cash Flow */}
-        <div className="rounded-2xl p-5 border-2 border-gray-200 bg-gray-50">
-          <div className="flex items-center mb-4">
-            <div className="w-10 h-10 bg-[#97A9FF] rounded-xl flex items-center justify-center mr-3">
-              <DollarSign className="text-white" size={20} />
+      {/* Total Cost Card */}
+      <div className="rounded-2xl p-5 border-2 border-gray-200 bg-[#F9F9FB] mb-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center">
+            <div className="rounded-xl flex items-center justify-center mr-3">
+              <FileText className="text-[#AB78FF]" size={30} />
             </div>
             <div>
-              <h3 className="font-semibold text-[#320992]">
-                Monthly Cash Flow
-              </h3>
-              <p className="text-xs text-[#666666]">
-                Income vs expenses breakdown
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-[#D4ECCD] rounded-xl border border-[#B8D9AD]">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-[#4A7C59] rounded-full"></div>
-                <span className="text-sm font-medium text-[#2D5016]">
-                  Rental Income
-                </span>
-              </div>
-              <span className="font-bold text-[#4A7C59]">
-                +{formatIndianCurrency(monthlyRentalIncome)}
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center p-3 bg-red-50 rounded-xl border border-red-200">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                <span className="text-sm font-medium text-red-800">
-                  EMI Payment
-                </span>
-              </div>
-              <span className="font-bold text-red-600">
-                -{formatIndianCurrency(monthlyEMI)}
-              </span>
-            </div>
-
-            <div className="border-t-2 border-dashed border-gray-300 pt-3">
-              <div
-                className={`flex justify-between items-center p-3 rounded-xl ${
-                  isPositiveFlow
-                    ? "bg-[#D4ECCD] border-2 border-[#B8D9AD]"
-                    : "bg-red-100 border-2 border-red-300"
-                }`}
-              >
-                <span className="text-sm font-bold text-[#320992]">
-                  Net Cash Flow
-                </span>
-                <span
-                  className={`font-bold text-lg ${
-                    isPositiveFlow ? "text-[#4A7C59]" : "text-red-600"
-                  }`}
-                >
-                  {isPositiveFlow ? "+" : ""}
-                  {formatIndianCurrency(monthlyNetCashFlow)}
-                </span>
-              </div>
+              <h3 className="font-semibold text-[#2C178C]">Cost Breakdown</h3>
+              <p className="text-xs text-[#666666]">All costs included</p>
             </div>
           </div>
         </div>
 
-        {/* Performance Metrics */}
-        <div className="rounded-2xl p-5 border-2 border-gray-200 bg-gray-50">
-          <div className="flex items-center mb-4">
-            <div className="w-10 h-10 bg-[#97A9FF] rounded-xl flex items-center justify-center mr-3">
-              <Target className="text-white" size={20} />
-            </div>
-            <div>
-              <h3 className="font-semibold text-[#320992]">
-                Performance Metrics
-              </h3>
-              <p className="text-xs text-[#666666]">
-                Key investment indicators
-              </p>
-            </div>
+        <div className="text-sm space-y-2">
+          <div className="flex justify-between pt-2">
+            <span className="text-xs text-[#666666] font-medium">
+              Total Loan Payment
+            </span>
+            <span className="font-semibold text-[#2C178C]">
+              {formatIndianCurrency(totalAmountPaid)}
+            </span>
           </div>
 
-          <div className="space-y-3">
-            {[
-              {
-                label: "Rental Yield",
-                value: formatPercentage(rentalYield),
-                color: "text-[#5A7FC7]",
-              },
-              {
-                label: "Cash-on-Cash Return",
-                value: formatPercentage(cashOnCashReturn),
-                color: cashOnCashReturn > 0 ? "text-[#4A7C59]" : "text-red-600",
-              },
-              {
-                label: "Break-even Period",
-                value: breakEvenPoint
-                  ? `${breakEvenPoint.toFixed(1)} years`
-                  : "N/A",
-                color: "text-[#5A7FC7]",
-              },
-            ].map((metric, index) => (
-              <div
-                key={index}
-                className="flex justify-between items-center p-3 bg-white rounded-xl border border-gray-200"
-              >
-                <span className="text-sm font-medium text-[#666666]">
-                  {metric.label}
-                </span>
-                <span className={`font-bold ${metric.color}`}>
-                  {metric.value}
-                </span>
-              </div>
-            ))}
+          <div className="flex justify-between">
+            <span className="text-xs text-[#666666] font-medium">
+              Down Payment
+            </span>
+            <span className="font-semibold text-[#2C178C]">
+              {formatIndianCurrency(downPaymentAmount)}
+            </span>
+          </div>
 
-            <div className="mt-4 pt-4 border-t border-gray-300">
-              <div className="text-xs text-[#666666] mb-1 text-center">
-                Recommendation Score
-              </div>
-              <div className="flex items-center justify-center">
-                <div className="w-16 h-16 rounded-full border-4 border-gray-200 flex items-center justify-center relative">
-                  <div
-                    className="absolute inset-0 rounded-full border-4 border-transparent"
-                    style={{
-                      borderTopColor:
-                        summary.recommendationScore >= 70
-                          ? "#4A7C59"
-                          : summary.recommendationScore >= 50
-                          ? "#F59E0B"
-                          : "#EF4444",
-                      transform: `rotate(${
-                        (summary.recommendationScore / 100) * 360
-                      }deg)`,
-                    }}
-                  ></div>
-                  <span className="text-lg font-bold text-[#320992]">
-                    {summary.recommendationScore}
-                  </span>
-                </div>
-              </div>
+          {registrationFees > 0 && (
+            <div className="flex justify-between">
+              <span className="text-xs text-[#666666] font-medium">
+                Registration Fees
+              </span>
+              <span className="font-semibold text-[#2C178C]">
+                {formatIndianCurrency(registrationFees)}
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white rounded-xl p-3 border border-gray-200 mt-4">
+          <div className="text-center">
+            <div className="text-xs text-[#666666] mb-1">
+              Total Cost of Ownership
+            </div>
+            <div className="text-xl font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+              {formatIndianCurrency(totalCostOfOwnershipCalc)}
+            </div>
+            <div className="text-xs text-[#666666] mt-1">
+              EMI + Down Payment{registrationFees > 0 ? " + Fees" : ""}
             </div>
           </div>
         </div>
+
+        {/* Returns section */}
+        <div className="bg-green-50 rounded-xl p-3 border border-green-200 mt-4">
+          <div className="text-center">
+            <div className="text-xs text-green-700 mb-1 font-medium">
+              Expected Total Returns
+            </div>
+            <div className="text-lg font-bold text-green-700">
+              {formatIndianCurrency(
+                propertyValueAfterLoanTerm + totalRentalIncome
+              )}
+            </div>
+            <div className="text-xs text-green-600 mt-1">
+              Property Value + Rental Income
+            </div>
+          </div>
+        </div>
+
+        {isTotallyProfitable && (
+          <div className="bg-blue-50 rounded-xl p-3 border border-blue-200 mt-4">
+            <div className="text-center">
+              <div className="text-xs text-blue-700 mb-1 font-medium">
+                Net Profit After All Costs
+              </div>
+              <div className="text-lg font-bold text-blue-700">
+                {formatIndianCurrency(netReturnsAfterCosts)}
+              </div>
+              <div className="text-xs text-blue-600 mt-1">
+                Total Returns - Total Investment
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Returns Breakdown */}
-      <div className="rounded-2xl p-5 border-2 border-gray-200 bg-gray-50 mb-6">
+      {/* Cash Flow Details */}
+      <div className="rounded-2xl p-5 border-2 border-gray-200 bg-[#F9F9FB] mb-4">
         <div className="flex items-center mb-4">
-          <div className="w-10 h-10 bg-[#97A9FF] rounded-xl flex items-center justify-center mr-3">
-            <PieChart className="text-white" size={20} />
+          <div className="rounded-xl flex items-center justify-center mr-3">
+            <CreditCard className="text-[#B3BEF5]" size={30} />
           </div>
           <div>
-            <h3 className="font-semibold text-[#320992]">Returns Breakdown</h3>
-            <p className="text-xs text-[#666666]">
-              How your returns are generated over {loanTerm} years
-            </p>
+            <h3 className="font-semibold text-[#2C178C]">Monthly Cash Flow</h3>
+            <p className="text-xs text-[#666666]">Income vs expenses</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          {/* Capital Appreciation */}
-          <div className="bg-[#D4ECCD] rounded-2xl p-4 border-2 border-[#B8D9AD]">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-[#4A7C59] rounded-full"></div>
-                <span className="text-sm font-semibold text-[#2D5016]">
-                  Capital Gains
-                </span>
-              </div>
-              <Building className="text-[#4A7C59]" size={20} />
-            </div>
-            <div className="space-y-2">
-              <div className="text-2xl font-bold text-[#4A7C59]">
-                {formatShortCurrency(capitalGains)}
-              </div>
-              <div className="text-xs text-[#2D5016]">
-                Property value growth over {loanTerm} years
-              </div>
-              <div className="w-full h-2 bg-[#B8D9AD] rounded-full mt-2">
-                <div
-                  className="h-2 bg-[#4A7C59] rounded-full"
-                  style={{ width: `${capitalGainsPercent.toFixed(1)}%` }}
-                ></div>
-              </div>
-              <div className="text-xs text-[#4A7C59] font-medium">
-                {capitalGainsPercent.toFixed(1)}% of total returns
-              </div>
-            </div>
+        {[
+          ["Monthly Rental Income", monthlyRentalIncome, "positive"],
+          ["Monthly EMI", monthlyEMI, "negative"],
+          [
+            "Net Monthly Cash Flow",
+            monthlyNetCashFlow,
+            isPositiveFlow ? "positive" : "negative",
+          ],
+        ].map(([label, value, type]) => (
+          <div
+            className="flex justify-between items-center text-sm mb-2"
+            key={label}
+          >
+            <span className="text-xs text-[#666666]">{label}</span>
+            <span
+              className={`font-semibold ${
+                type === "positive"
+                  ? "text-green-600"
+                  : type === "negative"
+                  ? "text-red-600"
+                  : "bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent"
+              }`}
+            >
+              {type === "positive" && "+"}
+              {type === "negative" && label !== "Net Monthly Cash Flow" && "-"}
+              {formatIndianCurrency(Math.abs(value))}
+            </span>
           </div>
+        ))}
 
-          {/* Rental Income */}
-          <div className="bg-[#B3BEF5] rounded-2xl p-4 border-2 border-[#9AAEF0]">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-[#5A7FC7] rounded-full"></div>
-                <span className="text-sm font-semibold text-[#2A4A73]">
-                  Rental Income
-                </span>
-              </div>
-              <Banknote className="text-[#5A7FC7]" size={20} />
-            </div>
-            <div className="space-y-2">
-              <div className="text-2xl font-bold text-[#5A7FC7]">
-                {formatShortCurrency(totalRentalIncome)}
-              </div>
-              <div className="text-xs text-[#2A4A73]">
-                Total rental income over {loanTerm} years
-              </div>
-              <div className="w-full h-2 bg-[#9AAEF0] rounded-full mt-2">
-                <div
-                  className="h-2 bg-[#5A7FC7] rounded-full"
-                  style={{ width: `${rentalIncomePercent.toFixed(1)}%` }}
-                ></div>
-              </div>
-              <div className="text-xs text-[#5A7FC7] font-medium">
-                {rentalIncomePercent.toFixed(1)}% of total returns
-              </div>
-            </div>
+        <div className="bg-white rounded-xl p-3 border border-gray-200 mt-4 text-xs">
+          <div className="flex justify-between mb-1">
+            <span className="text-[#666666]">Rental Yield</span>
+            <span className="font-semibold text-[#2C178C]">
+              {rentalYield?.toFixed(2)}% p.a.
+            </span>
           </div>
-        </div>
-
-        {/* Total Returns Summary */}
-        <div className="bg-white rounded-xl p-4 border border-gray-200 text-center">
-          <div className="text-xs text-[#666666] mb-1">
-            Total Expected Returns
-          </div>
-          <div className="text-2xl font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent mb-1">
-            {formatShortCurrency(totalReturnsValue)}
-          </div>
-          <div className="text-xs text-[#666666]">
-            Initial Investment: {formatShortCurrency(totalInitialInvestment)} →
-            Total Returns: {formatShortCurrency(totalReturnsValue)}
+          <div className="flex justify-between">
+            <span className="text-[#666666]">Cash-on-Cash Return</span>
+            <span
+              className={`font-semibold ${
+                cashOnCashReturn > 0 ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {cashOnCashReturn?.toFixed(2)}% p.a.
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Investment Summary */}
-      <div className="mt-6 pt-4 border-gray-300">
-        <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-          <FileText size={16} className="text-[#97A9FF]" />
-          Investment Summary
-        </h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div
-            className={`rounded-lg p-3 border ${
-              summary.isPositiveCashFlow
-                ? "bg-[#D4ECCD] border-[#B8D9AD]"
-                : "bg-red-100 border-red-200"
-            }`}
-          >
-            <div className="text-center">
-              <div
-                className={`text-sm font-medium ${
-                  summary.isPositiveCashFlow ? "text-[#2D5016]" : "text-red-700"
-                }`}
-              >
-                Cash Flow Status
+      {/* Investment Performance */}
+      <div className="rounded-2xl p-5 border-2 border-gray-200 bg-[#F9F9FB]">
+        <div className="flex items-center mb-4">
+          <div className="rounded-xl flex items-center justify-center mr-3">
+            <PieChart className="text-[#AB78FF]" size={30} />
+          </div>
+          <div>
+            <h3 className="font-semibold text-[#2C178C]">
+              Investment Analysis
+            </h3>
+            <p className="text-xs text-[#666666]">
+              Performance over {loanTerm} years
+            </p>
+          </div>
+        </div>
+
+        {/* Calculate components for breakdown */}
+        {(() => {
+          const investmentComponents = [
+            { label: "Principal Amount", value: loanAmount, color: "#B3BEF5" },
+            {
+              label: "Total Interest",
+              value: totalInterestPaid,
+              color: "#FD9CD0",
+            },
+            {
+              label: "Down Payment",
+              value: downPaymentAmount,
+              color: "#D4ECCD",
+            },
+            ...(registrationFees > 0
+              ? [
+                  {
+                    label: "Registration Fees",
+                    value: registrationFees,
+                    color: "#CCBBF4",
+                  },
+                ]
+              : []),
+          ].filter((item) => item.value > 0);
+
+          return (
+            <>
+              {investmentComponents.map((item, index) => {
+                const percent =
+                  totalCostOfOwnershipCalc > 0
+                    ? (item.value / totalCostOfOwnershipCalc) * 100
+                    : 0;
+
+                return (
+                  <div
+                    key={index}
+                    className="bg-white rounded-lg p-3 border border-gray-200 mb-2"
+                  >
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-4 h-4 rounded-full"
+                          style={{ backgroundColor: item.color }}
+                        ></div>
+                        <span className="text-sm font-medium text-gray-700">
+                          {item.label}
+                        </span>
+                      </div>
+                      <span className="text-sm font-semibold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+                        {formatShortCurrency(item.value)}
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-2 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${Math.min(percent, 100)}%`,
+                          backgroundColor: item.color,
+                        }}
+                      ></div>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {percent.toFixed(1)}% of total investment
+                    </div>
+                  </div>
+                );
+              })}
+            </>
+          );
+        })()}
+
+        {/* Returns breakdown */}
+        <div className="mt-4 pt-4 border-t border-gray-300">
+          <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+            <TrendingUp size={16} className="text-green-500" />
+            Expected Returns
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="bg-green-100 rounded-lg p-3 border border-green-200">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-sm font-medium text-green-700">
+                  Property Appreciation
+                </span>
+                <span className="text-sm font-bold text-green-600">
+                  {formatShortCurrency(capitalGains)}
+                </span>
               </div>
-              <div
-                className={`text-lg font-bold ${
-                  summary.isPositiveCashFlow ? "text-[#4A7C59]" : "text-red-600"
-                }`}
-              >
-                {summary.isPositiveCashFlow ? "Positive" : "Negative"}
+              <div className="text-xs text-green-600">
+                {propertyPrice
+                  ? ((capitalGains / propertyPrice) * 100).toFixed(1)
+                  : 0}
+                % growth over {loanTerm} years
+              </div>
+            </div>
+            <div className="bg-blue-100 rounded-lg p-3 border border-blue-200">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-sm font-medium text-blue-700">
+                  Total Rental Income
+                </span>
+                <span className="text-sm font-bold text-blue-600">
+                  {formatShortCurrency(totalRentalIncome)}
+                </span>
+              </div>
+              <div className="text-xs text-blue-600">
+                {formatIndianCurrency(annualRentalIncome)} per year
               </div>
             </div>
           </div>
 
-          <div
-            className={`rounded-lg p-3 border ${
-              summary.isProfitable
-                ? "bg-[#D4ECCD] border-[#B8D9AD]"
-                : "bg-red-100 border-red-200"
-            }`}
-          >
-            <div className="text-center">
-              <div
-                className={`text-sm font-medium ${
-                  summary.isProfitable ? "text-[#2D5016]" : "text-red-700"
-                }`}
-              >
-                Overall Profitability
-              </div>
-              <div
-                className={`text-lg font-bold ${
-                  summary.isProfitable ? "text-[#4A7C59]" : "text-red-600"
-                }`}
-              >
-                {summary.isProfitable ? "Profitable" : "Loss Making"}
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-[#B3BEF5] rounded-lg p-3 border border-[#9AAEF0]">
-            <div className="text-center">
-              <div className="text-sm font-medium text-[#2A4A73]">
-                Expected Net Gain
-              </div>
-              <div className="text-lg font-bold text-[#5A7FC7]">
-                {formatShortCurrency(totalReturns)}
+          {/* Overall ROI */}
+          <div className="mt-3">
+            <div
+              className={`rounded-lg p-3 border-2 ${
+                overallROI > 0
+                  ? "bg-green-50 border-green-300"
+                  : "bg-red-50 border-red-300"
+              }`}
+            >
+              <div className="text-center">
+                <div
+                  className={`text-sm font-medium ${
+                    overallROI > 0 ? "text-green-700" : "text-red-700"
+                  }`}
+                >
+                  Overall ROI
+                </div>
+                <div
+                  className={`text-2xl font-bold ${
+                    overallROI > 0 ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  {overallROI?.toFixed(1)}%
+                </div>
+                <div
+                  className={`text-xs ${
+                    overallROI > 0 ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  Annualized: {annualizedROI?.toFixed(1)}% per year
+                </div>
               </div>
             </div>
           </div>
