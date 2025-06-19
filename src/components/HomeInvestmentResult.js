@@ -8,8 +8,6 @@ import {
   CreditCard,
   FileText,
   Target,
-  Calendar,
-  Percent,
   ArrowUpRight,
   ArrowDownRight,
   Banknote,
@@ -102,9 +100,9 @@ const HomeInvestmentResult = ({ result }) => {
     <div className="sm:mt-2 mt-2 sm:text-sm bg-white py-6 px-5 rounded-2xl shadow-lg">
       {/* Header */}
       <div className="text-center mb-6">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-3 bg-[#AB78FF]">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-3 bg-[#97A9FF]">
           <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-            <Home className="text-[#AB78FF]" size={24} />
+            <Home className="text-[#97A9FF]" size={24} />
           </div>
         </div>
         <h2 className="text-2xl font-semibold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent mb-2">
@@ -118,7 +116,7 @@ const HomeInvestmentResult = ({ result }) => {
           with {isPositiveFlow ? "positive" : "negative"} cash flow of{" "}
           <span
             className={`font-semibold ${
-              isPositiveFlow ? "text-green-600" : "text-red-600"
+              isPositiveFlow ? "text-[#4A7C59]" : "text-red-600"
             }`}
           >
             {formatIndianCurrency(Math.abs(monthlyNetCashFlow))}
@@ -129,12 +127,12 @@ const HomeInvestmentResult = ({ result }) => {
       {/* Key Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {/* Property Value */}
-        <div className="rounded-2xl p-5 border-2 border-[#D4ECCD] bg-[#F4FBF2]">
+        <div className="rounded-2xl p-5 border-2 border-gray-200 bg-gray-50">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 bg-[#B3BEF5] rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-[#97A9FF] rounded-xl flex items-center justify-center">
               <Building className="text-white" size={20} />
             </div>
-            <ArrowUpRight className="text-green-600" size={16} />
+            <ArrowUpRight className="text-[#4A7C59]" size={16} />
           </div>
           <div className="space-y-2">
             <p className="text-xs text-[#666666] font-medium">Current Value</p>
@@ -142,19 +140,19 @@ const HomeInvestmentResult = ({ result }) => {
               {formatShortCurrency(propertyPrice)}
             </p>
             <p className="text-xs text-[#666666]">Future Value</p>
-            <p className="text-lg font-semibold text-green-600">
+            <p className="text-lg font-semibold text-[#4A7C59]">
               {formatShortCurrency(propertyValueAfterLoanTerm)}
             </p>
           </div>
         </div>
 
         {/* Investment Amount */}
-        <div className="rounded-2xl p-5 border-2 border-[#CCBBF4] bg-[#F6F0FF]">
+        <div className="rounded-2xl p-5 border-2 border-gray-200 bg-gray-50">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 bg-[#AB78FF] rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-[#97A9FF] rounded-xl flex items-center justify-center">
               <CreditCard className="text-white" size={20} />
             </div>
-            <DollarSign className="text-[#AB78FF]" size={16} />
+            <DollarSign className="text-[#97A9FF]" size={16} />
           </div>
           <div className="space-y-2">
             <p className="text-xs text-[#666666] font-medium">
@@ -164,20 +162,20 @@ const HomeInvestmentResult = ({ result }) => {
               {formatShortCurrency(totalInitialInvestment)}
             </p>
             <p className="text-xs text-[#666666]">Down Payment</p>
-            <p className="text-lg font-semibold text-[#AB78FF]">
+            <p className="text-lg font-semibold text-[#5A7FC7]">
               {formatShortCurrency(downPaymentAmount)}
             </p>
           </div>
         </div>
 
         {/* ROI */}
-        <div className="rounded-2xl p-5 border-2 border-[#F5DF9F] bg-[#FFF4E6]">
+        <div className="rounded-2xl p-5 border-2 border-gray-200 bg-gray-50">
           <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 bg-[#F59E0B] rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-[#97A9FF] rounded-xl flex items-center justify-center">
               <TrendingUp className="text-white" size={20} />
             </div>
             {isProfitable ? (
-              <ArrowUpRight className="text-green-600" size={16} />
+              <ArrowUpRight className="text-[#4A7C59]" size={16} />
             ) : (
               <ArrowDownRight className="text-red-600" size={16} />
             )}
@@ -186,7 +184,7 @@ const HomeInvestmentResult = ({ result }) => {
             <p className="text-xs text-[#666666] font-medium">Overall ROI</p>
             <p
               className={`text-xl font-bold ${
-                isProfitable ? "text-green-600" : "text-red-600"
+                isProfitable ? "text-[#4A7C59]" : "text-red-600"
               }`}
             >
               {formatPercentage(overallROI)}
@@ -194,7 +192,7 @@ const HomeInvestmentResult = ({ result }) => {
             <p className="text-xs text-[#666666]">Annualized ROI</p>
             <p
               className={`text-lg font-semibold ${
-                annualizedROI > 0 ? "text-green-600" : "text-red-600"
+                annualizedROI > 0 ? "text-[#4A7C59]" : "text-red-600"
               }`}
             >
               {formatPercentage(annualizedROI)}
@@ -206,13 +204,13 @@ const HomeInvestmentResult = ({ result }) => {
       {/* Cash Flow and Performance Analysis */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         {/* Monthly Cash Flow */}
-        <div className="rounded-2xl p-5 border-2 border-[#D4ECCD] bg-[#F4FBF2]">
+        <div className="rounded-2xl p-5 border-2 border-gray-200 bg-gray-50">
           <div className="flex items-center mb-4">
-            <div className="w-10 h-10 bg-[#B3BEF5] rounded-xl flex items-center justify-center mr-3">
+            <div className="w-10 h-10 bg-[#97A9FF] rounded-xl flex items-center justify-center mr-3">
               <DollarSign className="text-white" size={20} />
             </div>
             <div>
-              <h3 className="font-semibold text-[#2C178C]">
+              <h3 className="font-semibold text-[#320992]">
                 Monthly Cash Flow
               </h3>
               <p className="text-xs text-[#666666]">
@@ -222,14 +220,14 @@ const HomeInvestmentResult = ({ result }) => {
           </div>
 
           <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-green-50 rounded-xl border border-green-200">
+            <div className="flex justify-between items-center p-3 bg-[#D4ECCD] rounded-xl border border-[#B8D9AD]">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span className="text-sm font-medium text-green-800">
+                <div className="w-3 h-3 bg-[#4A7C59] rounded-full"></div>
+                <span className="text-sm font-medium text-[#2D5016]">
                   Rental Income
                 </span>
               </div>
-              <span className="font-bold text-green-600">
+              <span className="font-bold text-[#4A7C59]">
                 +{formatIndianCurrency(monthlyRentalIncome)}
               </span>
             </div>
@@ -250,16 +248,16 @@ const HomeInvestmentResult = ({ result }) => {
               <div
                 className={`flex justify-between items-center p-3 rounded-xl ${
                   isPositiveFlow
-                    ? "bg-green-100 border-2 border-green-300"
+                    ? "bg-[#D4ECCD] border-2 border-[#B8D9AD]"
                     : "bg-red-100 border-2 border-red-300"
                 }`}
               >
-                <span className="text-sm font-bold text-[#2C178C]">
+                <span className="text-sm font-bold text-[#320992]">
                   Net Cash Flow
                 </span>
                 <span
                   className={`font-bold text-lg ${
-                    isPositiveFlow ? "text-green-600" : "text-red-600"
+                    isPositiveFlow ? "text-[#4A7C59]" : "text-red-600"
                   }`}
                 >
                   {isPositiveFlow ? "+" : ""}
@@ -271,13 +269,13 @@ const HomeInvestmentResult = ({ result }) => {
         </div>
 
         {/* Performance Metrics */}
-        <div className="rounded-2xl p-5 border-2 border-[#CCBBF4] bg-[#F6F0FF]">
+        <div className="rounded-2xl p-5 border-2 border-gray-200 bg-gray-50">
           <div className="flex items-center mb-4">
-            <div className="w-10 h-10 bg-[#AB78FF] rounded-xl flex items-center justify-center mr-3">
+            <div className="w-10 h-10 bg-[#97A9FF] rounded-xl flex items-center justify-center mr-3">
               <Target className="text-white" size={20} />
             </div>
             <div>
-              <h3 className="font-semibold text-[#2C178C]">
+              <h3 className="font-semibold text-[#320992]">
                 Performance Metrics
               </h3>
               <p className="text-xs text-[#666666]">
@@ -291,19 +289,19 @@ const HomeInvestmentResult = ({ result }) => {
               {
                 label: "Rental Yield",
                 value: formatPercentage(rentalYield),
-                color: "text-blue-600",
+                color: "text-[#5A7FC7]",
               },
               {
                 label: "Cash-on-Cash Return",
                 value: formatPercentage(cashOnCashReturn),
-                color: cashOnCashReturn > 0 ? "text-green-600" : "text-red-600",
+                color: cashOnCashReturn > 0 ? "text-[#4A7C59]" : "text-red-600",
               },
               {
                 label: "Break-even Period",
                 value: breakEvenPoint
                   ? `${breakEvenPoint.toFixed(1)} years`
                   : "N/A",
-                color: "text-purple-600",
+                color: "text-[#5A7FC7]",
               },
             ].map((metric, index) => (
               <div
@@ -330,7 +328,7 @@ const HomeInvestmentResult = ({ result }) => {
                     style={{
                       borderTopColor:
                         summary.recommendationScore >= 70
-                          ? "#10B981"
+                          ? "#4A7C59"
                           : summary.recommendationScore >= 50
                           ? "#F59E0B"
                           : "#EF4444",
@@ -339,7 +337,7 @@ const HomeInvestmentResult = ({ result }) => {
                       }deg)`,
                     }}
                   ></div>
-                  <span className="text-lg font-bold text-[#2C178C]">
+                  <span className="text-lg font-bold text-[#320992]">
                     {summary.recommendationScore}
                   </span>
                 </div>
@@ -350,13 +348,13 @@ const HomeInvestmentResult = ({ result }) => {
       </div>
 
       {/* Returns Breakdown */}
-      <div className="rounded-2xl p-5 border-2 border-gray-200 bg-[#F9F9FB] mb-6">
+      <div className="rounded-2xl p-5 border-2 border-gray-200 bg-gray-50 mb-6">
         <div className="flex items-center mb-4">
-          <div className="w-10 h-10 bg-[#AB78FF] rounded-xl flex items-center justify-center mr-3">
+          <div className="w-10 h-10 bg-[#97A9FF] rounded-xl flex items-center justify-center mr-3">
             <PieChart className="text-white" size={20} />
           </div>
           <div>
-            <h3 className="font-semibold text-[#2C178C]">Returns Breakdown</h3>
+            <h3 className="font-semibold text-[#320992]">Returns Breakdown</h3>
             <p className="text-xs text-[#666666]">
               How your returns are generated over {loanTerm} years
             </p>
@@ -365,60 +363,60 @@ const HomeInvestmentResult = ({ result }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           {/* Capital Appreciation */}
-          <div className="bg-green-50 rounded-2xl p-4 border-2 border-green-200">
+          <div className="bg-[#D4ECCD] rounded-2xl p-4 border-2 border-[#B8D9AD]">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-                <span className="text-sm font-semibold text-green-800">
+                <div className="w-4 h-4 bg-[#4A7C59] rounded-full"></div>
+                <span className="text-sm font-semibold text-[#2D5016]">
                   Capital Gains
                 </span>
               </div>
-              <Building className="text-green-600" size={20} />
+              <Building className="text-[#4A7C59]" size={20} />
             </div>
             <div className="space-y-2">
-              <div className="text-2xl font-bold text-green-600">
+              <div className="text-2xl font-bold text-[#4A7C59]">
                 {formatShortCurrency(capitalGains)}
               </div>
-              <div className="text-xs text-green-700">
+              <div className="text-xs text-[#2D5016]">
                 Property value growth over {loanTerm} years
               </div>
-              <div className="w-full h-2 bg-green-200 rounded-full mt-2">
+              <div className="w-full h-2 bg-[#B8D9AD] rounded-full mt-2">
                 <div
-                  className="h-2 bg-green-500 rounded-full"
+                  className="h-2 bg-[#4A7C59] rounded-full"
                   style={{ width: `${capitalGainsPercent.toFixed(1)}%` }}
                 ></div>
               </div>
-              <div className="text-xs text-green-600 font-medium">
+              <div className="text-xs text-[#4A7C59] font-medium">
                 {capitalGainsPercent.toFixed(1)}% of total returns
               </div>
             </div>
           </div>
 
           {/* Rental Income */}
-          <div className="bg-blue-50 rounded-2xl p-4 border-2 border-blue-200">
+          <div className="bg-[#B3BEF5] rounded-2xl p-4 border-2 border-[#9AAEF0]">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-                <span className="text-sm font-semibold text-blue-800">
+                <div className="w-4 h-4 bg-[#5A7FC7] rounded-full"></div>
+                <span className="text-sm font-semibold text-[#2A4A73]">
                   Rental Income
                 </span>
               </div>
-              <Banknote className="text-blue-600" size={20} />
+              <Banknote className="text-[#5A7FC7]" size={20} />
             </div>
             <div className="space-y-2">
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-2xl font-bold text-[#5A7FC7]">
                 {formatShortCurrency(totalRentalIncome)}
               </div>
-              <div className="text-xs text-blue-700">
+              <div className="text-xs text-[#2A4A73]">
                 Total rental income over {loanTerm} years
               </div>
-              <div className="w-full h-2 bg-blue-200 rounded-full mt-2">
+              <div className="w-full h-2 bg-[#9AAEF0] rounded-full mt-2">
                 <div
-                  className="h-2 bg-blue-500 rounded-full"
+                  className="h-2 bg-[#5A7FC7] rounded-full"
                   style={{ width: `${rentalIncomePercent.toFixed(1)}%` }}
                 ></div>
               </div>
-              <div className="text-xs text-blue-600 font-medium">
+              <div className="text-xs text-[#5A7FC7] font-medium">
                 {rentalIncomePercent.toFixed(1)}% of total returns
               </div>
             </div>
@@ -443,28 +441,28 @@ const HomeInvestmentResult = ({ result }) => {
       {/* Investment Summary */}
       <div className="mt-6 pt-4 border-gray-300">
         <h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-          <FileText size={16} className="text-[#AB78FF]" />
+          <FileText size={16} className="text-[#97A9FF]" />
           Investment Summary
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div
             className={`rounded-lg p-3 border ${
               summary.isPositiveCashFlow
-                ? "bg-green-100 border-green-200"
+                ? "bg-[#D4ECCD] border-[#B8D9AD]"
                 : "bg-red-100 border-red-200"
             }`}
           >
             <div className="text-center">
               <div
                 className={`text-sm font-medium ${
-                  summary.isPositiveCashFlow ? "text-green-700" : "text-red-700"
+                  summary.isPositiveCashFlow ? "text-[#2D5016]" : "text-red-700"
                 }`}
               >
                 Cash Flow Status
               </div>
               <div
                 className={`text-lg font-bold ${
-                  summary.isPositiveCashFlow ? "text-green-600" : "text-red-600"
+                  summary.isPositiveCashFlow ? "text-[#4A7C59]" : "text-red-600"
                 }`}
               >
                 {summary.isPositiveCashFlow ? "Positive" : "Negative"}
@@ -475,21 +473,21 @@ const HomeInvestmentResult = ({ result }) => {
           <div
             className={`rounded-lg p-3 border ${
               summary.isProfitable
-                ? "bg-green-100 border-green-200"
+                ? "bg-[#D4ECCD] border-[#B8D9AD]"
                 : "bg-red-100 border-red-200"
             }`}
           >
             <div className="text-center">
               <div
                 className={`text-sm font-medium ${
-                  summary.isProfitable ? "text-green-700" : "text-red-700"
+                  summary.isProfitable ? "text-[#2D5016]" : "text-red-700"
                 }`}
               >
                 Overall Profitability
               </div>
               <div
                 className={`text-lg font-bold ${
-                  summary.isProfitable ? "text-green-600" : "text-red-600"
+                  summary.isProfitable ? "text-[#4A7C59]" : "text-red-600"
                 }`}
               >
                 {summary.isProfitable ? "Profitable" : "Loss Making"}
@@ -497,12 +495,12 @@ const HomeInvestmentResult = ({ result }) => {
             </div>
           </div>
 
-          <div className="bg-blue-100 rounded-lg p-3 border border-blue-200">
+          <div className="bg-[#B3BEF5] rounded-lg p-3 border border-[#9AAEF0]">
             <div className="text-center">
-              <div className="text-sm font-medium text-blue-700">
+              <div className="text-sm font-medium text-[#2A4A73]">
                 Expected Net Gain
               </div>
-              <div className="text-lg font-bold text-blue-600">
+              <div className="text-lg font-bold text-[#5A7FC7]">
                 {formatShortCurrency(totalReturns)}
               </div>
             </div>

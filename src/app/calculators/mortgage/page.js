@@ -194,22 +194,16 @@ const MortgageCalculator = () => {
   // Info tooltip data
 
   return (
-    <div className="min-h-screen font-lexend bg-[#EFEDF4] px-2 sm:px-4 lg:px-6">
+    <div className="min-h-screen font-lexend bg-[#EFEDF4] px-1.5 xs:px-0">
       <div className="max-w-xl mx-auto">
         <Heading
           header={headingData.mortgage.heading}
           desc={headingData.mortgage.desc}
         />
-        <div
-          className="rounded-2xl p-6 relative"
-          style={{
-            background:
-              "radial-gradient(ellipse 113px 357px at center, #8362D1 -60%, #192226 130%)",
-          }}
-        >
+        <div className="rounded-2xl p-6 relative bg-white">
           {/* Home Price */}
           <div className="mb-1">
-            <div className="flex text-sm justify-between items-center  text-white font-medium">
+            <div className="flex text-sm justify-between items-center  text-[#020288] font-medium">
               <div className="flex items-center gap-1.5">
                 <p>Home Price</p>
                 <Popover>
@@ -224,7 +218,7 @@ const MortgageCalculator = () => {
                 </Popover>
               </div>
 
-              <div className="flex items-center text-xs bg-white px-1 py-1 rounded-lg">
+              <div className="flex items-center text-xs bg-[#EAE9F0] px-1 py-1 rounded-lg">
                 <span className="text-[#020288]">₹</span>
                 <input
                   type="text"
@@ -254,7 +248,7 @@ const MortgageCalculator = () => {
                 />
               </div>
             </div>
-            <div className="text-[10px] text-white flex justify-end pt-2 px-2">
+            <div className="text-[10px] text-[#020288] flex justify-end pt-2 px-2">
               {formatShortIndianCurrency(homePrice.toString())}
             </div>
 
@@ -262,13 +256,13 @@ const MortgageCalculator = () => {
               value={homePrice}
               min={500000}
               max={50000000}
-              step={25000}
+              step={100000}
               onChange={(e, val) => {
                 setHomePrice(val);
                 setHomePriceInput(formatIndianNumber(val));
               }}
               sx={{
-                color: "#fff",
+                color: "#020288",
                 height: 6,
                 "& .MuiSlider-thumb": {
                   backgroundImage: "url('/slider.svg')",
@@ -290,7 +284,7 @@ const MortgageCalculator = () => {
 
           {/* Down Payment % */}
           <div className="mb-1">
-            <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
+            <div className="flex text-sm justify-between items-center mb-1 text-[#020288] font-medium">
               <div className="flex items-center gap-1.5">
                 <label>Down Payment</label>
                 <Popover>
@@ -304,7 +298,7 @@ const MortgageCalculator = () => {
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="flex items-center bg-white px-1 py-1 rounded-lg">
+              <div className="flex items-center bg-[#EAE9F0] px-1 py-1 rounded-lg">
                 <input
                   type="text"
                   className="text-[#020288] text-xs border-none w-16 text-center outline-none focus:ring-0"
@@ -334,8 +328,8 @@ const MortgageCalculator = () => {
             {/* Down Payment and Loan Amount Display */}
             <div className="flex justify-between items-center text-[10px]  pt-2 px-2 mb-2">
               <div className="flex flex-col gap-2">
-                <span className="text-white">Down Payment</span>
-                <span className="font-medium bg-white text-[#2D14A0] px-2 py-1 rounded-md">
+                <span className="text-[#020288]">Down Payment</span>
+                <span className="font-medium bg-[#EAE9F0] text-[#2D14A0] px-2 py-1 rounded-md">
                   ₹
                   {formatShortIndianCurrency(
                     ((homePrice * downPaymentPercent) / 100).toString()
@@ -343,8 +337,8 @@ const MortgageCalculator = () => {
                 </span>
               </div>
               <div className="flex flex-col gap-2">
-                <span className="text-white">Loan Amount</span>
-                <span className="font-medium bg-white text-[#2D14A0] px-2 py-1 rounded-md">
+                <span className="text-[#020288]">Loan Amount</span>
+                <span className="font-medium bg-[#EAE9F0] text-[#2D14A0] px-2 py-1 rounded-md">
                   ₹{formatShortIndianCurrency(loanAmount.toString())}
                 </span>
               </div>
@@ -354,13 +348,13 @@ const MortgageCalculator = () => {
               value={downPaymentPercent}
               min={5}
               max={50}
-              step={0.5}
+              step={1}
               onChange={(e, val) => {
                 setDownPaymentPercent(val);
                 setDownPaymentPercentInput(`${val}`);
               }}
               sx={{
-                color: "#fff",
+                color: "#020288",
                 height: 6,
                 "& .MuiSlider-thumb": {
                   backgroundImage: "url('/slider.svg')",
@@ -382,7 +376,7 @@ const MortgageCalculator = () => {
 
           {/* Tenure */}
           <div className="mb-1">
-            <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
+            <div className="flex text-sm justify-between items-center mb-1 text-[#020288] font-medium">
               <div className="flex items-center gap-1.5">
                 <label>Loan Tenure</label>
                 <Popover>
@@ -396,7 +390,7 @@ const MortgageCalculator = () => {
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="flex items-center bg-white px-1 py-1 rounded-lg">
+              <div className="flex items-center bg-[#EAE9F0] px-1 py-1 rounded-lg">
                 <input
                   type="text"
                   className="text-[#020288] text-xs border-none w-20 text-center outline-none focus:ring-0"
@@ -419,13 +413,13 @@ const MortgageCalculator = () => {
               value={tenure}
               min={1}
               max={50}
-              step={0.5}
+              step={1}
               onChange={(e, val) => {
                 setTenure(val);
                 setTenureInput(`${val}`);
               }}
               sx={{
-                color: "#fff",
+                color: "#020288",
                 height: 6,
                 "& .MuiSlider-thumb": {
                   backgroundImage: "url('/slider.svg')",
@@ -447,7 +441,7 @@ const MortgageCalculator = () => {
 
           {/* Interest Rate */}
           <div className="mb-1">
-            <div className="flex text-sm justify-between items-center mb-1 text-white font-medium">
+            <div className="flex text-sm justify-between items-center mb-1 text-[#020288] font-medium">
               <div className="flex items-center gap-1.5">
                 <label>Interest Rate</label>
                 <Popover>
@@ -461,7 +455,7 @@ const MortgageCalculator = () => {
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="flex items-center bg-white px-1 py-1 rounded-lg">
+              <div className="flex items-center bg-[#EAE9F0] px-1 py-1 rounded-lg">
                 <input
                   type="text"
                   className="text-[#020288] text-xs border-none w-16 text-center outline-none focus:ring-0"
@@ -489,13 +483,13 @@ const MortgageCalculator = () => {
               value={interestRate}
               min={1}
               max={20}
-              step={0.05}
+              step={0.5}
               onChange={(e, val) => {
                 setInterestRate(val);
                 setInterestRateInput(`${val}`);
               }}
               sx={{
-                color: "#fff",
+                color: "#020288",
                 height: 6,
                 "& .MuiSlider-thumb": {
                   backgroundImage: "url('/slider.svg')",
@@ -517,7 +511,7 @@ const MortgageCalculator = () => {
 
           {/* Property Taxes */}
           <div className="mb-1">
-            <div className="flex text-sm justify-between items-center text-white font-medium">
+            <div className="flex text-sm justify-between items-center text-[#020288] font-medium">
               <div className="flex items-center gap-1.5">
                 <label>
                   <div>Property Taxes</div>
@@ -535,7 +529,7 @@ const MortgageCalculator = () => {
                 </Popover>
               </div>
 
-              <div className="flex items-center text-xs bg-white px-1 py-1 rounded-lg">
+              <div className="flex items-center text-xs bg-[#EAE9F0] px-1 py-1 rounded-lg">
                 <span className="text-[#020288]">₹</span>
                 <input
                   type="text"
@@ -565,7 +559,7 @@ const MortgageCalculator = () => {
                 />
               </div>
             </div>
-            <div className="text-[10px] text-white flex justify-end pt-2 px-2">
+            <div className="text-[10px] text-[#020288] flex justify-end pt-2 px-2">
               {formatShortIndianCurrency(propertyTaxes.toString())}
             </div>
 
@@ -573,13 +567,13 @@ const MortgageCalculator = () => {
               value={propertyTaxes}
               min={0}
               max={50000}
-              step={500}
+              step={1000}
               onChange={(e, val) => {
                 setPropertyTaxes(val);
                 setPropertyTaxesInput(formatIndianNumber(val));
               }}
               sx={{
-                color: "#fff",
+                color: "#020288",
                 height: 6,
                 "& .MuiSlider-thumb": {
                   backgroundImage: "url('/slider.svg')",
@@ -601,7 +595,7 @@ const MortgageCalculator = () => {
 
           {/* Home Insurance */}
           <div className="mb-1">
-            <div className="flex text-sm justify-between items-center text-white font-medium">
+            <div className="flex text-sm justify-between items-center text-[#020288] font-medium">
               <div className="flex items-center gap-1.5">
                 <label>
                   <div>Home Insurance</div> (Annual)
@@ -618,7 +612,7 @@ const MortgageCalculator = () => {
                 </Popover>
               </div>
 
-              <div className="flex items-center text-xs bg-white px-1 py-1 rounded-lg">
+              <div className="flex items-center text-xs bg-[#EAE9F0] px-1 py-1 rounded-lg">
                 <span className="text-[#020288]">₹</span>
                 <input
                   type="text"
@@ -648,7 +642,7 @@ const MortgageCalculator = () => {
                 />
               </div>
             </div>
-            <div className="text-[10px] text-white flex justify-end pt-2 px-2">
+            <div className="text-[10px] text-[#020288] flex justify-end pt-2 px-2">
               {formatShortIndianCurrency(homeInsurance.toString())}
             </div>
 
@@ -656,13 +650,13 @@ const MortgageCalculator = () => {
               value={homeInsurance}
               min={0}
               max={50000}
-              step={250}
+              step={1000}
               onChange={(e, val) => {
                 setHomeInsurance(val);
                 setHomeInsuranceInput(formatIndianNumber(val));
               }}
               sx={{
-                color: "#fff",
+                color: "#020288",
                 height: 6,
                 "& .MuiSlider-thumb": {
                   backgroundImage: "url('/slider.svg')",
@@ -684,7 +678,7 @@ const MortgageCalculator = () => {
 
           {/* Other Costs */}
           <div>
-            <div className="flex text-sm justify-between items-center text-white font-medium">
+            <div className="flex text-sm justify-between items-center text-[#020288] font-medium">
               <div className="flex items-center gap-1.5">
                 <label>
                   <div>Other Costs</div> (Monthly)
@@ -701,7 +695,7 @@ const MortgageCalculator = () => {
                 </Popover>
               </div>
 
-              <div className="flex items-center text-xs bg-white px-1 py-1 rounded-lg">
+              <div className="flex items-center text-xs bg-[#EAE9F0] px-1 py-1 rounded-lg">
                 <span className="text-[#020288]">₹</span>
                 <input
                   type="text"
@@ -731,7 +725,7 @@ const MortgageCalculator = () => {
                 />
               </div>
             </div>
-            <div className="text-[10px] text-white flex justify-end pt-2 px-2">
+            <div className="text-[10px] text-[#020288] flex justify-end pt-2 px-2">
               {formatShortIndianCurrency(otherCosts.toString())}
             </div>
 
@@ -739,13 +733,13 @@ const MortgageCalculator = () => {
               value={otherCosts}
               min={0}
               max={50000}
-              step={250}
+              step={1000}
               onChange={(e, val) => {
                 setOtherCosts(val);
                 setOtherCostsInput(formatIndianNumber(val));
               }}
               sx={{
-                color: "#fff",
+                color: "#020288",
                 height: 6,
                 "& .MuiSlider-thumb": {
                   backgroundImage: "url('/slider.svg')",

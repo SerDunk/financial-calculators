@@ -98,7 +98,7 @@ const CarPurchaseCalculator = () => {
   };
 
   return (
-    <div className="min-h-screen font-lexend bg-[#EFEDF4] px-2 sm:px-4 lg:px-6">
+    <div className="min-h-screen font-lexend bg-[#EFEDF4] xs:px-0 px-1.5">
       <div className="max-w-xl mx-auto">
         <Heading
           header="Car Purchase Calculator"
@@ -146,8 +146,8 @@ const CarPurchaseCalculator = () => {
             <Slider
               value={vehiclePrice}
               min={100000}
-              max={50000000}
-              step={50000}
+              max={10000000}
+              step={100000}
               onChange={(e, val) => {
                 setVehiclePrice(val);
                 setVehiclePriceInput(formatIndianNumber(val));
@@ -280,7 +280,7 @@ const CarPurchaseCalculator = () => {
               value={interestRate}
               min={0}
               max={20}
-              step={0.1}
+              step={0.5}
               onChange={(e, val) => {
                 setInterestRate(val);
                 setInterestRateInput(`${val}`);
@@ -340,7 +340,7 @@ const CarPurchaseCalculator = () => {
             <Slider
               value={loanTerm}
               min={1}
-              max={10}
+              max={20}
               step={1}
               onChange={(e, val) => {
                 setLoanTerm(val);
@@ -404,7 +404,7 @@ const CarPurchaseCalculator = () => {
               value={cashIncentive}
               min={0}
               max={500000}
-              step={1000}
+              step={5000}
               onChange={(e, val) => {
                 setCashIncentive(val);
                 setCashIncentiveInput(`${val}`);
@@ -467,7 +467,7 @@ const CarPurchaseCalculator = () => {
               value={tradeInValue}
               min={0}
               max={3000000}
-              step={1000}
+              step={5000}
               onChange={(e, val) => {
                 setTradeInValue(val);
                 setTradeInValueInput(`${val}`);
@@ -532,7 +532,7 @@ const CarPurchaseCalculator = () => {
               value={otherFees}
               min={0}
               max={200000}
-              step={1000}
+              step={5000}
               onChange={(e, val) => {
                 setOtherFees(val);
                 setOtherFeesInput(`${val}`);
