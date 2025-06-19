@@ -2,6 +2,7 @@ import Home from "../../public/house-cleaning.png";
 import HouseBOR from "../../public/house.png";
 import Car from "../../public/accept-car.png";
 import Invest from "../../public/benefit.png";
+import Vacation from "../../public/beach.png";
 import Image from "next/image";
 
 const FAQIcon = () => (
@@ -66,7 +67,7 @@ export const calculatorData = [
     id: 5,
     title: "Vacation Planning",
     description: "Plan your dream vacation savings with investment returns",
-    icon: "✈️",
+    icon: <Image src={Vacation} alt="Beach" />,
     link: "/calculators/vacation-planning",
   },
 ];

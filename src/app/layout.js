@@ -1,5 +1,6 @@
 import "./globals.css";
 import { lexend } from "../../public/fonts";
+import Footer from "@/components/Footer";
 
 export const viewport = {
   width: "device-width",
@@ -19,12 +20,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={lexend.variable}>
       <body className="bg-[#EFEDF4] min-h-screen flex flex-col sm:items-center justify-center">
-        <main className=" py-3 flex-grow px-6 max-w-xl">{children}</main>
-        <footer className="bg-gradient-to-r from-[#583FCA] to-[#2D14A0] text-white py-2 mt-4 sm:py-4">
-          <div className="px-4 text-center">
-            <p>© {new Date().getFullYear()} GoalSeek. All rights reserved.</p>
-          </div>
-        </footer>
+        <main className=" py-3 px-6 max-w-xl ">{children}</main>
+        <Footer />
       </body>
     </html>
   );
