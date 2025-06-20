@@ -3,6 +3,8 @@ import HouseBOR from "../../public/house.png";
 import Car from "../../public/accept-car.png";
 import Invest from "../../public/benefit.png";
 import Vacation from "../../public/beach.png";
+import Rings from "../../public/wedding-rings.png";
+
 import Image from "next/image";
 
 const FAQIcon = () => (
@@ -35,7 +37,7 @@ const FAQIcon = () => (
 export const calculatorData = [
   {
     id: 1,
-    title: "Mortgage Calculator",
+    title: "Home Loan",
     description:
       "Calculate your home loan EMI based on amount, tenure and interest rate",
     icon: <Image src={Home} alt="House" />,
@@ -66,8 +68,16 @@ export const calculatorData = [
   {
     id: 5,
     title: "Vacation Planning",
-    description: "Plan your dream vacation savings with investment returns",
+    description: "Estimate travel costs and plan your perfect getaway.",
     icon: <Image src={Vacation} alt="Beach" />,
     link: "/calculators/vacation-planning",
+  },
+  {
+    id: 6,
+    title: "Wedding Cost",
+    description:
+      "Create a personalized budget to plan your dream wedding with ease.",
+    icon: <Image src={Rings} alt="wedding-ring" />,
+    link: "/calculators/wedding",
   },
 ];

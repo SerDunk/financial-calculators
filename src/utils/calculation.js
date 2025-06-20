@@ -746,7 +746,7 @@ export const calculateBuyVsRentBreakdown = (
   };
 };
 
-//Home Investment Calculator
+//Home Investment Calculator - Fixed Version
 // Helper function to calculate EMI (Equated Monthly Installment)
 
 // Helper function to calculate compound interest
@@ -765,8 +765,8 @@ const calculateRentalYield = (annualRent, propertyPrice) => {
   return (annualRent / propertyPrice) * 100;
 };
 
-// Helper function to calculate net cash flow per year
-const calculateNetCashFlow = (annualRent, emi, annualMaintenance) => {
+// Helper function to calculate net cash flow per year (including maintenance)
+const calculateNetCashFlow = (annualRent, emi, annualMaintenance = 0) => {
   const annualEMI = emi * 12;
   return annualRent - annualEMI - annualMaintenance;
 };
@@ -780,31 +780,30 @@ const calculateBreakEvenPoint = (totalInitialInvestment, netAnnualCashFlow) => {
 };
 
 // Helper function to calculate ROI after a certain period
-const calculateROI = (currentValue, initialInvestment) => {
-  return ((currentValue - initialInvestment) / initialInvestment) * 100;
+const calculateROI = (totalGains, initialInvestment) => {
+  return (totalGains / initialInvestment) * 100;
 };
 
-// Helper function to calculate future value of rental income with growth
-const calculateFutureRentalValue = (monthlyRent, years, growthRate = 3) => {
-  const annualRent = monthlyRent * 12;
-  return calculateCompoundInterest(annualRent, growthRate, years);
-};
-
-// Main calculation function
+// Main calculation function with fixes
 export const calculateHomeInvestmentBreakdown = ({
   propertyPrice,
   downPaymentPercent,
   interestRate,
   loanTerm,
-  annualMaintenance,
-  propertyAppreciationRate,
-  monthlyRentalIncome,
-  registrationFees,
+  annualMaintenance = 0,
+  propertyAppreciationRate = 5,
+  monthlyRentalIncome = 0,
+  registrationFees = 0,
+  stampDuty = 0,
+  legalFees = 0,
 }) => {
   // Basic calculations
   const downPaymentAmount = (propertyPrice * downPaymentPercent) / 100;
   const loanAmount = propertyPrice - downPaymentAmount;
-  const totalInitialInvestment = downPaymentAmount + registrationFees;
+
+  // All upfront costs
+  const totalUpfrontCosts =
+    downPaymentAmount + registrationFees + stampDuty + legalFees;
 
   // EMI calculations
   const monthlyEMI = calculateEMI(loanAmount, interestRate, loanTerm);
@@ -813,97 +812,89 @@ export const calculateHomeInvestmentBreakdown = ({
     loanTerm,
     loanAmount
   );
-  const totalAmountPaid = loanAmount + totalInterestPaid;
+  const totalLoanPayments = loanAmount + totalInterestPaid;
 
   // Rental calculations
   const annualRentalIncome = monthlyRentalIncome * 12;
   const rentalYield = calculateRentalYield(annualRentalIncome, propertyPrice);
+
+  // Realistic maintenance costs (if not provided, estimate 1-2% of property value annually)
+  const estimatedMaintenance = annualMaintenance || propertyPrice * 0.015;
+
   const netAnnualCashFlow = calculateNetCashFlow(
     annualRentalIncome,
     monthlyEMI,
-    annualMaintenance
+    estimatedMaintenance
   );
   const monthlyNetCashFlow = netAnnualCashFlow / 12;
 
-  // Property appreciation
+  // Property appreciation with realistic bounds
+  const appreciationRate = Math.min(Math.max(propertyAppreciationRate, 0), 15); // Cap at 15%
   const propertyValueAfterLoanTerm = calculateCompoundInterest(
     propertyPrice,
-    propertyAppreciationRate,
+    appreciationRate,
     loanTerm
   );
 
+  // Total costs over loan term
+  const totalMaintenanceOverTerm = estimatedMaintenance * loanTerm;
+  const totalCostOfOwnership =
+    totalUpfrontCosts + totalLoanPayments + totalMaintenanceOverTerm;
+
+  // Total rental income over loan term (with realistic growth)
+  const rentalGrowthRate = 3; // Assume 3% annual growth in rent
+  let totalRentalIncomeOverTerm = 0;
+  for (let year = 1; year <= loanTerm; year++) {
+    const yearlyRent =
+      annualRentalIncome * Math.pow(1 + rentalGrowthRate / 100, year - 1);
+    totalRentalIncomeOverTerm += yearlyRent;
+  }
+
+  // Capital gains
+  const capitalGains = propertyValueAfterLoanTerm - propertyPrice;
+
+  // Net profit calculation
+  const totalReturns = propertyValueAfterLoanTerm + totalRentalIncomeOverTerm;
+  const netProfit = totalReturns - totalCostOfOwnership;
+
+  // ROI calculations
+  const overallROI = calculateROI(netProfit, totalCostOfOwnership);
+  const annualizedROI = Math.pow(1 + overallROI / 100, 1 / loanTerm) - 1;
+
   // Break-even analysis
   const breakEvenPoint = calculateBreakEvenPoint(
-    totalInitialInvestment,
+    totalUpfrontCosts,
     netAnnualCashFlow
   );
 
-  // ROI calculations
-  const totalEquityAfterLoanTerm = propertyValueAfterLoanTerm; // Assuming loan is fully paid
-  const totalRentalIncomeOverTerm = annualRentalIncome * loanTerm;
-  const totalMaintenanceOverTerm = annualMaintenance * loanTerm;
-  const netRentalIncomeOverTerm =
-    totalRentalIncomeOverTerm - totalMaintenanceOverTerm;
-
-  // Total returns
-  const capitalGains = propertyValueAfterLoanTerm - propertyPrice;
-  const totalReturns = capitalGains + netRentalIncomeOverTerm;
-  const totalInvested = totalInitialInvestment + totalAmountPaid;
-  const overallROI = calculateROI(totalReturns + propertyPrice, totalInvested);
-
-  // Annualized ROI
-  const annualizedROI =
-    (Math.pow(1 + overallROI / 100, 1 / loanTerm) - 1) * 100;
-
-  // Year-wise breakdown for the first 10 years or loan term (whichever is less)
-  const yearlyBreakdown = [];
-  const analysisYears = Math.min(10, loanTerm);
-
-  for (let year = 1; year <= analysisYears; year++) {
-    const propertyValueThisYear = calculateCompoundInterest(
-      propertyPrice,
-      propertyAppreciationRate,
-      year
-    );
-    const totalRentalToDate = annualRentalIncome * year;
-    const totalMaintenanceToDate = annualMaintenance * year;
-    const totalEMIPaidToDate = monthlyEMI * 12 * year;
-    const netCashFlowToDate =
-      totalRentalToDate - totalMaintenanceToDate - totalEMIPaidToDate;
-    const equityBuilt =
-      totalEMIPaidToDate - (totalInterestPaid * year) / loanTerm;
-
-    yearlyBreakdown.push({
-      year,
-      propertyValue: propertyValueThisYear,
-      totalRentalIncome: totalRentalToDate,
-      totalMaintenance: totalMaintenanceToDate,
-      totalEMIPaid: totalEMIPaidToDate,
-      netCashFlow: netCashFlowToDate,
-      equityBuilt: Math.max(0, equityBuilt),
-      totalEquity: propertyValueThisYear,
-    });
-  }
-
   // Cash-on-cash return (first year)
-  const cashOnCashReturn = (netAnnualCashFlow / totalInitialInvestment) * 100;
+  const cashOnCashReturn = (netAnnualCashFlow / totalUpfrontCosts) * 100;
 
   // Loan-to-value ratio
   const loanToValue = (loanAmount / propertyPrice) * 100;
+
+  // Tax implications (basic estimate - 30% tax on rental income)
+  const taxOnRentalIncome = totalRentalIncomeOverTerm * 0.3;
+  const afterTaxRentalIncome = totalRentalIncomeOverTerm - taxOnRentalIncome;
+
+  // After-tax returns
+  const afterTaxTotalReturns =
+    propertyValueAfterLoanTerm + afterTaxRentalIncome;
+  const afterTaxNetProfit = afterTaxTotalReturns - totalCostOfOwnership;
+  const afterTaxROI = calculateROI(afterTaxNetProfit, totalCostOfOwnership);
 
   return {
     // Basic Info
     propertyPrice,
     downPaymentAmount,
     loanAmount,
-    registrationFees,
-    totalInitialInvestment,
+    totalUpfrontCosts,
     loanToValue,
 
     // EMI Details
     monthlyEMI,
     totalInterestPaid,
-    totalAmountPaid,
+    totalLoanPayments,
 
     // Rental Income
     monthlyRentalIncome,
@@ -911,39 +902,42 @@ export const calculateHomeInvestmentBreakdown = ({
     rentalYield,
     monthlyNetCashFlow,
     netAnnualCashFlow,
+    estimatedMaintenance,
 
     // Property Appreciation
     propertyValueAfterLoanTerm,
     capitalGains,
 
+    // Cost Analysis
+    totalCostOfOwnership,
+    totalMaintenanceOverTerm,
+
     // Returns Analysis
+    totalReturns,
+    totalRentalIncomeOverTerm,
+    netProfit,
     overallROI,
-    annualizedROI,
+    annualizedROI: annualizedROI * 100,
     cashOnCashReturn,
     breakEvenPoint,
 
-    // Totals
-    totalReturns,
-    totalInvested,
-    netRentalIncomeOverTerm,
+    // Tax Considerations
+    taxOnRentalIncome,
+    afterTaxRentalIncome,
+    afterTaxNetProfit,
+    afterTaxROI,
 
-    // Yearly Analysis
-    yearlyBreakdown,
-
-    // Additional Metrics
-    totalCostOfOwnership:
-      totalAmountPaid + totalInitialInvestment + annualMaintenance * loanTerm,
-
-    // Investment summary
+    // Investment Summary
     summary: {
       isPositiveCashFlow: netAnnualCashFlow > 0,
-      isProfitable: overallROI > 0,
+      isProfitable: netProfit > 0,
+      isProfitableAfterTax: afterTaxNetProfit > 0,
       paybackPeriod: breakEvenPoint,
       recommendationScore: calculateRecommendationScore(
         overallROI,
         rentalYield,
         netAnnualCashFlow > 0 ? 1 : 0,
-        propertyAppreciationRate
+        appreciationRate
       ),
     },
   };
@@ -958,32 +952,35 @@ const calculateRecommendationScore = (
 ) => {
   let score = 50; // Base score
 
-  // ROI component (30% weight)
-  if (roi > 15) score += 15;
+  // ROI component (35% weight)
+  if (roi > 20) score += 20;
+  else if (roi > 15) score += 15;
   else if (roi > 10) score += 10;
   else if (roi > 5) score += 5;
-  else if (roi < 0) score -= 20;
+  else if (roi < 0) score -= 25;
 
   // Rental yield component (25% weight)
-  if (rentalYield > 6) score += 12;
+  if (rentalYield > 8) score += 15;
+  else if (rentalYield > 6) score += 12;
   else if (rentalYield > 4) score += 8;
   else if (rentalYield > 2) score += 4;
-  else if (rentalYield < 1) score -= 10;
+  else if (rentalYield < 1) score -= 15;
 
   // Cash flow component (25% weight)
   if (cashFlowPositive) score += 12;
-  else score -= 15;
+  else score -= 18;
 
-  // Appreciation component (20% weight)
-  if (appreciationRate > 8) score += 10;
-  else if (appreciationRate > 5) score += 6;
-  else if (appreciationRate > 3) score += 3;
-  else if (appreciationRate < 2) score -= 5;
+  // Appreciation component (15% weight)
+  if (appreciationRate > 10) score += 8;
+  else if (appreciationRate > 7) score += 6;
+  else if (appreciationRate > 5) score += 4;
+  else if (appreciationRate > 3) score += 2;
+  else if (appreciationRate < 2) score -= 8;
 
   return Math.max(0, Math.min(100, Math.round(score)));
 };
 
-// Export individual helper functions if needed elsewhere
+// Export individual helper functions
 export {
   calculateEMI,
   calculateCompoundInterest,
@@ -992,5 +989,356 @@ export {
   calculateNetCashFlow,
   calculateBreakEvenPoint,
   calculateROI,
-  calculateFutureRentalValue,
+};
+
+//Vacation Calculator
+export const calculateVacationBreakdown = ({
+  numAdults,
+  numChildren,
+  destination,
+  tripDuration,
+  hotelLuxury,
+  flightClass,
+  mealPreference,
+  activitiesBudget,
+}) => {
+  const totalPeople = numAdults + numChildren;
+
+  // Flight cost calculations with more realistic 2025 pricing
+  let flightCostPerAdult = 0;
+  let flightCostPerChild = 0; // Children typically get 10-25% discount
+
+  if (destination === "Domestic") {
+    switch (flightClass) {
+      case "Economy":
+        flightCostPerAdult = 6000; // More realistic domestic pricing
+        flightCostPerChild = 5000;
+        break;
+      case "Premium Economy":
+        flightCostPerAdult = 12000;
+        flightCostPerChild = 10000;
+        break;
+      case "Business":
+        flightCostPerAdult = 20000;
+        flightCostPerChild = 16000;
+        break;
+    }
+  } else {
+    // International - more realistic pricing
+    switch (flightClass) {
+      case "Economy":
+        flightCostPerAdult = 35000; // Reduced from 45000
+        flightCostPerChild = 28000;
+        break;
+      case "Premium Economy":
+        flightCostPerAdult = 65000; // Reduced from 75000
+        flightCostPerChild = 52000;
+        break;
+      case "Business":
+        flightCostPerAdult = 120000; // Reduced from 150000
+        flightCostPerChild = 95000;
+        break;
+    }
+  }
+
+  const totalFlightCost =
+    flightCostPerAdult * numAdults + flightCostPerChild * numChildren;
+
+  // Hotel cost calculations with more realistic pricing
+  let hotelCostPerNight = 0;
+  let seasonalMultiplier = 1.15; // Reduced from 1.2
+
+  if (destination === "Domestic") {
+    switch (hotelLuxury) {
+      case "Budget":
+        hotelCostPerNight = 2500 * seasonalMultiplier; // Reduced from 3500
+        break;
+      case "Mid-range":
+        hotelCostPerNight = 6000 * seasonalMultiplier; // Reduced from 7500
+        break;
+      case "Luxury":
+        hotelCostPerNight = 15000 * seasonalMultiplier; // Reduced from 18000
+        break;
+    }
+  } else {
+    // International
+    switch (hotelLuxury) {
+      case "Budget":
+        hotelCostPerNight = 5000 * seasonalMultiplier; // Reduced from 6000
+        break;
+      case "Mid-range":
+        hotelCostPerNight = 10000 * seasonalMultiplier; // Reduced from 12000
+        break;
+      case "Luxury":
+        hotelCostPerNight = 20000 * seasonalMultiplier; // Reduced from 25000
+        break;
+    }
+  }
+
+  const totalHotelCost = hotelCostPerNight * tripDuration;
+
+  // Meal cost calculations with more realistic pricing
+  let mealCostPerPersonPerDay = 0;
+  let locationMultiplier = destination === "International" ? 1.3 : 1; // Reduced from 1.5
+
+  switch (mealPreference) {
+    case "Street Food":
+      mealCostPerPersonPerDay = 600 * locationMultiplier; // Reduced from 800
+      break;
+    case "Mix":
+      mealCostPerPersonPerDay = 1500 * locationMultiplier; // Reduced from 2000
+      break;
+    case "Fine Dining":
+      mealCostPerPersonPerDay = 3500 * locationMultiplier; // Reduced from 4500
+      break;
+  }
+
+  // Children typically eat less, so 70% of adult meal cost
+  const adultMealCost = mealCostPerPersonPerDay * numAdults * tripDuration;
+  const childMealCost =
+    mealCostPerPersonPerDay * 0.7 * numChildren * tripDuration;
+  const totalMealCost = adultMealCost + childMealCost;
+
+  // Additional cost calculations - more realistic
+  const visaAndDocumentsCost =
+    destination === "International" ? 6000 * totalPeople : 0; // Reduced from 8000
+  const travelInsuranceCost =
+    destination === "International" ? 2000 * totalPeople : 800 * totalPeople; // Reduced
+  const localTransportCost =
+    (destination === "International" ? 1200 : 600) * tripDuration; // Reduced
+
+  // Shopping and miscellaneous budget (reduced to 12% from 15%)
+  const baseTripCost =
+    totalFlightCost + totalHotelCost + totalMealCost + activitiesBudget;
+  const shoppingAndMiscCost = baseTripCost * 0.12;
+
+  // Emergency buffer (reduced to 8% from 10%)
+  const emergencyBuffer = baseTripCost * 0.08;
+
+  // Total cost breakdown
+  const totalCostBeforeExtras =
+    totalFlightCost + totalHotelCost + totalMealCost + activitiesBudget;
+  const totalExtraCosts =
+    visaAndDocumentsCost +
+    travelInsuranceCost +
+    localTransportCost +
+    shoppingAndMiscCost;
+  const totalCostWithExtras = totalCostBeforeExtras + totalExtraCosts;
+  const recommendedBudget = totalCostWithExtras + emergencyBuffer;
+
+  // Cost per person analysis
+  const costPerPerson = recommendedBudget / totalPeople;
+  const costPerDay = recommendedBudget / tripDuration;
+  const costPerPersonPerDay = costPerPerson / tripDuration;
+
+  // Budget category analysis with updated thresholds
+  const getBudgetCategory = (totalCost) => {
+    if (totalCost < 80000) return "Budget Trip";
+    if (totalCost < 250000) return "Mid-range Trip";
+    if (totalCost < 500000) return "Premium Trip";
+    return "Luxury Trip";
+  };
+
+  // More realistic optimization calculations
+  const costOptimizations = {
+    // Flight savings: realistic 15-25% savings by downgrading class
+    flightSavings:
+      flightClass === "Business"
+        ? totalFlightCost * 0.25
+        : flightClass === "Premium Economy"
+        ? totalFlightCost * 0.15
+        : 0,
+
+    // Hotel savings: 20-30% savings by choosing budget option
+    hotelSavings:
+      hotelLuxury === "Luxury"
+        ? totalHotelCost * 0.3
+        : hotelLuxury === "Mid-range"
+        ? totalHotelCost * 0.2
+        : 0,
+
+    // Meal savings: 25-40% savings by choosing local food
+    mealSavings:
+      mealPreference === "Fine Dining"
+        ? totalMealCost * 0.4
+        : mealPreference === "Mix"
+        ? totalMealCost * 0.25
+        : 0,
+  };
+
+  const potentialSavings = Object.values(costOptimizations).reduce(
+    (sum, saving) => sum + saving,
+    0
+  );
+
+  // Value analysis with updated thresholds
+  const valueMetrics = {
+    costEfficiency:
+      costPerPersonPerDay < 4000
+        ? "Excellent"
+        : costPerPersonPerDay < 7000
+        ? "Good"
+        : costPerPersonPerDay < 12000
+        ? "Average"
+        : "Premium",
+    tripLength:
+      tripDuration < 4
+        ? "Short Trip"
+        : tripDuration < 8
+        ? "Standard Trip"
+        : tripDuration < 15
+        ? "Extended Trip"
+        : "Long Vacation",
+  };
+
+  return {
+    // Basic trip details
+    tripDetails: {
+      totalPeople,
+      numAdults,
+      numChildren,
+      destination,
+      tripDuration,
+      budgetCategory: getBudgetCategory(recommendedBudget),
+    },
+
+    // Main cost breakdown
+    costs: {
+      flights: {
+        adults: flightCostPerAdult * numAdults,
+        children: flightCostPerChild * numChildren,
+        total: totalFlightCost,
+      },
+      accommodation: {
+        perNight: hotelCostPerNight,
+        totalNights: tripDuration,
+        total: totalHotelCost,
+      },
+      meals: {
+        adultCost: adultMealCost,
+        childCost: childMealCost,
+        total: totalMealCost,
+        perPersonPerDay: mealCostPerPersonPerDay,
+      },
+      activities: activitiesBudget,
+    },
+
+    // Additional costs
+    additionalCosts: {
+      visaAndDocuments: visaAndDocumentsCost,
+      travelInsurance: travelInsuranceCost,
+      localTransport: localTransportCost,
+      shoppingAndMisc: shoppingAndMiscCost,
+      total: totalExtraCosts,
+    },
+
+    // Total calculations
+    totals: {
+      baseTripCost: totalCostBeforeExtras,
+      totalWithExtras: totalCostWithExtras,
+      emergencyBuffer: emergencyBuffer,
+      recommendedBudget: recommendedBudget,
+    },
+
+    // Per person/day analysis
+    perPersonAnalysis: {
+      costPerPerson: costPerPerson,
+      costPerDay: costPerDay,
+      costPerPersonPerDay: costPerPersonPerDay,
+    },
+
+    // Optimization suggestions with realistic savings
+    optimizations: {
+      potentialSavings: potentialSavings,
+      suggestions: costOptimizations,
+      optimizedTotalBudget: recommendedBudget - potentialSavings,
+      optimizedPerPersonBudget:
+        (recommendedBudget - potentialSavings) / totalPeople,
+    },
+
+    // Value metrics
+    valueAnalysis: valueMetrics,
+
+    // Summary for display
+    summary: {
+      isAffordable: costPerPersonPerDay < 10000, // Updated threshold
+      isValueForMoney:
+        valueMetrics.costEfficiency === "Excellent" ||
+        valueMetrics.costEfficiency === "Good",
+      recommendationScore: calculateRecommendation(
+        costPerPersonPerDay,
+        tripDuration,
+        destination
+      ),
+      keyInsights: generateKeyInsights(
+        recommendedBudget,
+        costPerPersonPerDay,
+        destination,
+        tripDuration,
+        totalPeople
+      ),
+    },
+  };
+};
+
+// Helper function to calculate recommendation score
+const calculateRecommendation = (
+  costPerPersonPerDay,
+  duration,
+  destination
+) => {
+  let score = 5; // Base score out of 10
+
+  // Cost efficiency factor
+  if (costPerPersonPerDay < 4000) score += 2;
+  else if (costPerPersonPerDay < 7000) score += 1;
+  else if (costPerPersonPerDay > 12000) score -= 1;
+
+  // Duration factor
+  if (duration >= 5 && duration <= 10) score += 1;
+  if (duration < 3) score -= 1;
+
+  // Destination factor
+  if (destination === "International") score += 1;
+
+  return Math.min(Math.max(score, 1), 10);
+};
+
+// Helper function to generate key insights
+const generateKeyInsights = (
+  totalBudget,
+  costPerPersonPerDay,
+  destination,
+  duration,
+  totalPeople
+) => {
+  const insights = [];
+
+  if (costPerPersonPerDay < 4000) {
+    insights.push("Excellent value for money trip");
+  } else if (costPerPersonPerDay > 12000) {
+    insights.push("Premium vacation experience");
+  }
+
+  if (destination === "International" && totalBudget < 150000) {
+    insights.push("Budget-friendly international trip");
+  }
+
+  if (duration > 10) {
+    insights.push("Extended vacation - great for relaxation");
+  }
+
+  if (totalBudget > 400000) {
+    insights.push("Luxury vacation - premium experience");
+  }
+
+  // Add per-person context
+  const perPersonTotal = totalBudget / totalPeople;
+  if (perPersonTotal < 50000) {
+    insights.push(
+      `Affordable at ₹${Math.round(perPersonTotal / 1000)}K per person`
+    );
+  }
+
+  return insights;
 };
