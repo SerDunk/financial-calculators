@@ -154,7 +154,7 @@ const VacationResult = ({ result }) => {
                   Flight Costs (Total)
                 </span>
               </div>
-              <span className="font-semibold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+              <span className="font-semibold text-sm bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
                 {formatIndianCurrency(costs.flights.total)}
               </span>
             </div>
@@ -179,7 +179,7 @@ const VacationResult = ({ result }) => {
                   Accommodation (Total)
                 </span>
               </div>
-              <span className="font-semibold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+              <span className="font-semibold text-sm bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
                 {formatIndianCurrency(costs.accommodation.total)}
               </span>
             </div>
@@ -198,7 +198,7 @@ const VacationResult = ({ result }) => {
                   Meals & Dining (All Travelers)
                 </span>
               </div>
-              <span className="font-semibold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+              <span className="font-semibold text-sm bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
                 {formatIndianCurrency(costs.meals.total)}
               </span>
             </div>
@@ -217,7 +217,7 @@ const VacationResult = ({ result }) => {
                   Activities & Sightseeing (Total)
                 </span>
               </div>
-              <span className="font-semibold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+              <span className="font-semibold text-sm bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
                 {formatIndianCurrency(costs.activities)}
               </span>
             </div>
@@ -433,51 +433,6 @@ const VacationResult = ({ result }) => {
               <div className="text-xs text-green-600 mt-1">
                 {formatIndianCurrency(optimizedPerPersonBudget)} per person
                 after optimization
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Insights */}
-      {summary.keyInsights && summary.keyInsights.length > 0 && (
-        <div className="rounded-2xl p-5 border-2 border-blue-200 bg-blue-50">
-          <div className="flex items-center mb-4">
-            <div className="rounded-xl flex items-center justify-center mr-3">
-              <PieChart className="text-blue-500" size={30} />
-            </div>
-            <div>
-              <h3 className="font-semibold text-blue-800">Trip Insights</h3>
-              <p className="text-xs text-blue-600">
-                Key recommendations and observations
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            {summary.keyInsights.map((insight, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-lg p-3 border border-blue-200"
-              >
-                <div className="text-sm text-blue-700">• {insight}</div>
-              </div>
-            ))}
-          </div>
-
-          <div className="bg-white rounded-xl p-3 border border-blue-200 mt-4">
-            <div className="text-center">
-              <div className="text-xs text-blue-600 mb-1">
-                Recommendation Score
-              </div>
-              <div className="text-lg font-bold text-blue-700">
-                {summary.recommendationScore}/10
-              </div>
-              <div className="text-xs text-blue-600 mt-1">
-                {summary.isAffordable ? "✓ Affordable" : "⚠ Premium pricing"} •
-                {summary.isValueForMoney
-                  ? " ✓ Good value"
-                  : " Premium experience"}
               </div>
             </div>
           </div>

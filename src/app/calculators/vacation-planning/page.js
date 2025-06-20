@@ -450,7 +450,7 @@ const VacationPlanner = () => {
         </button>
 
         <VacationResult result={result} />
-        {/* <VacationAssumptions /> */}
+        <VacationAssumptions />
       </div>
     </div>
   );
