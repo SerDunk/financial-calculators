@@ -12,7 +12,7 @@ import { Info } from "lucide-react";
 import Heading from "@/components/Heading";
 import { calculateWeddingBreakdown } from "@/utils/calculation";
 import WeddingResult from "@/components/WeddingResult";
-// import WeddingAssumptions from "@/components/WeddingAssumptions";
+import WeddingAssumptions from "@/components/WeddingAssumptions";
 import {
   Select,
   SelectTrigger,
@@ -734,7 +734,7 @@ const WeddingCalculator = () => {
         </button>
         {/* Results and Assumptions */}
         <WeddingResult result={result} />
-        {/* <WeddingAssumptions /> */}
+        <WeddingAssumptions />
       </div>
     </div>
   );
