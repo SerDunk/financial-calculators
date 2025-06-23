@@ -7,151 +7,108 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
+
 import { Info } from "lucide-react";
 import Heading from "@/components/Heading";
-// import { calculateWeddingBreakdown } from "@/utils/calculation";
-// import WeddingResult from "@/components/WeddingResult";
-// import WeddingAssumptions from "@/components/AssumptionsWedding";
-// import WeddingGraph from "@/components/WeddingGraph";
+import { calculateWeddingBreakdown } from "@/utils/calculation";
+import WeddingResult from "@/components/WeddingResult";
+// import WeddingAssumptions from "@/components/WeddingAssumptions";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 const WeddingCalculator = () => {
-  // States for inputs
-  const [totalBudget, setTotalBudget] = useState(1500000); // ₹15,00,000
+  const [totalBudget, setTotalBudget] = useState(1500000);
   const [guestCount, setGuestCount] = useState(200);
-  const [venuePercent, setVenuePercent] = useState(40);
-  const [cateringPercent, setCateringPercent] = useState(30);
-  const [photographyPercent, setPhotographyPercent] = useState(8);
-  const [decorationPercent, setDecorationPercent] = useState(10);
-  const [attirePercent, setAttirePercent] = useState(7);
-  const [miscellaneousPercent, setMiscellaneousPercent] = useState(5);
-
-  // Derived amounts
-  const [venueAmount, setVenueAmount] = useState(0);
-  const [cateringAmount, setCateringAmount] = useState(0);
-  const [photographyAmount, setPhotographyAmount] = useState(0);
-  const [decorationAmount, setDecorationAmount] = useState(0);
-  const [attireAmount, setAttireAmount] = useState(0);
-  const [miscellaneousAmount, setMiscellaneousAmount] = useState(0);
-
-  // Display strings
+  const [foodAmount, setFoodAmount] = useState(375000);
+  const [decorationAmount, setDecorationAmount] = useState(180000);
+  const [photographyAmount, setPhotographyAmount] = useState(120000);
+  const [venueAmount, setVenueAmount] = useState(375000);
+  const [clothingAmount, setClothingAmount] = useState(150000);
+  const [makeupAmount, setMakeupAmount] = useState(75000);
+  const [entertainmentAmount, setEntertainmentAmount] = useState(75000);
+  const [accommodationAmount, setAccommodationAmount] = useState(45000);
+  const [invitationAmount, setInvitationAmount] = useState(30000);
+  const [weddingPlanner, setWeddingPlanner] = useState("No");
   const [totalBudgetInput, setTotalBudgetInput] = useState("15,00,000");
   const [guestCountInput, setGuestCountInput] = useState("200");
-  const [venuePercentInput, setVenuePercentInput] = useState("40%");
-  const [cateringPercentInput, setCateringPercentInput] = useState("30%");
-  const [photographyPercentInput, setPhotographyPercentInput] = useState("8%");
-  const [decorationPercentInput, setDecorationPercentInput] = useState("10%");
-  const [attirePercentInput, setAttirePercentInput] = useState("7%");
-  const [miscellaneousPercentInput, setMiscellaneousPercentInput] =
-    useState("5%");
-
-  // Results
   const [result, setResult] = useState(null);
 
-  // Formatters
-  const formatIndianNumber = (num) => num.toLocaleString("en-IN");
+  const formatIndianNumber = (num) => {
+    if (num == null || isNaN(num)) return "0";
+    return Number(num).toLocaleString("en-IN");
+  };
+
   const formatShortIndianCurrency = (amt) => {
+    if (amt == null) return "0";
     const num = parseInt(amt);
+    if (isNaN(num)) return "0";
     if (num >= 1e7) return `${(num / 1e7).toFixed(1)}Cr`;
     if (num >= 1e5) return `${(num / 1e5).toFixed(1)}L`;
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
     return `${num}`;
   };
-  const parseFormattedNumber = (str) =>
-    parseInt(str.replace(/[^\d]/g, "")) || 0;
-  const parseAndSet = (setter, value, min, max) => {
-    const num = parseFloat(value.replace(/[₹,%\s]/g, ""));
-    setter(isNaN(num) ? min : Math.min(Math.max(num, min), max));
+
+  const parseFormattedNumber = (str) => {
+    if (!str) return 0;
+    const parsed = parseInt(str.replace(/[^\d]/g, ""));
+    return isNaN(parsed) ? 0 : parsed;
   };
 
-  // Calculate derived amounts and trigger calculation
   useEffect(() => {
-    const venue = (totalBudget * venuePercent) / 100;
-    const catering = (totalBudget * cateringPercent) / 100;
-    const photography = (totalBudget * photographyPercent) / 100;
-    const decoration = (totalBudget * decorationPercent) / 100;
-    const attire = (totalBudget * attirePercent) / 100;
-    const miscellaneous = (totalBudget * miscellaneousPercent) / 100;
-
-    setVenueAmount(venue);
-    setCateringAmount(catering);
-    setPhotographyAmount(photography);
-    setDecorationAmount(decoration);
-    setAttireAmount(attire);
-    setMiscellaneousAmount(miscellaneous);
-
-    // Auto-calculate results when inputs change
     calculate();
   }, [
     totalBudget,
-    venuePercent,
-    cateringPercent,
-    photographyPercent,
-    decorationPercent,
-    attirePercent,
-    miscellaneousPercent,
     guestCount,
+    foodAmount,
+    decorationAmount,
+    photographyAmount,
+    venueAmount,
+    clothingAmount,
+    makeupAmount,
+    entertainmentAmount,
+    accommodationAmount,
+    invitationAmount,
+    weddingPlanner,
   ]);
 
-  // Display updates
-  useEffect(() => setVenuePercentInput(`${venuePercent}%`), [venuePercent]);
-  useEffect(
-    () => setCateringPercentInput(`${cateringPercent}%`),
-    [cateringPercent]
-  );
-  useEffect(
-    () => setPhotographyPercentInput(`${photographyPercent}%`),
-    [photographyPercent]
-  );
-  useEffect(
-    () => setDecorationPercentInput(`${decorationPercent}%`),
-    [decorationPercent]
-  );
-  useEffect(() => setAttirePercentInput(`${attirePercent}%`), [attirePercent]);
-  useEffect(
-    () => setMiscellaneousPercentInput(`${miscellaneousPercent}%`),
-    [miscellaneousPercent]
-  );
-
-  // Initial trigger
-  useEffect(() => handleCalculate(), []);
+  // useEffect(() => handleCalculate(), []);
 
   const handleCalculate = () => {
     calculate();
   };
 
   const calculate = () => {
-    // const calculationResult = calculateWeddingBreakdown({
-    //   totalBudget,
-    //   guestCount,
-    //   venuePercent,
-    //   cateringPercent,
-    //   photographyPercent,
-    //   decorationPercent,
-    //   attirePercent,
-    //   miscellaneousPercent,
-    // });
-    // setResult(calculationResult);
+    const result = calculateWeddingBreakdown({
+      totalBudget,
+      guestCount,
+      foodAmount,
+      decorationAmount,
+      photographyAmount,
+      venueAmount,
+      clothingAmount,
+      makeupAmount,
+      entertainmentAmount,
+      accommodationAmount,
+      invitationAmount,
+      weddingPlanner,
+    });
+    setResult(result);
   };
-
-  // Ensure percentages add up to 100%
-  const totalPercentage =
-    venuePercent +
-    cateringPercent +
-    photographyPercent +
-    decorationPercent +
-    attirePercent +
-    miscellaneousPercent;
 
   return (
     <div className="min-h-screen font-lexend bg-[#EFEDF4] xs:px-0 px-1.5">
       <div className="max-w-xl mx-auto">
         <Heading
           header="Wedding Budget Calculator"
-          desc="Plan and allocate your wedding budget across different categories"
+          desc="Plan and allocate your wedding budget across different categories for Indian weddings"
         />
 
         <div className="rounded-2xl p-6 relative bg-white">
-          {/* Total Budget */}
           <div className="mb-1">
             <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
               <div className="flex items-center gap-1.5">
@@ -160,8 +117,10 @@ const WeddingCalculator = () => {
                   <PopoverTrigger>
                     <Info width={15} />
                   </PopoverTrigger>
-                  <PopoverContent className="text-xs border-[#666666]">
-                    Total amount you plan to spend on the wedding
+                  <PopoverContent className="text-xs border-[#666666] max-w-xs">
+                    Total amount you plan to spend on the wedding including all
+                    ceremonies like engagement, mehendi, sangam, wedding, and
+                    reception
                   </PopoverContent>
                 </Popover>
               </div>
@@ -169,7 +128,7 @@ const WeddingCalculator = () => {
                 <span className="text-[#020288]">₹</span>
                 <input
                   type="text"
-                  className="text-[#020288] text-xs w-18 text-center border-none outline-none focus:ring-0"
+                  className="text-[#020288] text-xs w-18 text-center border-none outline-none focus:ring-0 bg-transparent"
                   value={totalBudgetInput}
                   onChange={(e) => {
                     const raw = e.target.value.replace(/[^0-9]/g, "");
@@ -231,15 +190,16 @@ const WeddingCalculator = () => {
                   <PopoverTrigger>
                     <Info width={15} />
                   </PopoverTrigger>
-                  <PopoverContent className="text-xs border-[#666666]">
-                    Expected number of wedding guests
+                  <PopoverContent className="text-xs border-[#666666] max-w-xs">
+                    Total number of guests across all wedding functions
+                    including relatives, friends, colleagues, and neighbors
                   </PopoverContent>
                 </Popover>
               </div>
               <div className="flex bg-[#EAE9F0] px-1 py-1 rounded-lg">
                 <input
                   type="text"
-                  className="text-[#020288] text-xs w-16 text-center border-none outline-none focus:ring-0"
+                  className="text-[#020288] text-xs w-16 text-center border-none outline-none focus:ring-0 bg-transparent"
                   value={guestCountInput}
                   onChange={(e) => {
                     const raw = e.target.value.replace(/[^0-9]/g, "");
@@ -262,7 +222,7 @@ const WeddingCalculator = () => {
               value={guestCount}
               min={50}
               max={1000}
-              step={10}
+              step={50}
               onChange={(e, val) => {
                 setGuestCount(val);
                 setGuestCountInput(val.toString());
@@ -288,51 +248,35 @@ const WeddingCalculator = () => {
             />
           </div>
 
-          {/* Venue Allocation */}
+          {/* Food */}
           <div className="mb-1">
             <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
               <div className="flex items-center gap-1.5">
-                <label>Venue (%)</label>
+                <label>Food & Catering</label>
                 <Popover>
                   <PopoverTrigger>
                     <Info width={15} />
                   </PopoverTrigger>
-                  <PopoverContent className="text-xs border-[#666666]">
-                    Wedding venue booking and rental costs
+                  <PopoverContent className="text-xs border-[#666666] max-w-xs">
+                    Complete catering for all functions including welcome
+                    drinks, breakfast, lunch, dinner, snacks, sweets, paan, and
+                    special dietary requirements for different ceremonies
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="flex bg-[#EAE9F0] px-1 py-1 rounded-lg">
-                <input
-                  type="text"
-                  className="text-[#020288] text-xs w-16 text-center border-none outline-none focus:ring-0"
-                  value={venuePercentInput}
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/[^0-9.]/g, "");
-                    setVenuePercentInput(raw);
-                    setVenuePercent(raw ? +raw : 0);
-                  }}
-                  onFocus={(e) =>
-                    setVenuePercentInput(e.target.value.replace(/[^0-9.]/g, ""))
-                  }
-                  onBlur={() =>
-                    parseAndSet(setVenuePercent, venuePercentInput, 0, 80)
-                  }
-                />
+              <div className="flex bg-[#EAE9F0] px-1 py-1 rounded-lg items-center">
+                <span className="text-[#020288] text-xs">₹</span>
+                <span className="text-[#020288] text-xs w-18 text-center">
+                  {formatShortIndianCurrency(foodAmount.toString())}
+                </span>
               </div>
             </div>
-            <div className="text-[10px] text-[#020288] flex justify-end pt-2 px-2">
-              ₹{formatShortIndianCurrency(venueAmount.toString())}
-            </div>
             <Slider
-              value={venuePercent}
+              value={foodAmount}
               min={0}
-              max={80}
-              step={1}
-              onChange={(e, val) => {
-                setVenuePercent(val);
-                setVenuePercentInput(`${val}`);
-              }}
+              max={1000000}
+              step={5000}
+              onChange={(e, val) => setFoodAmount(val)}
               sx={{
                 color: "#020288",
                 height: 6,
@@ -354,53 +298,36 @@ const WeddingCalculator = () => {
             />
           </div>
 
-          {/* Catering Allocation */}
+          {/* Venue */}
           <div className="mb-1">
             <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
               <div className="flex items-center gap-1.5">
-                <label>Catering (%)</label>
+                <label>Venue</label>
                 <Popover>
                   <PopoverTrigger>
                     <Info width={15} />
                   </PopoverTrigger>
-                  <PopoverContent className="text-xs border-[#666666]">
-                    Food and beverage expenses
+                  <PopoverContent className="text-xs border-[#666666] max-w-xs">
+                    Booking charges for marriage halls, banquet halls,
+                    farmhouses, hotels, or destination venues for all ceremonies
+                    including advance booking, security deposits, and additional
+                    charges
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="flex bg-[#EAE9F0] px-1 py-1 rounded-lg">
-                <input
-                  type="text"
-                  className="text-[#020288] text-xs w-16 text-center border-none outline-none focus:ring-0"
-                  value={cateringPercentInput}
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/[^0-9.]/g, "");
-                    setCateringPercentInput(raw);
-                    setCateringPercent(raw ? +raw : 0);
-                  }}
-                  onFocus={(e) =>
-                    setCateringPercentInput(
-                      e.target.value.replace(/[^0-9.]/g, "")
-                    )
-                  }
-                  onBlur={() =>
-                    parseAndSet(setCateringPercent, cateringPercentInput, 0, 60)
-                  }
-                />
+              <div className="flex bg-[#EAE9F0] px-1 py-1 rounded-lg items-center">
+                <span className="text-[#020288] text-xs">₹</span>
+                <span className="text-[#020288] text-xs w-18 text-center">
+                  {formatShortIndianCurrency(venueAmount.toString())}
+                </span>
               </div>
             </div>
-            <div className="text-[10px] text-[#020288] flex justify-end pt-2 px-2">
-              ₹{formatShortIndianCurrency(cateringAmount.toString())}
-            </div>
             <Slider
-              value={cateringPercent}
+              value={venueAmount}
               min={0}
-              max={60}
-              step={1}
-              onChange={(e, val) => {
-                setCateringPercent(val);
-                setCateringPercentInput(`${val}`);
-              }}
+              max={10000000}
+              step={10000}
+              onChange={(e, val) => setVenueAmount(val)}
               sx={{
                 color: "#020288",
                 height: 6,
@@ -422,58 +349,36 @@ const WeddingCalculator = () => {
             />
           </div>
 
-          {/* Photography Allocation */}
+          {/* Decoration */}
           <div className="mb-1">
             <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
               <div className="flex items-center gap-1.5">
-                <label>Photography (%)</label>
+                <label>Decoration</label>
                 <Popover>
                   <PopoverTrigger>
                     <Info width={15} />
                   </PopoverTrigger>
-                  <PopoverContent className="text-xs border-[#666666]">
-                    Photography and videography services
+                  <PopoverContent className="text-xs border-[#666666] max-w-xs">
+                    Complete decoration including mandap decoration, floral
+                    arrangements, lighting, stage decoration, entrance gates,
+                    backdrop, rangoli, and traditional decorative items for all
+                    ceremonies
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="flex bg-[#EAE9F0] px-1 py-1 rounded-lg">
-                <input
-                  type="text"
-                  className="text-[#020288] text-xs w-16 text-center border-none outline-none focus:ring-0"
-                  value={photographyPercentInput}
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/[^0-9.]/g, "");
-                    setPhotographyPercentInput(raw);
-                    setPhotographyPercent(raw ? +raw : 0);
-                  }}
-                  onFocus={(e) =>
-                    setPhotographyPercentInput(
-                      e.target.value.replace(/[^0-9.]/g, "")
-                    )
-                  }
-                  onBlur={() =>
-                    parseAndSet(
-                      setPhotographyPercent,
-                      photographyPercentInput,
-                      0,
-                      20
-                    )
-                  }
-                />
+              <div className="flex bg-[#EAE9F0] px-1 py-1 rounded-lg items-center">
+                <span className="text-[#020288] text-xs">₹</span>
+                <span className="text-[#020288] text-xs w-18 text-center">
+                  {formatShortIndianCurrency(decorationAmount.toString())}
+                </span>
               </div>
             </div>
-            <div className="text-[10px] text-[#020288] flex justify-end pt-2 px-2">
-              ₹{formatShortIndianCurrency(photographyAmount.toString())}
-            </div>
             <Slider
-              value={photographyPercent}
+              value={decorationAmount}
               min={0}
-              max={20}
-              step={0.5}
-              onChange={(e, val) => {
-                setPhotographyPercent(val);
-                setPhotographyPercentInput(`${val}`);
-              }}
+              max={1000000}
+              step={50000}
+              onChange={(e, val) => setDecorationAmount(val)}
               sx={{
                 color: "#020288",
                 height: 6,
@@ -495,58 +400,35 @@ const WeddingCalculator = () => {
             />
           </div>
 
-          {/* Decoration Allocation */}
+          {/* Photography & Videography */}
           <div className="mb-1">
             <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
               <div className="flex items-center gap-1.5">
-                <label>Decoration (%)</label>
+                <label>Photography & Videography</label>
                 <Popover>
                   <PopoverTrigger>
                     <Info width={15} />
                   </PopoverTrigger>
-                  <PopoverContent className="text-xs border-[#666666]">
-                    Flowers, lighting, and decoration costs
+                  <PopoverContent className="text-xs border-[#666666] max-w-xs">
+                    Professional photography and videography for all ceremonies,
+                    candid shots, traditional portraits, drone shots,
+                    pre-wedding shoots, photo albums, and video editing services
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="flex bg-[#EAE9F0] px-1 py-1 rounded-lg">
-                <input
-                  type="text"
-                  className="text-[#020288] text-xs w-16 text-center border-none outline-none focus:ring-0"
-                  value={decorationPercentInput}
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/[^0-9.]/g, "");
-                    setDecorationPercentInput(raw);
-                    setDecorationPercent(raw ? +raw : 0);
-                  }}
-                  onFocus={(e) =>
-                    setDecorationPercentInput(
-                      e.target.value.replace(/[^0-9.]/g, "")
-                    )
-                  }
-                  onBlur={() =>
-                    parseAndSet(
-                      setDecorationPercent,
-                      decorationPercentInput,
-                      0,
-                      25
-                    )
-                  }
-                />
+              <div className="flex bg-[#EAE9F0] px-1 py-1 rounded-lg items-center">
+                <span className="text-[#020288] text-xs">₹</span>
+                <span className="text-[#020288] text-xs w-18 text-center">
+                  {formatShortIndianCurrency(photographyAmount.toString())}
+                </span>
               </div>
             </div>
-            <div className="text-[10px] text-[#020288] flex justify-end pt-2 px-2">
-              ₹{formatShortIndianCurrency(decorationAmount.toString())}
-            </div>
             <Slider
-              value={decorationPercent}
+              value={photographyAmount}
               min={0}
-              max={25}
-              step={0.5}
-              onChange={(e, val) => {
-                setDecorationPercent(val);
-                setDecorationPercentInput(`${val}`);
-              }}
+              max={500000}
+              step={10000}
+              onChange={(e, val) => setPhotographyAmount(val)}
               sx={{
                 color: "#020288",
                 height: 6,
@@ -568,53 +450,36 @@ const WeddingCalculator = () => {
             />
           </div>
 
-          {/* Attire Allocation */}
+          {/* Clothing & Jewelry */}
           <div className="mb-1">
             <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
               <div className="flex items-center gap-1.5">
-                <label>Attire & Jewelry (%)</label>
+                <label>Clothing & Jewelry</label>
                 <Popover>
                   <PopoverTrigger>
                     <Info width={15} />
                   </PopoverTrigger>
-                  <PopoverContent className="text-xs border-[#666666]">
-                    Wedding outfits and jewelry expenses
+                  <PopoverContent className="text-xs border-[#666666] max-w-xs">
+                    Wedding outfits for bride and groom including lehengas,
+                    sarees, sherwanis, suits, jewelry (gold, silver, diamond),
+                    accessories, footwear, and outfits for different ceremonies
+                    like mehendi, sangam, etc.
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="flex bg-[#EAE9F0] px-1 py-1 rounded-lg">
-                <input
-                  type="text"
-                  className="text-[#020288] text-xs w-16 text-center border-none outline-none focus:ring-0"
-                  value={attirePercentInput}
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/[^0-9.]/g, "");
-                    setAttirePercentInput(raw);
-                    setAttirePercent(raw ? +raw : 0);
-                  }}
-                  onFocus={(e) =>
-                    setAttirePercentInput(
-                      e.target.value.replace(/[^0-9.]/g, "")
-                    )
-                  }
-                  onBlur={() =>
-                    parseAndSet(setAttirePercent, attirePercentInput, 0, 20)
-                  }
-                />
+              <div className="flex bg-[#EAE9F0] px-1 py-1 rounded-lg items-center">
+                <span className="text-[#020288] text-xs">₹</span>
+                <span className="text-[#020288] text-xs w-18 text-center">
+                  {formatShortIndianCurrency(clothingAmount.toString())}
+                </span>
               </div>
             </div>
-            <div className="text-[10px] text-[#020288] flex justify-end pt-2 px-2">
-              ₹{formatShortIndianCurrency(attireAmount.toString())}
-            </div>
             <Slider
-              value={attirePercent}
+              value={clothingAmount}
               min={0}
-              max={20}
-              step={0.5}
-              onChange={(e, val) => {
-                setAttirePercent(val);
-                setAttirePercentInput(`${val}`);
-              }}
+              max={1000000}
+              step={10000}
+              onChange={(e, val) => setClothingAmount(val)}
               sx={{
                 color: "#020288",
                 height: 6,
@@ -636,58 +501,35 @@ const WeddingCalculator = () => {
             />
           </div>
 
-          {/* Miscellaneous Allocation */}
+          {/* Makeup & Grooming */}
           <div className="mb-1">
             <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
               <div className="flex items-center gap-1.5">
-                <label>Miscellaneous (%)</label>
+                <label>Makeup & Grooming</label>
                 <Popover>
                   <PopoverTrigger>
                     <Info width={15} />
                   </PopoverTrigger>
-                  <PopoverContent className="text-xs border-[#666666]">
-                    Music, transport, gifts, and other expenses
+                  <PopoverContent className="text-xs border-[#666666] max-w-xs">
+                    Professional makeup artist, hair styling, mehendi artist,
+                    spa treatments, facials, grooming services for bride and
+                    groom, and makeup for different ceremonies and functions
                   </PopoverContent>
                 </Popover>
               </div>
-              <div className="flex bg-[#EAE9F0] px-1 py-1 rounded-lg">
-                <input
-                  type="text"
-                  className="text-[#020288] text-xs w-16 text-center border-none outline-none focus:ring-0"
-                  value={miscellaneousPercentInput}
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/[^0-9.]/g, "");
-                    setMiscellaneousPercentInput(raw);
-                    setMiscellaneousPercent(raw ? +raw : 0);
-                  }}
-                  onFocus={(e) =>
-                    setMiscellaneousPercentInput(
-                      e.target.value.replace(/[^0-9.]/g, "")
-                    )
-                  }
-                  onBlur={() =>
-                    parseAndSet(
-                      setMiscellaneousPercent,
-                      miscellaneousPercentInput,
-                      0,
-                      20
-                    )
-                  }
-                />
+              <div className="flex bg-[#EAE9F0] px-1 py-1 rounded-lg items-center">
+                <span className="text-[#020288] text-xs">₹</span>
+                <span className="text-[#020288] text-xs w-18 text-center">
+                  {formatShortIndianCurrency(makeupAmount.toString())}
+                </span>
               </div>
             </div>
-            <div className="text-[10px] text-[#020288] flex justify-end pt-2 px-2">
-              ₹{formatShortIndianCurrency(miscellaneousAmount.toString())}
-            </div>
             <Slider
-              value={miscellaneousPercent}
+              value={makeupAmount}
               min={0}
-              max={20}
-              step={0.5}
-              onChange={(e, val) => {
-                setMiscellaneousPercent(val);
-                setMiscellaneousPercentInput(`${val}`);
-              }}
+              max={100000}
+              step={10000}
+              onChange={(e, val) => setMakeupAmount(val)}
               sx={{
                 color: "#020288",
                 height: 6,
@@ -709,103 +551,190 @@ const WeddingCalculator = () => {
             />
           </div>
 
-          {/* Budget Allocation Summary */}
-          <div className="mt-4 p-3 bg-[#F8F7FF] rounded-lg">
-            <div className="text-xs text-[#323233] font-medium mb-2">
-              Budget Allocation Summary
-            </div>
-            <div className="text-[10px] text-[#666666] space-y-1">
-              <div className="flex justify-between">
-                <span>Venue:</span>
-                <span>
-                  ₹{formatShortIndianCurrency(venueAmount.toString())} (
-                  {venuePercent}%)
-                </span>
+          {/* Entertainment */}
+          <div className="mb-1">
+            <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
+              <div className="flex items-center gap-1.5">
+                <label>Entertainment</label>
+                <Popover>
+                  <PopoverTrigger>
+                    <Info width={15} />
+                  </PopoverTrigger>
+                  <PopoverContent className="text-xs border-[#666666] max-w-xs">
+                    DJ, live band, sound system, lighting setup, dance
+                    performances, live singers, dhol players, and other
+                    entertainment arrangements for all ceremonies
+                  </PopoverContent>
+                </Popover>
               </div>
-              <div className="flex justify-between">
-                <span>Catering:</span>
-                <span>
-                  ₹{formatShortIndianCurrency(cateringAmount.toString())} (
-                  {cateringPercent}%)
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Photography:</span>
-                <span>
-                  ₹{formatShortIndianCurrency(photographyAmount.toString())} (
-                  {photographyPercent}%)
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Decoration:</span>
-                <span>
-                  ₹{formatShortIndianCurrency(decorationAmount.toString())} (
-                  {decorationPercent}%)
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Attire & Jewelry:</span>
-                <span>
-                  ₹{formatShortIndianCurrency(attireAmount.toString())} (
-                  {attirePercent}%)
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Miscellaneous:</span>
-                <span>
-                  ₹{formatShortIndianCurrency(miscellaneousAmount.toString())} (
-                  {miscellaneousPercent}%)
-                </span>
-              </div>
-              <div className="flex justify-between border-t pt-1 mt-2 font-medium text-[#323233]">
-                <span>Total:</span>
-                <span
-                  className={
-                    totalPercentage === 100 ? "text-green-600" : "text-red-600"
-                  }
-                >
-                  {totalPercentage}%
+              <div className="flex bg-[#EAE9F0] px-1 py-1 rounded-lg items-center">
+                <span className="text-[#020288] text-xs">₹</span>
+                <span className="text-[#020288] text-xs w-18 text-center">
+                  {formatShortIndianCurrency(entertainmentAmount.toString())}
                 </span>
               </div>
             </div>
-            {totalPercentage !== 100 && (
-              <div className="text-[10px] text-red-600 mt-2">
-                Note: Percentages should add up to 100%
-              </div>
-            )}
+            <Slider
+              value={entertainmentAmount}
+              min={0}
+              max={500000}
+              step={10000}
+              onChange={(e, val) => setEntertainmentAmount(val)}
+              sx={{
+                color: "#020288",
+                height: 6,
+                "& .MuiSlider-thumb": {
+                  backgroundImage: "url('/slider.svg')",
+                  backgroundPosition: "center",
+                  width: 18,
+                  height: 18,
+                  transition:
+                    "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                  "&:hover, &.Mui-focusVisible": {
+                    boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                  },
+                },
+                "& .MuiSlider-track": {
+                  transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                },
+              }}
+            />
           </div>
 
-          {/* Cost per Guest */}
-          <div className="mt-4 p-3 bg-[#F0F8FF] rounded-lg">
-            <div className="text-xs text-[#323233] font-medium mb-2">
-              Cost Analysis
+          {/* Accommodation */}
+          <div className="mb-1">
+            <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
+              <div className="flex items-center gap-1.5">
+                <label>Accommodation</label>
+                <Popover>
+                  <PopoverTrigger>
+                    <Info width={15} />
+                  </PopoverTrigger>
+                  <PopoverContent className="text-xs border-[#666666] max-w-xs">
+                    Hotel bookings for out-of-town guests, family members, and
+                    VIPs including room charges, breakfast, and special
+                    arrangements
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="flex bg-[#EAE9F0] px-1 py-1 rounded-lg items-center">
+                <span className="text-[#020288] text-xs">₹</span>
+                <span className="text-[#020288] text-xs w-18 text-center">
+                  {formatShortIndianCurrency(accommodationAmount.toString())}
+                </span>
+              </div>
             </div>
-            <div className="text-[10px] text-[#666666] space-y-1">
-              <div className="flex justify-between">
-                <span>Cost per Guest:</span>
-                <span>
-                  ₹{formatIndianNumber(Math.round(totalBudget / guestCount))}
+            <Slider
+              value={accommodationAmount}
+              min={0}
+              max={1000000}
+              step={5000}
+              onChange={(e, val) => setAccommodationAmount(val)}
+              sx={{
+                color: "#020288",
+                height: 6,
+                "& .MuiSlider-thumb": {
+                  backgroundImage: "url('/slider.svg')",
+                  backgroundPosition: "center",
+                  width: 18,
+                  height: 18,
+                  transition:
+                    "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                  "&:hover, &.Mui-focusVisible": {
+                    boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                  },
+                },
+                "& .MuiSlider-track": {
+                  transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                },
+              }}
+            />
+          </div>
+          {/* Invitation Cards & Gifts */}
+          <div className="mb-1">
+            <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
+              <div className="flex items-center gap-1.5">
+                <label>Invitation Cards & Gifts</label>
+                <Popover>
+                  <PopoverTrigger>
+                    <Info width={15} />
+                  </PopoverTrigger>
+                  <PopoverContent className="text-xs border-[#666666] max-w-xs">
+                    Wedding invitation cards, save-the-date cards, return gifts
+                    for guests, welcome hampers, and ceremonial gifts for
+                    relatives and VIPs
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="flex bg-[#EAE9F0] px-1 py-1 rounded-lg items-center">
+                <span className="text-[#020288] text-xs">₹</span>
+                <span className="text-[#020288] text-xs w-18 text-center">
+                  {formatShortIndianCurrency(invitationAmount.toString())}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span>Catering per Guest:</span>
-                <span>
-                  ₹{formatIndianNumber(Math.round(cateringAmount / guestCount))}
-                </span>
+            </div>
+            <Slider
+              value={invitationAmount}
+              min={0}
+              max={100000}
+              step={5000}
+              onChange={(e, val) => setInvitationAmount(val)}
+              sx={{
+                color: "#020288",
+                height: 6,
+                "& .MuiSlider-thumb": {
+                  backgroundImage: "url('/slider.svg')",
+                  backgroundPosition: "center",
+                  width: 18,
+                  height: 18,
+                  transition:
+                    "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                  "&:hover, &.Mui-focusVisible": {
+                    boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
+                  },
+                },
+                "& .MuiSlider-track": {
+                  transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+                },
+              }}
+            />
+          </div>
+
+          {/* Wedding Planner Toggle */}
+          <div className="mb-3">
+            <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
+              <div className="flex items-center gap-1.5">
+                <label>Wedding Planner</label>
+                <Popover>
+                  <PopoverTrigger>
+                    <Info width={15} />
+                  </PopoverTrigger>
+                  <PopoverContent className="text-xs border-[#666666]">
+                    Do you plan to hire a professional wedding planner?
+                  </PopoverContent>
+                </Popover>
               </div>
+              <Select value={weddingPlanner} onValueChange={setWeddingPlanner}>
+                <SelectTrigger className="w-24 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Yes">Yes</SelectItem>
+                  <SelectItem value="No">No</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
-
         <button
           onClick={handleCalculate}
           className="w-full mt-2 bg-gradient-to-r from-[#583FCA] to-[#2D14A0] text-white font-bold py-3 rounded-2xl text-sm hover:opacity-90"
         >
           CALCULATE
         </button>
-
-        {/* <WeddingResult result={result} />
-        <WeddingAssumptions /> */}
+        {/* Results and Assumptions */}
+        <WeddingResult result={result} />
+        {/* <WeddingAssumptions /> */}
       </div>
     </div>
   );
