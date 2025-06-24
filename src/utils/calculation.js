@@ -1344,6 +1344,103 @@ const generateKeyInsights = (
 };
 
 //Wedding Calculations
+// Wedding Calculations
+// Helper functions for formatting and calculations
+export const formatters = {
+  // Format number in Indian currency format (with commas)
+  formatIndianCurrency: (amount) => {
+    if (!amount && amount !== 0) return "0";
+    return Math.round(amount).toLocaleString("en-IN");
+  },
+
+  // Format number in short Indian currency format (L, Cr, K)
+  formatShortIndianCurrency: (amount) => {
+    const num = Math.round(amount);
+    if (num >= 10000000) return `₹${(num / 10000000).toFixed(1)}Cr`;
+    if (num >= 100000) return `₹${(num / 100000).toFixed(1)}L`;
+    if (num >= 1000) return `₹${(num / 1000).toFixed(1)}K`;
+    return `₹${num}`;
+  },
+
+  // Format percentage with 1 decimal place
+  formatPercentage: (percentage) => {
+    return `${Math.round(percentage * 10) / 10}%`;
+  },
+
+  // Parse formatted Indian number back to integer
+  parseFormattedNumber: (str) => {
+    if (!str) return 0;
+    return parseInt(str.toString().replace(/[^\d]/g, "")) || 0;
+  },
+};
+
+// Budget analysis helpers
+export const budgetAnalysis = {
+  // Check if a category allocation is within recommended range
+  getCategoryStatus: (currentAmount, totalBudget, minPercent, maxPercent) => {
+    const percentage =
+      totalBudget > 0 ? (currentAmount / totalBudget) * 100 : 0;
+    if (percentage < minPercent) return "low";
+    if (percentage > maxPercent) return "high";
+    return "optimal";
+  },
+
+  // Get budget recommendations for Indian weddings
+  getRecommendations: (totalBudget) => ({
+    food: { min: 20, max: 30, recommended: 25 },
+    venue: { min: 15, max: 25, recommended: 20 },
+    decoration: { min: 8, max: 15, recommended: 12 },
+    photography: { min: 5, max: 12, recommended: 8 },
+    clothing: { min: 7, max: 15, recommended: 10 },
+    makeup: { min: 3, max: 8, recommended: 5 },
+    entertainment: { min: 3, max: 10, recommended: 6 },
+    accommodation: { min: 5, max: 15, recommended: 10 },
+    invitations: { min: 2, max: 8, recommended: 4 },
+  }),
+
+  // Generate optimization suggestions
+  generateOptimizations: (expenses, totalBudget, recommendations) => {
+    const suggestions = [];
+    let totalPotentialSavings = 0;
+
+    Object.entries(expenses).forEach(([category, data]) => {
+      if (data.percentage > recommendations[category]?.max) {
+        const recommendedAmount =
+          totalBudget * (recommendations[category].recommended / 100);
+        const savings = data.amount - recommendedAmount;
+
+        const suggestionMap = {
+          food: "Consider buffet style or reduce menu variety",
+          venue: "Choose off-peak dates or simpler venues",
+          decoration: "Use seasonal flowers or DIY elements",
+          photography: "Book for main ceremonies only",
+          clothing: "Shop during sales or consider rentals",
+          makeup: "Book local artists or simplified packages",
+          entertainment: "Use DJ instead of live band",
+          accommodation: "Negotiate group rates with hotels",
+          invitations: "Consider digital invites or simpler designs",
+        };
+
+        suggestions.push({
+          category,
+          suggestion: suggestionMap[category] || `Reduce ${category} expenses`,
+          currentAmount: data.amount,
+          recommendedAmount,
+          savings: Math.max(0, savings),
+        });
+
+        totalPotentialSavings += Math.max(0, savings);
+      }
+    });
+
+    return {
+      suggestions: suggestions.sort((a, b) => b.savings - a.savings),
+      totalPotentialSavings,
+    };
+  },
+};
+
+// Main calculation function
 export const calculateWeddingBreakdown = ({
   totalBudget,
   guestCount,
@@ -1357,273 +1454,368 @@ export const calculateWeddingBreakdown = ({
   accommodationAmount,
   invitationAmount,
   weddingPlanner,
+  events = [],
 }) => {
-  // Calculate wedding planner cost (typically 10-15% of total budget if hired)
-  const weddingPlannerCost = weddingPlanner === "Yes" ? totalBudget * 0.12 : 0;
+  // Input validation
+  const validBudget = Math.max(0, totalBudget || 0);
+  const validGuestCount = Math.max(0, guestCount || 0);
 
-  // Main wedding expenses
+  // Calculate wedding planner cost (10-15% of total budget if hired)
+  const weddingPlannerCost = weddingPlanner === "Yes" ? validBudget * 0.12 : 0;
+
+  // Main wedding expenses with calculations
   const mainExpenses = {
     food: {
-      amount: foodAmount,
-      perGuest: guestCount > 0 ? foodAmount / guestCount : 0,
-      percentage: totalBudget > 0 ? (foodAmount / totalBudget) * 100 : 0,
+      amount: foodAmount || 0,
+      percentage: validBudget > 0 ? ((foodAmount || 0) / validBudget) * 100 : 0,
+      perGuest: validGuestCount > 0 ? (foodAmount || 0) / validGuestCount : 0,
+      status: budgetAnalysis.getCategoryStatus(
+        foodAmount || 0,
+        validBudget,
+        20,
+        30
+      ),
     },
     venue: {
-      amount: venueAmount,
-      percentage: totalBudget > 0 ? (venueAmount / totalBudget) * 100 : 0,
+      amount: venueAmount || 0,
+      percentage:
+        validBudget > 0 ? ((venueAmount || 0) / validBudget) * 100 : 0,
+      status: budgetAnalysis.getCategoryStatus(
+        venueAmount || 0,
+        validBudget,
+        15,
+        25
+      ),
     },
     decoration: {
-      amount: decorationAmount,
-      percentage: totalBudget > 0 ? (decorationAmount / totalBudget) * 100 : 0,
+      amount: decorationAmount || 0,
+      percentage:
+        validBudget > 0 ? ((decorationAmount || 0) / validBudget) * 100 : 0,
+      status: budgetAnalysis.getCategoryStatus(
+        decorationAmount || 0,
+        validBudget,
+        8,
+        15
+      ),
     },
     photography: {
-      amount: photographyAmount,
-      percentage: totalBudget > 0 ? (photographyAmount / totalBudget) * 100 : 0,
+      amount: photographyAmount || 0,
+      percentage:
+        validBudget > 0 ? ((photographyAmount || 0) / validBudget) * 100 : 0,
+      status: budgetAnalysis.getCategoryStatus(
+        photographyAmount || 0,
+        validBudget,
+        5,
+        12
+      ),
     },
     clothing: {
-      amount: clothingAmount,
-      percentage: totalBudget > 0 ? (clothingAmount / totalBudget) * 100 : 0,
+      amount: clothingAmount || 0,
+      percentage:
+        validBudget > 0 ? ((clothingAmount || 0) / validBudget) * 100 : 0,
+      status: budgetAnalysis.getCategoryStatus(
+        clothingAmount || 0,
+        validBudget,
+        7,
+        15
+      ),
     },
     makeup: {
-      amount: makeupAmount,
-      percentage: totalBudget > 0 ? (makeupAmount / totalBudget) * 100 : 0,
+      amount: makeupAmount || 0,
+      percentage:
+        validBudget > 0 ? ((makeupAmount || 0) / validBudget) * 100 : 0,
+      status: budgetAnalysis.getCategoryStatus(
+        makeupAmount || 0,
+        validBudget,
+        3,
+        8
+      ),
     },
     entertainment: {
-      amount: entertainmentAmount,
+      amount: entertainmentAmount || 0,
       percentage:
-        totalBudget > 0 ? (entertainmentAmount / totalBudget) * 100 : 0,
+        validBudget > 0 ? ((entertainmentAmount || 0) / validBudget) * 100 : 0,
+      status: budgetAnalysis.getCategoryStatus(
+        entertainmentAmount || 0,
+        validBudget,
+        3,
+        10
+      ),
     },
     accommodation: {
-      amount: accommodationAmount,
+      amount: accommodationAmount || 0,
       percentage:
-        totalBudget > 0 ? (accommodationAmount / totalBudget) * 100 : 0,
+        validBudget > 0 ? ((accommodationAmount || 0) / validBudget) * 100 : 0,
+      status: budgetAnalysis.getCategoryStatus(
+        accommodationAmount || 0,
+        validBudget,
+        5,
+        15
+      ),
     },
     invitations: {
-      amount: invitationAmount,
-      percentage: totalBudget > 0 ? (invitationAmount / totalBudget) * 100 : 0,
+      amount: invitationAmount || 0,
+      percentage:
+        validBudget > 0 ? ((invitationAmount || 0) / validBudget) * 100 : 0,
+      status: budgetAnalysis.getCategoryStatus(
+        invitationAmount || 0,
+        validBudget,
+        2,
+        8
+      ),
     },
   };
 
-  // Calculate total allocated expenses
-  const totalAllocated =
-    foodAmount +
-    venueAmount +
-    decorationAmount +
-    photographyAmount +
-    clothingAmount +
-    makeupAmount +
-    entertainmentAmount +
-    accommodationAmount +
-    invitationAmount +
-    weddingPlannerCost;
+  // Calculate total main expenses
+  const totalMainExpenses = Object.values(mainExpenses).reduce(
+    (sum, expense) => sum + expense.amount,
+    0
+  );
 
-  // Additional costs (typically 10-20% of main costs for miscellaneous expenses)
+  // Miscellaneous expenses (additional costs)
   const miscellaneousExpenses = {
     weddingPlanner: {
       amount: weddingPlannerCost,
       percentage:
-        totalBudget > 0 ? (weddingPlannerCost / totalBudget) * 100 : 0,
+        validBudget > 0 ? (weddingPlannerCost / validBudget) * 100 : 0,
+      description: "Professional wedding planning services",
     },
-    transportationGuests: {
-      amount: Math.round(guestCount * 200), // Estimated ₹200 per guest for local transport
+    transportation: {
+      amount: validGuestCount * 150, // ₹150 per guest for transportation
       percentage:
-        totalBudget > 0 ? ((guestCount * 200) / totalBudget) * 100 : 0,
+        validBudget > 0 ? ((validGuestCount * 150) / validBudget) * 100 : 0,
+      description: "Guest transportation and logistics",
     },
     emergencyBuffer: {
-      amount: Math.round(totalBudget * 0.1), // 10% emergency buffer
-      percentage: 10,
+      amount: validBudget * 0.08, // 8% emergency buffer
+      percentage: 8,
+      description: "Emergency fund for unexpected expenses",
     },
     religiousCeremonies: {
-      amount: Math.round(totalBudget * 0.05), // 5% for puja items, pandit fees, etc.
-      percentage: 5,
+      amount: validBudget * 0.04, // 4% for religious ceremonies
+      percentage: 4,
+      description: "Puja items, pandit fees, ceremonial expenses",
+    },
+    miscellaneous: {
+      amount: validBudget * 0.03, // 3% for other small expenses
+      percentage: 3,
+      description: "Other miscellaneous wedding expenses",
     },
   };
 
-  const totalMiscellaneous =
-    miscellaneousExpenses.weddingPlanner.amount +
-    miscellaneousExpenses.transportationGuests.amount +
-    miscellaneousExpenses.emergencyBuffer.amount +
-    miscellaneousExpenses.religiousCeremonies.amount;
+  const totalMiscellaneous = Object.values(miscellaneousExpenses).reduce(
+    (sum, expense) => sum + expense.amount,
+    0
+  );
 
-  const grandTotal = totalAllocated + totalMiscellaneous;
+  // Calculate event totals with decorations
+  const eventsWithCosts = events.map((event) => ({
+    ...event,
+    calculatedCosts: {
+      food: event.totalGuests * event.foodCostPerPlate,
+      venue: event.venueAmount,
+      decoration: event.decorationAmount || 0,
+      accommodation: event.stayingGuests * event.accommodationCostPerGuest,
+      total:
+        event.totalGuests * event.foodCostPerPlate +
+        event.venueAmount +
+        (event.decorationAmount || 0) +
+        event.stayingGuests * event.accommodationCostPerGuest,
+      perGuest:
+        event.totalGuests > 0
+          ? (event.totalGuests * event.foodCostPerPlate +
+              event.venueAmount +
+              (event.decorationAmount || 0) +
+              event.stayingGuests * event.accommodationCostPerGuest) /
+            event.totalGuests
+          : 0,
+    },
+  }));
 
-  // Budget analysis
+  const eventsTotal = eventsWithCosts.reduce(
+    (sum, event) => sum + event.calculatedCosts.total,
+    0
+  );
+
+  const grandTotal = totalMainExpenses + totalMiscellaneous + eventsTotal;
+
+  // Budget status analysis
   const budgetStatus = {
-    isOverBudget: grandTotal > totalBudget,
-    difference: grandTotal - totalBudget,
+    totalAllocated: totalMainExpenses,
+    totalMiscellaneous,
+    eventsTotal,
+    grandTotal,
+    isOverBudget: grandTotal > validBudget,
+    difference: grandTotal - validBudget,
+    remainingBudget: validBudget - (totalMainExpenses + eventsTotal),
     utilizationPercentage:
-      totalBudget > 0 ? (totalAllocated / totalBudget) * 100 : 0,
-    remainingBudget: totalBudget - totalAllocated,
+      validBudget > 0
+        ? ((totalMainExpenses + eventsTotal) / validBudget) * 100
+        : 0,
+    effectiveUtilization:
+      validBudget > 0 ? (grandTotal / validBudget) * 100 : 0,
   };
 
   // Per guest analysis
   const perGuestAnalysis = {
-    totalCostPerGuest: guestCount > 0 ? grandTotal / guestCount : 0,
-    foodCostPerGuest: guestCount > 0 ? foodAmount / guestCount : 0,
-    averageCostPerGuest: guestCount > 0 ? totalBudget / guestCount : 0,
+    totalCostPerGuest: validGuestCount > 0 ? grandTotal / validGuestCount : 0,
+    budgetPerGuest: validGuestCount > 0 ? validBudget / validGuestCount : 0,
+    foodCostPerGuest:
+      validGuestCount > 0 ? (foodAmount || 0) / validGuestCount : 0,
+    mainExpensesPerGuest:
+      validGuestCount > 0 ? totalMainExpenses / validGuestCount : 0,
   };
 
-  // Category-wise analysis (sorted by amount)
+  // Category breakdown sorted by amount
   const categoryBreakdown = Object.entries(mainExpenses)
-    .map(([key, value]) => ({
-      category: key,
-      amount: value.amount,
-      percentage: value.percentage,
+    .map(([category, data]) => ({
+      category: category.charAt(0).toUpperCase() + category.slice(1),
+      amount: data.amount,
+      percentage: data.percentage,
+      status: data.status,
+      formattedAmount: formatters.formatIndianCurrency(data.amount),
+      formattedPercentage: formatters.formatPercentage(data.percentage),
     }))
-    .sort((a, b) => b.amount - a.amount);
+    .sort((a, b) => b.amount - a.amount)
+    .filter((item) => item.amount > 0); // Only show categories with expenses
 
-  // Budget recommendations based on Indian wedding standards
-  const recommendations = {
-    food: {
-      recommended: totalBudget * 0.25, // 25% of budget
-      current: foodAmount,
-      status:
-        foodAmount < totalBudget * 0.2
-          ? "low"
-          : foodAmount > totalBudget * 0.3
-          ? "high"
-          : "optimal",
-    },
-    venue: {
-      recommended: totalBudget * 0.25, // 25% of budget
-      current: venueAmount,
-      status:
-        venueAmount < totalBudget * 0.2
-          ? "low"
-          : venueAmount > totalBudget * 0.3
-          ? "high"
-          : "optimal",
-    },
-    decoration: {
-      recommended: totalBudget * 0.12, // 12% of budget
-      current: decorationAmount,
-      status:
-        decorationAmount < totalBudget * 0.08
-          ? "low"
-          : decorationAmount > totalBudget * 0.15
-          ? "high"
-          : "optimal",
-    },
-    photography: {
-      recommended: totalBudget * 0.08, // 8% of budget
-      current: photographyAmount,
-      status:
-        photographyAmount < totalBudget * 0.05
-          ? "low"
-          : photographyAmount > totalBudget * 0.12
-          ? "high"
-          : "optimal",
-    },
-    clothing: {
-      recommended: totalBudget * 0.1, // 10% of budget
-      current: clothingAmount,
-      status:
-        clothingAmount < totalBudget * 0.07
-          ? "low"
-          : clothingAmount > totalBudget * 0.15
-          ? "high"
-          : "optimal",
-    },
+  // Get recommendations and optimizations
+  const recommendations = budgetAnalysis.getRecommendations(validBudget);
+  const optimizations = budgetAnalysis.generateOptimizations(
+    mainExpenses,
+    validBudget,
+    recommendations
+  );
+
+  // Summary insights
+  const insights = {
+    topExpenseCategory: categoryBreakdown[0]?.category || "None",
+    topExpenseAmount: categoryBreakdown[0]?.amount || 0,
+    categoriesOverBudget: categoryBreakdown.filter(
+      (cat) => cat.status === "high"
+    ).length,
+    categoriesUnderBudget: categoryBreakdown.filter(
+      (cat) => cat.status === "low"
+    ).length,
+    averagePercentagePerCategory:
+      categoryBreakdown.length > 0
+        ? categoryBreakdown.reduce((sum, cat) => sum + cat.percentage, 0) /
+          categoryBreakdown.length
+        : 0,
   };
 
-  // Cost optimization suggestions
-  const optimizations = {
-    potentialSavings: 0,
-    suggestions: [],
-  };
-
-  // Generate optimization suggestions if over budget
-  if (budgetStatus.isOverBudget) {
-    let totalPotentialSavings = 0;
-
-    // Venue optimization
-    if (venueAmount > totalBudget * 0.3) {
-      const venueSavings = venueAmount - totalBudget * 0.25;
-      optimizations.suggestions.push({
-        category: "venue",
-        suggestion: "Consider a more budget-friendly venue or off-peak dates",
-        savings: venueSavings,
-      });
-      totalPotentialSavings += venueSavings;
-    }
-
-    // Food optimization
-    if (foodAmount > totalBudget * 0.3) {
-      const foodSavings = foodAmount - totalBudget * 0.25;
-      optimizations.suggestions.push({
-        category: "food",
-        suggestion: "Opt for simpler menu or reduce number of food counters",
-        savings: foodSavings,
-      });
-      totalPotentialSavings += foodSavings;
-    }
-
-    // Decoration optimization
-    if (decorationAmount > totalBudget * 0.15) {
-      const decorationSavings = decorationAmount - totalBudget * 0.12;
-      optimizations.suggestions.push({
-        category: "decoration",
-        suggestion: "Use seasonal flowers or DIY decorations",
-        savings: decorationSavings,
-      });
-      totalPotentialSavings += decorationSavings;
-    }
-
-    // Photography optimization
-    if (photographyAmount > totalBudget * 0.12) {
-      const photographySavings = photographyAmount - totalBudget * 0.08;
-      optimizations.suggestions.push({
-        category: "photography",
-        suggestion: "Book photographer for key ceremonies only",
-        savings: photographySavings,
-      });
-      totalPotentialSavings += photographySavings;
-    }
-
-    optimizations.potentialSavings = totalPotentialSavings;
-  }
-
-  // Wedding details summary
-  const weddingDetails = {
-    totalBudget,
-    guestCount,
-    hasWeddingPlanner: weddingPlanner === "Yes",
-    estimatedCeremonies: [
-      "Engagement",
-      "Mehendi",
-      "Sangam",
-      "Wedding",
-      "Reception",
-    ], // Typical Indian wedding ceremonies
-  };
-
-  // Final summary
-  const summary = {
-    totalAllocatedExpenses: totalAllocated,
-    totalMiscellaneousExpenses: totalMiscellaneous,
-    grandTotal,
-    budgetUtilization: budgetStatus.utilizationPercentage,
-    isOverBudget: budgetStatus.isOverBudget,
-    budgetDifference: budgetStatus.difference,
-    topExpenseCategory: categoryBreakdown[0]?.category || "none",
+  // Formatted totals for display
+  const formattedTotals = {
+    totalBudget: formatters.formatIndianCurrency(validBudget),
+    totalMainExpenses: formatters.formatIndianCurrency(totalMainExpenses),
+    totalMiscellaneous: formatters.formatIndianCurrency(totalMiscellaneous),
+    eventsTotal: formatters.formatIndianCurrency(eventsTotal),
+    grandTotal: formatters.formatIndianCurrency(grandTotal),
+    difference: formatters.formatIndianCurrency(
+      Math.abs(budgetStatus.difference)
+    ),
+    remainingBudget: formatters.formatIndianCurrency(
+      budgetStatus.remainingBudget
+    ),
+    shortTotalBudget: formatters.formatShortIndianCurrency(validBudget),
+    shortGrandTotal: formatters.formatShortIndianCurrency(grandTotal),
   };
 
   return {
-    weddingDetails,
+    // Input data
+    weddingDetails: {
+      totalBudget: validBudget,
+      guestCount: validGuestCount,
+      hasWeddingPlanner: weddingPlanner === "Yes",
+    },
+
+    // Expense breakdowns
     mainExpenses,
     miscellaneousExpenses,
-    totals: {
-      totalAllocated,
-      totalMiscellaneous,
-      grandTotal,
-      budgetDifference: budgetStatus.difference,
-      remainingBudget: budgetStatus.remainingBudget,
-    },
+    events: eventsWithCosts,
+
+    // Analysis
     budgetStatus,
     perGuestAnalysis,
     categoryBreakdown,
-    recommendations,
+    insights,
+
+    // Recommendations
     optimizations,
-    summary,
+
+    // Formatted data for display
+    formattedTotals,
+
+    // Status flags
+    isCalculated: true,
+    hasData: totalMainExpenses > 0 || validBudget > 0,
+    timestamp: new Date().toISOString(),
   };
+};
+
+// Additional utility functions for the component
+export const calculatorUtils = {
+  // Validate input ranges
+  validateInput: (value, min = 0, max = Infinity) => {
+    const numValue = parseInt(value) || 0;
+    return Math.min(Math.max(numValue, min), max);
+  },
+
+  // Calculate event totals with decorations
+  calculateEventTotals: (events) => {
+    return events.reduce(
+      (totals, event) => {
+        const foodCost = event.totalGuests * event.foodCostPerPlate;
+        const accommodationCost =
+          event.stayingGuests * event.accommodationCostPerGuest;
+        const decorationCost = event.decorationAmount || 0;
+
+        return {
+          totalFoodAmount: totals.totalFoodAmount + foodCost,
+          totalVenueAmount: totals.totalVenueAmount + event.venueAmount,
+          totalDecorationAmount: totals.totalDecorationAmount + decorationCost,
+          totalAccommodationAmount:
+            totals.totalAccommodationAmount + accommodationCost,
+          maxGuestCount: Math.max(totals.maxGuestCount, event.totalGuests),
+          totalEvents: totals.totalEvents + 1,
+        };
+      },
+      {
+        totalFoodAmount: 0,
+        totalVenueAmount: 0,
+        totalDecorationAmount: 0,
+        totalAccommodationAmount: 0,
+        maxGuestCount: 0,
+        totalEvents: 0,
+      }
+    );
+  },
+
+  // Get budget status color
+  getBudgetStatusColor: (status) => {
+    switch (status) {
+      case "optimal":
+        return "#10B981"; // green
+      case "high":
+        return "#EF4444"; // red
+      case "low":
+        return "#F59E0B"; // amber
+      default:
+        return "#6B7280"; // gray
+    }
+  },
+
+  // Get status icon
+  getStatusIcon: (status) => {
+    switch (status) {
+      case "optimal":
+        return "✓";
+      case "high":
+        return "⚠";
+      case "low":
+        return "↗";
+      default:
+        return "—";
+    }
+  },
 };

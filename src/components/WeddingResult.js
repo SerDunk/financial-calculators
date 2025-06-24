@@ -19,23 +19,12 @@ import {
   CheckCircle,
   XCircle,
   DollarSign,
+  Calendar,
+  Clock,
 } from "lucide-react";
+import { formatters } from "@/utils/calculation";
 
 const WeddingResult = ({ result }) => {
-  const formatIndianCurrency = (amount) => {
-    if (!amount) return "₹0";
-    return `₹${Math.round(amount).toLocaleString("en-IN")}`;
-  };
-
-  const formatShortCurrency = (amount) => {
-    if (!amount) return "₹0";
-    const num = Math.round(amount);
-    if (num >= 10000000) return `₹${(num / 10000000).toFixed(1)}Cr`;
-    if (num >= 100000) return `₹${(num / 100000).toFixed(1)}L`;
-    if (num >= 1000) return `₹${(num / 1000).toFixed(1)}K`;
-    return `₹${num}`;
-  };
-
   const getCategoryIcon = (category) => {
     const icons = {
       food: <Utensils size={16} className="text-[#AB78FF]" />,
@@ -70,6 +59,19 @@ const WeddingResult = ({ result }) => {
     );
   };
 
+  const getEventIcon = (eventType) => {
+    const icons = {
+      mehendi: <Flower2 size={16} className="text-[#AB78FF]" />,
+      sangam: <Music size={16} className="text-[#AB78FF]" />,
+      haldi: <Sparkles size={16} className="text-[#AB78FF]" />,
+      wedding: <Heart size={16} className="text-[#AB78FF]" />,
+      reception: <Users size={16} className="text-[#AB78FF]" />,
+    };
+    return (
+      icons[eventType] || <Calendar size={16} className="text-[#AB78FF]" />
+    );
+  };
+
   if (!result) {
     return (
       <div className="mt-6 p-8 bg-white rounded-2xl shadow-lg">
@@ -88,22 +90,19 @@ const WeddingResult = ({ result }) => {
 
   const {
     weddingDetails,
+    events,
     categoryBreakdown,
-    totals,
-    additionalCosts,
-    budgetAnalysis,
-    optimizations,
+    budgetStatus,
+    formattedTotals,
   } = result;
 
-  // Calculate typical extra charges as percentages of total budget
   const calculateExtraCharges = () => {
     const totalBudget = weddingDetails.totalBudget;
 
-    // Typical percentages for extra charges
-    const ritualsPercentage = 8; // 8% of total budget for rituals & ceremonies
-    const weddingPlannerPercentage = weddingDetails.hasWeddingPlanner ? 10 : 0; // 10% if planner is selected
-    const emergencyBufferPercentage = 10; // 10% emergency buffer
-    const miscellaneousPercentage = 5; // 5% for miscellaneous expenses
+    const ritualsPercentage = 8;
+    const weddingPlannerPercentage = weddingDetails.hasWeddingPlanner ? 10 : 0;
+    const emergencyBufferPercentage = 10;
+    const miscellaneousPercentage = 5;
 
     const ritualsAmount = (totalBudget * ritualsPercentage) / 100;
     const weddingPlannerAmount = (totalBudget * weddingPlannerPercentage) / 100;
@@ -118,15 +117,9 @@ const WeddingResult = ({ result }) => {
       miscellaneousAmount;
 
     return {
-      rituals: {
-        amount: ritualsAmount,
-        percentage: ritualsPercentage,
-      },
+      rituals: { amount: ritualsAmount, percentage: ritualsPercentage },
       weddingPlanner: weddingDetails.hasWeddingPlanner
-        ? {
-            amount: weddingPlannerAmount,
-            percentage: weddingPlannerPercentage,
-          }
+        ? { amount: weddingPlannerAmount, percentage: weddingPlannerPercentage }
         : null,
       emergencyBuffer: {
         amount: emergencyBufferAmount,
@@ -141,35 +134,9 @@ const WeddingResult = ({ result }) => {
   };
 
   const extraCharges = calculateExtraCharges();
-
-  // Calculate per-guest costs only for guest-relevant categories
-  const calculateGuestRelevantTotal = () => {
-    const guestRelevantCategories = [
-      "food",
-      "venue",
-      "entertainment",
-      "accommodation",
-      "invitations",
-    ];
-    return categoryBreakdown
-      .filter((item) => guestRelevantCategories.includes(item.category))
-      .reduce((sum, item) => sum + item.amount, 0);
-  };
-
-  const guestRelevantTotal = calculateGuestRelevantTotal();
-
-  // Calculate main expenses total
-  const mainExpensesTotal = categoryBreakdown.reduce(
-    (sum, item) => sum + item.amount,
-    0
-  );
-
-  // Calculate grand total with new extra charges
-  const grandTotal = mainExpensesTotal + extraCharges.total;
-
-  const isOverBudget = grandTotal > weddingDetails.totalBudget;
-  const budgetDifference = grandTotal - weddingDetails.totalBudget;
-  const budgetUtilization = (grandTotal / weddingDetails.totalBudget) * 100;
+  const isOverBudget = budgetStatus.isOverBudget;
+  const budgetDifference = budgetStatus.difference;
+  const budgetUtilization = budgetStatus.effectiveUtilization;
 
   return (
     <div className="sm:mt-2 mt-2 sm:text-sm bg-white py-6 px-5 rounded-2xl shadow-lg">
@@ -201,16 +168,18 @@ const WeddingResult = ({ result }) => {
           </div>
           <p className="text-sm text-red-600 mb-2">
             Your total expenses exceed your budget by{" "}
-            <span className="font-bold">
-              {formatIndianCurrency(Math.abs(budgetDifference))}
-            </span>
+            <span className="font-bold">{formattedTotals.difference}</span>
           </p>
           <div className="text-xs text-red-500 mb-2">
-            <div>Main Expenses: {formatIndianCurrency(mainExpensesTotal)}</div>
-            <div>Extra Charges: {formatIndianCurrency(extraCharges.total)}</div>
+            <div>Main Expenses: {formattedTotals.totalMainExpenses}</div>
+            <div>Events Total: {formattedTotals.eventsTotal}</div>
+            <div>
+              Extra Charges:{" "}
+              {formatters.formatIndianCurrency(extraCharges.total)}
+            </div>
             <div className="font-semibold">
-              Total Cost: {formatIndianCurrency(grandTotal)} | Budget:{" "}
-              {formatIndianCurrency(weddingDetails.totalBudget)}
+              Total Cost: {formattedTotals.grandTotal} | Budget:{" "}
+              {formattedTotals.totalBudget}
             </div>
           </div>
         </div>
@@ -240,13 +209,11 @@ const WeddingResult = ({ result }) => {
           </div>
           <div className="bg-white rounded-lg p-3 border border-gray-200">
             <div className="flex items-center gap-2 mb-1">
-              <FileText size={16} className="text-[#AB78FF]" />
-              <span className="text-xs text-[#666666]">Planning</span>
+              <Calendar size={16} className="text-[#AB78FF]" />
+              <span className="text-xs text-[#666666]">Events</span>
             </div>
             <div className="font-semibold text-[#2C178C]">
-              {weddingDetails.hasWeddingPlanner
-                ? "Professional"
-                : "Self-Planned"}
+              {events.length} Events
             </div>
           </div>
         </div>
@@ -261,10 +228,10 @@ const WeddingResult = ({ result }) => {
           <div className="text-center">
             <div className="text-xs text-[#666666] mb-1">Total Budget</div>
             <div className="text-xl font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
-              {formatIndianCurrency(weddingDetails.totalBudget)}
+              {formattedTotals.totalBudget}
             </div>
             <div className="text-xs text-[#666666] mt-1">
-              {formatIndianCurrency(
+              {formatters.formatIndianCurrency(
                 weddingDetails.totalBudget / weddingDetails.guestCount
               )}{" "}
               per guest budget
@@ -273,74 +240,168 @@ const WeddingResult = ({ result }) => {
         </div>
       </div>
 
-      {/* Category Breakdown */}
-      <div className="rounded-2xl p-5 border-2 border-gray-200 bg-[#F9F9FB] mb-4">
-        <div className="flex items-center mb-4">
-          <PieChart className="text-[#B3BEF5] mr-3" size={30} />
-          <div>
-            <h3 className="font-semibold text-[#2C178C]">Expense Breakdown</h3>
-            <p className="text-xs text-[#666666]">Wedding costs by category</p>
+      {/* Events Breakdown */}
+      {events.length > 0 && (
+        <div className="rounded-2xl p-5 border-2 border-gray-200 bg-[#F9F9FB] mb-4">
+          <div className="flex items-center mb-4">
+            <Calendar className="text-[#AB78FF] mr-3" size={30} />
+            <div>
+              <h3 className="font-semibold text-[#2C178C]">Event Breakdown</h3>
+              <p className="text-xs text-[#666666]">Individual event costs</p>
+            </div>
           </div>
-        </div>
 
-        <div className="space-y-3">
-          {categoryBreakdown.map((item, index) => (
-            <div
-              key={item.category}
-              className="bg-white rounded-lg p-3 border border-gray-200"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  {getCategoryIcon(item.category)}
-                  <span className="text-sm font-medium text-gray-700">
-                    {getCategoryName(item.category)}
+          <div className="space-y-3">
+            {events.map((event, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-lg p-4 border border-gray-200"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    {getEventIcon(event.name.toLowerCase())}
+                    <span className="text-sm font-medium text-gray-700 capitalize">
+                      {event.name}
+                    </span>
+                  </div>
+                  <span className="font-semibold text-sm bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+                    {formatters.formatIndianCurrency(
+                      event.calculatedCosts.total
+                    )}
                   </span>
                 </div>
-                <span className="font-semibold text-sm bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
-                  {formatIndianCurrency(item.amount)}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <div className="text-xs text-[#666666]">
-                  {((item.amount / grandTotal) * 100).toFixed(1)}% of total cost
-                </div>
-                {/* Only show per-guest cost for guest-relevant categories */}
-                {[
-                  "food",
-                  "venue",
-                  "entertainment",
-                  "accommodation",
-                  "invitations",
-                ].includes(item.category) && (
+
+                <div className="grid grid-cols-2 gap-2 mb-2">
                   <div className="text-xs text-[#666666]">
-                    {formatIndianCurrency(
-                      item.amount / weddingDetails.guestCount
+                    <Clock size={12} className="inline mr-1" />
+                    {event.totalGuests} guests
+                  </div>
+                  <div className="text-xs text-[#666666] text-right">
+                    {formatters.formatIndianCurrency(
+                      event.calculatedCosts.perGuest
                     )}{" "}
                     per guest
                   </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+                </div>
 
-        <div className="bg-white rounded-xl p-3 border border-gray-200 mt-4">
-          <div className="text-center">
-            <div className="text-xs text-[#666666] mb-1">
-              Total Main Expenses
-            </div>
-            <div className="text-lg font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
-              {formatIndianCurrency(mainExpensesTotal)}
-            </div>
-            <div className="text-xs text-[#666666] mt-1">
-              {formatIndianCurrency(
-                guestRelevantTotal / weddingDetails.guestCount
-              )}{" "}
-              per guest (guest-relevant costs)
+                <div className="space-y-1">
+                  {event.calculatedCosts.food > 0 && (
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-[#666666]">Food & Catering</span>
+                      <span className="font-medium text-[#2C178C]">
+                        {formatters.formatIndianCurrency(
+                          event.calculatedCosts.food
+                        )}
+                      </span>
+                    </div>
+                  )}
+                  {event.calculatedCosts.venue > 0 && (
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-[#666666]">Venue</span>
+                      <span className="font-medium text-[#2C178C]">
+                        {formatters.formatIndianCurrency(
+                          event.calculatedCosts.venue
+                        )}
+                      </span>
+                    </div>
+                  )}
+                  {event.decorationAmount > 0 && (
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-[#666666]">Decoration</span>
+                      <span className="font-medium text-[#2C178C]">
+                        {formatters.formatIndianCurrency(
+                          event.decorationAmount
+                        )}
+                      </span>
+                    </div>
+                  )}
+                  {event.calculatedCosts.accommodation > 0 && (
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-[#666666]">Accommodation</span>
+                      <span className="font-medium text-[#2C178C]">
+                        {formatters.formatIndianCurrency(
+                          event.calculatedCosts.accommodation
+                        )}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-white rounded-xl p-3 border border-gray-200 mt-4">
+            <div className="text-center">
+              <div className="text-xs text-[#666666] mb-1">
+                Total Events Cost
+              </div>
+              <div className="text-lg font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+                {formattedTotals.eventsTotal}
+              </div>
+              <div className="text-xs text-[#666666] mt-1">
+                {formatters.formatIndianCurrency(
+                  budgetStatus.eventsTotal / weddingDetails.guestCount
+                )}{" "}
+                per guest average
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Category Breakdown */}
+      {categoryBreakdown.length > 0 && (
+        <div className="rounded-2xl p-5 border-2 border-gray-200 bg-[#F9F9FB] mb-4">
+          <div className="flex items-center mb-4">
+            <PieChart className="text-[#B3BEF5] mr-3" size={30} />
+            <div>
+              <h3 className="font-semibold text-[#2C178C]">
+                Additional Expenses
+              </h3>
+              <p className="text-xs text-[#666666]">
+                Other wedding costs by category
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {categoryBreakdown.map((item, index) => (
+              <div
+                key={item.category}
+                className="bg-white rounded-lg p-3 border border-gray-200"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    {getCategoryIcon(item.category.toLowerCase())}
+                    <span className="text-sm font-medium text-gray-700">
+                      {getCategoryName(item.category)}
+                    </span>
+                  </div>
+                  <span className="font-semibold text-sm bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+                    {item.formattedAmount}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="text-xs text-[#666666]">
+                    {item.formattedPercentage} of total cost
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-white rounded-xl p-3 border border-gray-200 mt-4">
+            <div className="text-center">
+              <div className="text-xs text-[#666666] mb-1">
+                Additional Expenses Total
+              </div>
+              <div className="text-lg font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+                {formattedTotals.totalMainExpenses}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Extra Charges */}
       <div className="rounded-2xl p-5 border-2 border-gray-200 bg-[#F9F9FB] mb-4">
@@ -360,7 +421,7 @@ const WeddingResult = ({ result }) => {
               Rituals & Ceremonies
             </span>
             <span className="font-semibold text-[#2C178C]">
-              {formatIndianCurrency(extraCharges.rituals.amount)}
+              {formatters.formatIndianCurrency(extraCharges.rituals.amount)}
             </span>
           </div>
 
@@ -370,7 +431,9 @@ const WeddingResult = ({ result }) => {
                 Wedding Planner
               </span>
               <span className="font-semibold text-[#2C178C]">
-                {formatIndianCurrency(extraCharges.weddingPlanner.amount)}
+                {formatters.formatIndianCurrency(
+                  extraCharges.weddingPlanner.amount
+                )}
               </span>
             </div>
           )}
@@ -380,7 +443,9 @@ const WeddingResult = ({ result }) => {
               Emergency Buffer
             </span>
             <span className="font-semibold text-[#2C178C]">
-              {formatIndianCurrency(extraCharges.emergencyBuffer.amount)}
+              {formatters.formatIndianCurrency(
+                extraCharges.emergencyBuffer.amount
+              )}
             </span>
           </div>
 
@@ -389,7 +454,9 @@ const WeddingResult = ({ result }) => {
               Miscellaneous Expenses
             </span>
             <span className="font-semibold text-[#2C178C]">
-              {formatIndianCurrency(extraCharges.miscellaneous.amount)}
+              {formatters.formatIndianCurrency(
+                extraCharges.miscellaneous.amount
+              )}
             </span>
           </div>
         </div>
@@ -400,7 +467,7 @@ const WeddingResult = ({ result }) => {
               Total Extra Charges
             </div>
             <div className="text-lg font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
-              {formatIndianCurrency(extraCharges.total)}
+              {formatters.formatIndianCurrency(extraCharges.total)}
             </div>
             <div className="text-xs text-[#666666] mt-1">
               {(
@@ -418,53 +485,110 @@ const WeddingResult = ({ result }) => {
         <div className="flex items-center mb-4">
           <Users className="text-[#B3BEF5] mr-3" size={30} />
           <div>
-            <h3 className="font-semibold text-[#2C178C]">Analysis</h3>
-            <p className="text-xs text-[#666666]">Cost breakdown</p>
+            <h3 className="font-semibold text-[#2C178C]">Cost Analysis</h3>
+            <p className="text-xs text-[#666666]">Complete breakdown</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 gap-3">
-          <div className="bg-white rounded-lg p-3 border border-gray-200 text-center">
-            <div className="text-xs text-[#666666] mb-1">
-              Guest-Relevant Per Guest
-            </div>
-            <div className="font-bold text-[#2C178C]">
-              {formatIndianCurrency(
-                guestRelevantTotal / weddingDetails.guestCount
-              )}
-            </div>
-            <div className="text-xs text-[#666666] mt-1">
-              Food, Venue, Entertainment, etc.
-            </div>
-          </div>
-
-          {/* Cost Breakdown */}
           <div className="bg-white rounded-lg p-3 border border-gray-200">
             <div className="text-xs text-[#666666] mb-2 font-medium">
               Complete Cost Breakdown
             </div>
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-[#666666]">Main Expenses</span>
-                <span className="font-semibold text-[#2C178C]">
-                  {formatIndianCurrency(mainExpensesTotal)}
-                </span>
-              </div>
+              {budgetStatus.eventsTotal > 0 && (
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-[#666666]">Events Total</span>
+                  <span className="font-semibold text-[#2C178C]">
+                    {formattedTotals.eventsTotal}
+                  </span>
+                </div>
+              )}
+              {budgetStatus.totalAllocated > 0 && (
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-[#666666]">
+                    Additional Expenses
+                  </span>
+                  <span className="font-semibold text-[#2C178C]">
+                    {formattedTotals.totalMainExpenses}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between items-center">
                 <span className="text-xs text-[#666666]">Extra Charges</span>
                 <span className="font-semibold text-[#2C178C]">
-                  {formatIndianCurrency(extraCharges.total)}
+                  {formatters.formatIndianCurrency(extraCharges.total)}
                 </span>
               </div>
-              <div className="border-t border-gray-200 pt-2">
+              <div className="border-t pt-2 mt-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-medium text-[#666666]">
+                  <span className="text-sm font-medium text-[#2C178C]">
                     Grand Total
                   </span>
-                  <span className="font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
-                    {formatIndianCurrency(grandTotal)}
+                  <span className="font-bold text-lg bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+                    {formattedTotals.grandTotal}
                   </span>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg p-3 border border-gray-200">
+            <div className="text-xs text-[#666666] mb-2 font-medium">
+              Per Guest Analysis
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-[#666666]">
+                  Total Cost per Guest
+                </span>
+                <span className="font-semibold text-[#2C178C]">
+                  {formatters.formatIndianCurrency(
+                    budgetStatus.grandTotal / weddingDetails.guestCount
+                  )}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-[#666666]">Budget per Guest</span>
+                <span className="font-semibold text-[#2C178C]">
+                  {formatters.formatIndianCurrency(
+                    weddingDetails.totalBudget / weddingDetails.guestCount
+                  )}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg p-3 border border-gray-200">
+            <div className="text-xs text-[#666666] mb-2 font-medium">
+              Budget Utilization
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-[#666666]">
+                  Budget Utilization
+                </span>
+                <span
+                  className={`font-semibold ${
+                    budgetUtilization > 100 ? "text-red-600" : "text-green-600"
+                  }`}
+                >
+                  {formatters.formatPercentage(budgetUtilization)}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-[#666666]">
+                  {isOverBudget ? "Over Budget" : "Remaining Budget"}
+                </span>
+                <span
+                  className={`font-semibold ${
+                    isOverBudget ? "text-red-600" : "text-green-600"
+                  }`}
+                >
+                  {formatters.formatIndianCurrency(
+                    Math.abs(budgetStatus.difference)
+                  )}
+                </span>
               </div>
             </div>
           </div>
@@ -479,77 +603,45 @@ const WeddingResult = ({ result }) => {
             : "border-green-200 bg-green-50"
         }`}
       >
-        <div className="flex items-center mb-4">
-          <div className="mr-3">
+        <div className="text-center">
+          <div
+            className={`inline-flex items-center justify-center w-12 h-12 rounded-full mb-3 ${
+              isOverBudget ? "bg-red-100" : "bg-green-100"
+            }`}
+          >
             {isOverBudget ? (
-              <XCircle className="text-red-500" size={30} />
+              <XCircle className="text-red-600" size={24} />
             ) : (
-              <CheckCircle className="text-green-500" size={30} />
+              <CheckCircle className="text-green-600" size={24} />
             )}
           </div>
-          <div>
-            <h3
-              className={`font-semibold ${
-                isOverBudget ? "text-red-700" : "text-green-700"
-              }`}
-            >
-              Budget Summary
-            </h3>
-            <p
-              className={`text-xs ${
-                isOverBudget ? "text-red-600" : "text-green-600"
-              }`}
-            >
-              {isOverBudget
-                ? "Budget exceeded - consider optimization suggestions"
-                : "Budget looks good - ready to plan your dream wedding!"}
-            </p>
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-          <div className="bg-white rounded-lg p-3 border border-gray-200">
-            <div className="text-xs text-[#666666] mb-1">Grand Total</div>
-            <div
-              className={`font-bold text-lg ${
-                isOverBudget ? "text-red-600" : "text-green-600"
-              }`}
-            >
-              {formatIndianCurrency(grandTotal)}
-            </div>
-            <div className="text-xs text-[#666666]">Including all expenses</div>
-          </div>
-          <div className="bg-white rounded-lg p-3 border border-gray-200">
-            <div className="text-xs text-[#666666] mb-1">
-              Budget Utilization
-            </div>
-            <div
-              className={`font-bold text-lg ${
-                budgetUtilization > 100 ? "text-red-600" : "text-green-600"
-              }`}
-            >
-              {budgetUtilization.toFixed(1)}%
-            </div>
-            <div className="text-xs text-[#666666]">Of total budget used</div>
-          </div>
-        </div>
-
-        {/* Final Recommendation */}
-        <div
-          className={`mt-4 p-3 rounded-lg border ${
-            isOverBudget
-              ? "bg-red-100 border-red-200"
-              : "bg-green-100 border-green-200"
-          }`}
-        >
-          <div
-            className={`text-sm font-medium ${
+          <h3
+            className={`text-lg font-semibold mb-2 ${
               isOverBudget ? "text-red-700" : "text-green-700"
             }`}
           >
+            {isOverBudget ? "Budget Exceeded" : "Budget on Track"}
+          </h3>
+
+          <p
+            className={`text-sm mb-3 ${
+              isOverBudget ? "text-red-600" : "text-green-600"
+            }`}
+          >
             {isOverBudget
-              ? "💡 Recommendation: Consider the optimization suggestions above to bring your wedding within budget while maintaining quality."
-              : "🎉 Congratulations! Your wedding budget is well-planned. Don't forget to keep some extra buffer for last-minute expenses."}
+              ? `Your wedding will cost ${formatters.formatIndianCurrency(
+                  Math.abs(budgetStatus.difference)
+                )} more than planned`
+              : `You have ${formatters.formatIndianCurrency(
+                  budgetStatus.remainingBudget
+                )} remaining in your budget`}
+          </p>
+
+          <div className="text-xs text-gray-600">
+            Planning a wedding for {weddingDetails.guestCount} guests with{" "}
+            {events.length} events
+            {weddingDetails.hasWeddingPlanner && " and professional planning"}
           </div>
         </div>
       </div>
