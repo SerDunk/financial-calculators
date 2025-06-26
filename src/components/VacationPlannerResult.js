@@ -1,31 +1,98 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Plane,
   Calculator,
   TrendingDown,
   PieChart,
   MapPin,
-  FileText,
   Users,
   Calendar,
   Hotel,
   Utensils,
   Camera,
+  Train,
+  Car,
+  Shield,
+  ShoppingBag,
+  Navigation,
+  AlertCircle,
+  CheckCircle,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
-const VacationResult = ({ result }) => {
+const VacationPlannerResult = ({ result }) => {
+  const [expandedOptimizations, setExpandedOptimizations] = useState({});
+
+  const isPositiveNumber = (val) => typeof val === "number" && val > 0;
+
   const formatIndianCurrency = (amount) => {
-    if (!amount) return "₹0";
+    if (!amount || amount === 0) return "₹0";
     return `₹${Math.round(amount).toLocaleString("en-IN")}`;
   };
 
   const formatShortCurrency = (amount) => {
-    if (!amount) return "₹0";
+    if (!amount || amount === 0) return "₹0";
     const num = Math.round(amount);
     if (num >= 10000000) return `₹${(num / 10000000).toFixed(1)}Cr`;
     if (num >= 100000) return `₹${(num / 100000).toFixed(1)}L`;
     if (num >= 1000) return `₹${(num / 1000).toFixed(1)}K`;
     return `₹${num}`;
+  };
+
+  const getTransportIcon = (mode) => {
+    switch (mode) {
+      case "Flight":
+        return <Plane size={16} className="text-[#AB78FF]" />;
+      case "Train":
+        return <Train size={16} className="text-[#AB78FF]" />;
+      case "Road":
+        return <Car size={16} className="text-[#AB78FF]" />;
+      default:
+        return <Navigation size={16} className="text-[#AB78FF]" />;
+    }
+  };
+
+  const getBudgetCategoryColor = (category) => {
+    switch (category) {
+      case "Ultra Budget":
+        return "text-green-600 bg-green-50 border-green-200";
+      case "Budget Trip":
+        return "text-blue-600 bg-blue-50 border-blue-200";
+      case "Mid-range Trip":
+        return "text-yellow-600 bg-yellow-50 border-yellow-200";
+      case "Premium Trip":
+        return "text-orange-600 bg-orange-50 border-orange-200";
+      case "Luxury Trip":
+        return "text-purple-600 bg-purple-50 border-purple-200";
+      default:
+        return "text-gray-600 bg-gray-50 border-gray-200";
+    }
+  };
+
+  const toggleOptimizationDetails = (type) => {
+    setExpandedOptimizations((prev) => ({
+      ...prev,
+      [type]: !prev[type],
+    }));
+  };
+
+  const renderOptimizationDetails = (type, savings) => {
+    return (
+      <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+        <div
+          className="flex justify-between items-center cursor-pointer"
+          onClick={() => toggleOptimizationDetails(type)}
+        >
+          <span className="text-sm font-medium text-green-700">{type}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold text-green-600">
+              Save {formatShortCurrency(savings)}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   if (!result) {
@@ -45,16 +112,11 @@ const VacationResult = ({ result }) => {
   const {
     tripDetails,
     costs,
-    additionalCosts,
     totals,
     perPersonAnalysis,
     optimizations,
     summary,
   } = result;
-
-  const totalSavings = optimizations?.potentialSavings || 0;
-  const optimizedBudget = totals.recommendedBudget - totalSavings;
-  const optimizedPerPersonBudget = optimizations?.optimizedPerPersonBudget || 0;
 
   return (
     <div className="sm:mt-2 mt-2 sm:text-sm bg-white py-6 px-5 rounded-2xl shadow-lg">
@@ -62,18 +124,27 @@ const VacationResult = ({ result }) => {
       <div className="text-center mb-6">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-3 bg-[#AB78FF]">
           <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-            <Plane className="text-[#AB78FF]" size={24} />
+            {getTransportIcon(tripDetails.transportMode)}
           </div>
         </div>
         <h2 className="text-2xl font-semibold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent mb-2">
           Your {tripDetails.destination} Vacation
         </h2>
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-medium border ${getBudgetCategoryColor(
+              tripDetails.budgetCategory
+            )}`}
+          >
+            {tripDetails.budgetCategory}
+          </span>
+        </div>
         <p className="text-sm text-[#666666]">
-          {tripDetails.budgetCategory} for{" "}
+          For{" "}
           <span className="bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent font-semibold">
             {tripDetails.totalPeople} travelers
           </span>{" "}
-          over {tripDetails.tripDuration} days
+          over {tripDetails.tripDuration} days via {tripDetails.transportMode}
         </p>
       </div>
 
@@ -88,6 +159,16 @@ const VacationResult = ({ result }) => {
               <h3 className="font-semibold text-[#2C178C]">Trip Overview</h3>
               <p className="text-xs text-[#666666]">Essential details</p>
             </div>
+          </div>
+          <div className="flex items-center gap-1">
+            {summary?.isAffordable ? (
+              <CheckCircle size={16} className="text-green-500" />
+            ) : (
+              <AlertCircle size={16} className="text-orange-500" />
+            )}
+            <span className="text-xs text-gray-600">
+              {summary?.isValueForMoney ? "Great Value" : "Premium Pricing"}
+            </span>
           </div>
         </div>
 
@@ -116,67 +197,162 @@ const VacationResult = ({ result }) => {
 
         <div className="bg-white rounded-xl p-3 border border-gray-200">
           <div className="text-center">
-            <div className="text-xs text-[#666666] mb-1">
-              Total Recommended Budget
-            </div>
+            <div className="text-xs text-[#666666] mb-1">Total Trip Cost</div>
             <div className="text-xl font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
-              {formatIndianCurrency(totals.recommendedBudget)}
+              {formatIndianCurrency(totals.totalCost)}
             </div>
-            <div className="text-xs text-[#666666] mt-1">
-              {formatIndianCurrency(perPersonAnalysis.costPerPerson)} per person
-              • Emergency buffer: {formatIndianCurrency(totals.emergencyBuffer)}
-            </div>
+            {isPositiveNumber(totals.emergencyBuffer) && (
+              <div className="text-xs text-[#666666] mt-1">
+                Emergency buffer: {formatIndianCurrency(totals.emergencyBuffer)}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Main Cost Breakdown */}
+      {/* Transportation Breakdown */}
       <div className="rounded-2xl p-5 border-2 border-gray-200 bg-[#F9F9FB] mb-4">
         <div className="flex items-center mb-4">
           <div className="rounded-xl flex items-center justify-center mr-3">
-            <FileText className="text-[#B3BEF5]" size={30} />
+            {getTransportIcon(costs.transportation.mode)}
           </div>
           <div>
-            <h3 className="font-semibold text-[#2C178C]">Cost Breakdown</h3>
+            <h3 className="font-semibold text-[#2C178C]">Transportation</h3>
             <p className="text-xs text-[#666666]">
-              Main vacation expenses (total for all travelers)
+              {costs.transportation.mode} travel costs
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg p-3 border border-gray-200 mb-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-gray-700">
+              Total {costs.transportation.mode} Cost
+            </span>
+            <span className="font-semibold text-sm bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+              {formatIndianCurrency(costs.transportation.total)}
+            </span>
+          </div>
+
+          {costs.transportation.breakdown && (
+            <div className="space-y-1 text-xs text-[#666666]">
+              {isPositiveNumber(
+                costs.transportation.breakdown.adultTickets
+              ) && (
+                <div className="flex justify-between">
+                  <span>Adult tickets ({tripDetails.numAdults}×):</span>
+                  <span>
+                    {formatIndianCurrency(
+                      costs.transportation.breakdown.adultTickets
+                    )}
+                  </span>
+                </div>
+              )}
+              {isPositiveNumber(
+                costs.transportation.breakdown.childTickets
+              ) && (
+                <div className="flex justify-between">
+                  <span>Child tickets ({tripDetails.numChildren}×):</span>
+                  <span>
+                    {formatIndianCurrency(
+                      costs.transportation.breakdown.childTickets
+                    )}
+                  </span>
+                </div>
+              )}
+              {isPositiveNumber(costs.transportation.breakdown.fuelCost) && (
+                <div className="flex justify-between">
+                  <span>Fuel cost:</span>
+                  <span>
+                    {formatIndianCurrency(
+                      costs.transportation.breakdown.fuelCost
+                    )}
+                  </span>
+                </div>
+              )}
+              {isPositiveNumber(costs.transportation.breakdown.tollCharges) && (
+                <div className="flex justify-between">
+                  <span>Toll charges:</span>
+                  <span>
+                    {formatIndianCurrency(
+                      costs.transportation.breakdown.tollCharges
+                    )}
+                  </span>
+                </div>
+              )}
+              {isPositiveNumber(
+                costs.transportation.breakdown.vehicleRental
+              ) && (
+                <div className="flex justify-between">
+                  <span>Vehicle rental:</span>
+                  <span>
+                    {formatIndianCurrency(
+                      costs.transportation.breakdown.vehicleRental
+                    )}
+                  </span>
+                </div>
+              )}
+              {isPositiveNumber(
+                costs.transportation.breakdown.parkingCharges
+              ) && (
+                <div className="flex justify-between">
+                  <span>Parking charges:</span>
+                  <span>
+                    {formatIndianCurrency(
+                      costs.transportation.breakdown.parkingCharges
+                    )}
+                  </span>
+                </div>
+              )}
+              {isPositiveNumber(
+                costs.transportation.breakdown.stationTransfers
+              ) && (
+                <div className="flex justify-between">
+                  <span>Station transfers:</span>
+                  <span>
+                    {formatIndianCurrency(
+                      costs.transportation.breakdown.stationTransfers
+                    )}
+                  </span>
+                </div>
+              )}
+              {isPositiveNumber(costs.transportation.breakdown.trainMeals) && (
+                <div className="flex justify-between">
+                  <span>Train meals:</span>
+                  <span>
+                    {formatIndianCurrency(
+                      costs.transportation.breakdown.trainMeals
+                    )}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Accommodation & Meals */}
+      <div className="rounded-2xl p-5 border-2 border-gray-200 bg-[#F9F9FB] mb-4">
+        <div className="flex items-center mb-4">
+          <div className="rounded-xl flex items-center justify-center mr-3">
+            <Hotel className="text-[#AB78FF]" size={30} />
+          </div>
+          <div>
+            <h3 className="font-semibold text-[#2C178C]">Stay & Dining</h3>
+            <p className="text-xs text-[#666666]">
+              Accommodation and meal expenses
             </p>
           </div>
         </div>
 
         <div className="space-y-3">
-          {/* Flights */}
-          <div className="bg-white rounded-lg p-3 border border-gray-200">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <Plane size={16} className="text-[#AB78FF]" />
-                <span className="text-sm font-medium text-gray-700">
-                  Flight Costs (Total)
-                </span>
-              </div>
-              <span className="font-semibold text-sm bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
-                {formatIndianCurrency(costs.flights.total)}
-              </span>
-            </div>
-            <div className="text-xs text-[#666666]">
-              {tripDetails.numAdults} adults:{" "}
-              {formatIndianCurrency(costs.flights.adults)}
-              {tripDetails.numChildren > 0 && (
-                <>
-                  , {tripDetails.numChildren} children:{" "}
-                  {formatIndianCurrency(costs.flights.children)}
-                </>
-              )}
-            </div>
-          </div>
-
           {/* Accommodation */}
           <div className="bg-white rounded-lg p-3 border border-gray-200">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Hotel size={16} className="text-[#AB78FF]" />
                 <span className="text-sm font-medium text-gray-700">
-                  Accommodation (Total)
+                  {costs.accommodation.type}
                 </span>
               </div>
               <span className="font-semibold text-sm bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
@@ -184,135 +360,172 @@ const VacationResult = ({ result }) => {
               </span>
             </div>
             <div className="text-xs text-[#666666]">
-              {formatIndianCurrency(costs.accommodation.perNight)} per night ×{" "}
-              {costs.accommodation.totalNights} nights
+              {formatIndianCurrency(costs.accommodation.breakdown.costPerNight)}{" "}
+              per night × {costs.accommodation.breakdown.numberOfNights} nights
+              {costs.accommodation.breakdown.numberOfRooms > 1 &&
+                ` × ${costs.accommodation.breakdown.numberOfRooms} rooms`}
             </div>
           </div>
 
-          {/* Meals */}
-          <div className="bg-white rounded-lg p-3 border border-gray-200">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <Utensils size={16} className="text-[#AB78FF]" />
-                <span className="text-sm font-medium text-gray-700">
-                  Meals & Dining (All Travelers)
+          {/* Meals - Only show if there's a cost */}
+          {isPositiveNumber(costs.meals.total) && (
+            <div className="bg-white rounded-lg p-3 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Utensils size={16} className="text-[#AB78FF]" />
+                  <span className="text-sm font-medium text-gray-700">
+                    {costs.meals.preference}
+                  </span>
+                </div>
+                <span className="font-semibold text-sm bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+                  {formatIndianCurrency(costs.meals.total)}
                 </span>
               </div>
-              <span className="font-semibold text-sm bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
-                {formatIndianCurrency(costs.meals.total)}
-              </span>
-            </div>
-            <div className="text-xs text-[#666666]">
-              ~{formatIndianCurrency(costs.meals.perPersonPerDay)} per person
-              per day
-            </div>
-          </div>
-
-          {/* Activities */}
-          <div className="bg-white rounded-lg p-3 border border-gray-200">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <Camera size={16} className="text-[#AB78FF]" />
-                <span className="text-sm font-medium text-gray-700">
-                  Activities & Sightseeing (Total)
-                </span>
+              <div className="text-xs text-[#666666] space-y-1">
+                {isPositiveNumber(costs.meals.breakdown.adultMealCost) && (
+                  <div className="flex justify-between">
+                    <span>
+                      Adults ({tripDetails.numAdults}×{tripDetails.tripDuration}{" "}
+                      days):
+                    </span>
+                    <span>
+                      {formatIndianCurrency(
+                        costs.meals.breakdown.adultMealCost
+                      )}
+                    </span>
+                  </div>
+                )}
+                {isPositiveNumber(costs.meals.breakdown.childMealCost) && (
+                  <div className="flex justify-between">
+                    <span>
+                      Children ({tripDetails.numChildren}×
+                      {tripDetails.tripDuration} days):
+                    </span>
+                    <span>
+                      {formatIndianCurrency(
+                        costs.meals.breakdown.childMealCost
+                      )}
+                    </span>
+                  </div>
+                )}
               </div>
-              <span className="font-semibold text-sm bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
-                {formatIndianCurrency(costs.activities)}
-              </span>
             </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-3 border border-gray-200 mt-4">
-          <div className="text-center">
-            <div className="text-xs text-[#666666] mb-1">
-              Main Trip Cost (Total)
-            </div>
-            <div className="text-lg font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
-              {formatIndianCurrency(totals.baseTripCost)}
-            </div>
-            <div className="text-xs text-[#666666] mt-1">
-              {formatIndianCurrency(
-                totals.baseTripCost / tripDetails.totalPeople
-              )}{" "}
-              per person
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Additional Costs */}
+      {/* Activities & Other Costs */}
       <div className="rounded-2xl p-5 border-2 border-gray-200 bg-[#F9F9FB] mb-4">
         <div className="flex items-center mb-4">
           <div className="rounded-xl flex items-center justify-center mr-3">
-            <FileText className="text-[#AB78FF]" size={30} />
+            <Camera className="text-[#AB78FF]" size={30} />
           </div>
           <div>
             <h3 className="font-semibold text-[#2C178C]">
-              Additional Expenses
+              Activities & Extras
             </h3>
             <p className="text-xs text-[#666666]">
-              Extra costs to consider (total amounts)
+              Additional vacation expenses
             </p>
           </div>
         </div>
 
-        <div className="text-sm space-y-2">
-          {additionalCosts.visaAndDocuments > 0 && (
-            <div className="flex justify-between">
-              <span className="text-xs text-[#666666] font-medium">
-                Visa & Documents (All Travelers)
-              </span>
-              <span className="font-semibold text-[#2C178C]">
-                {formatIndianCurrency(additionalCosts.visaAndDocuments)}
-              </span>
+        <div className="space-y-3">
+          {/* Activities */}
+          {isPositiveNumber(costs.activities.total) && (
+            <div className="bg-white rounded-lg p-3 border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Camera size={16} className="text-[#AB78FF]" />
+                  <span className="text-sm font-medium text-gray-700">
+                    Activities & Sightseeing
+                  </span>
+                </div>
+                <span className="font-semibold text-sm bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+                  {formatIndianCurrency(costs.activities.total)}
+                </span>
+              </div>
             </div>
           )}
 
-          <div className="flex justify-between">
-            <span className="text-xs text-[#666666] font-medium">
-              Travel Insurance (All Travelers)
-            </span>
-            <span className="font-semibold text-[#2C178C]">
-              {formatIndianCurrency(additionalCosts.travelInsurance)}
-            </span>
-          </div>
-
-          <div className="flex justify-between">
-            <span className="text-xs text-[#666666] font-medium">
-              Local Transport (Total)
-            </span>
-            <span className="font-semibold text-[#2C178C]">
-              {formatIndianCurrency(additionalCosts.localTransport)}
-            </span>
-          </div>
-
-          <div className="flex justify-between">
-            <span className="text-xs text-[#666666] font-medium">
-              Shopping & Misc (Total)
-            </span>
-            <span className="font-semibold text-[#2C178C]">
-              {formatIndianCurrency(additionalCosts.shoppingAndMisc)}
-            </span>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-3 border border-gray-200 mt-4">
-          <div className="text-center">
-            <div className="text-xs text-[#666666] mb-1">
-              Total Additional Costs
+          {/* Local Transport */}
+          {isPositiveNumber(costs.localTransport.total) && (
+            <div className="bg-white rounded-lg p-3 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Navigation size={16} className="text-[#AB78FF]" />
+                  <span className="text-sm font-medium text-gray-700">
+                    Local Transport ({costs.localTransport.type})
+                  </span>
+                </div>
+                <span className="font-semibold text-sm bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+                  {formatIndianCurrency(costs.localTransport.total)}
+                </span>
+              </div>
+              <div className="text-xs text-[#666666]">
+                {formatIndianCurrency(costs.localTransport.breakdown.dailyCost)}{" "}
+                per day × {costs.localTransport.breakdown.totalDays} days
+              </div>
             </div>
-            <div className="text-lg font-bold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
-              {formatIndianCurrency(additionalCosts.total)}
+          )}
+
+          {/* Documentation - Only show if has valid costs */}
+          {isPositiveNumber(costs.documentation?.total) && (
+            <div className="bg-white rounded-lg p-3 border border-gray-200">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Shield size={16} className="text-[#AB78FF]" />
+                  <span className="text-sm font-medium text-gray-700">
+                    Documentation & Insurance
+                  </span>
+                </div>
+                <span className="font-semibold text-sm bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+                  {formatIndianCurrency(costs.documentation.total)}
+                </span>
+              </div>
+              <div className="text-xs text-[#666666] space-y-1">
+                {isPositiveNumber(costs.documentation.breakdown?.visaCost) && (
+                  <div className="flex justify-between">
+                    <span>Visa fees:</span>
+                    <span>
+                      {formatIndianCurrency(
+                        costs.documentation.breakdown.visaCost
+                      )}
+                    </span>
+                  </div>
+                )}
+                {isPositiveNumber(
+                  costs.documentation.breakdown?.insuranceCost
+                ) && (
+                  <div className="flex justify-between">
+                    <span>Travel insurance:</span>
+                    <span>
+                      {formatIndianCurrency(
+                        costs.documentation.breakdown.insuranceCost
+                      )}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="text-xs text-[#666666] mt-1">
-              {formatIndianCurrency(
-                additionalCosts.total / tripDetails.totalPeople
-              )}{" "}
-              per person
+          )}
+
+          {/* Shopping */}
+          {isPositiveNumber(costs.shopping.total) && (
+            <div className="bg-white rounded-lg p-3 border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShoppingBag size={16} className="text-[#AB78FF]" />
+                  <span className="text-sm font-medium text-gray-700">
+                    Shopping & Miscellaneous
+                  </span>
+                </div>
+                <span className="font-semibold text-sm bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent">
+                  {formatIndianCurrency(costs.shopping.total)}
+                </span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -320,7 +533,7 @@ const VacationResult = ({ result }) => {
       <div className="rounded-2xl p-5 border-2 border-gray-200 bg-[#F9F9FB] mb-4">
         <div className="flex items-center mb-4">
           <div className="rounded-xl flex items-center justify-center mr-3">
-            <Users className="text-[#B3BEF5]" size={30} />
+            <Users className="text-[#AB78FF]" size={30} />
           </div>
           <div>
             <h3 className="font-semibold text-[#2C178C]">
@@ -354,8 +567,8 @@ const VacationResult = ({ result }) => {
         </div>
       </div>
 
-      {/* Cost Optimization */}
-      {totalSavings > 0 && (
+      {/* Cost Optimization - Only show if there are actual savings */}
+      {optimizations?.overallSavings && (
         <div className="rounded-2xl p-5 border-2 border-gray-200 bg-[#F9F9FB] mb-4">
           <div className="flex items-center mb-4">
             <div className="rounded-xl flex items-center justify-center mr-3">
@@ -372,50 +585,22 @@ const VacationResult = ({ result }) => {
           </div>
 
           <div className="space-y-3">
-            {optimizations.suggestions.flightSavings > 0 && (
-              <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-green-700">
-                    Flight Class Downgrade
-                  </span>
-                  <span className="text-sm font-bold text-green-600">
-                    Save{" "}
-                    {formatShortCurrency(
-                      optimizations.suggestions.flightSavings
-                    )}
-                  </span>
-                </div>
-              </div>
+            {renderOptimizationDetails(
+              "Transportation",
+              optimizations.transportSavings,
+              optimizations.transportOptimizationDetails
             )}
 
-            {optimizations.suggestions.hotelSavings > 0 && (
-              <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-green-700">
-                    Budget Accommodation
-                  </span>
-                  <span className="text-sm font-bold text-green-600">
-                    Save{" "}
-                    {formatShortCurrency(
-                      optimizations.suggestions.hotelSavings
-                    )}
-                  </span>
-                </div>
-              </div>
+            {renderOptimizationDetails(
+              "Accommodation",
+              optimizations.accommodationSavings,
+              optimizations.accommodationOptimizationDetails
             )}
 
-            {optimizations.suggestions.mealSavings > 0 && (
-              <div className="bg-green-50 rounded-lg p-3 border border-green-200">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-green-700">
-                    Local Food Options
-                  </span>
-                  <span className="text-sm font-bold text-green-600">
-                    Save{" "}
-                    {formatShortCurrency(optimizations.suggestions.mealSavings)}
-                  </span>
-                </div>
-              </div>
+            {renderOptimizationDetails(
+              "Dining",
+              optimizations.mealSavings,
+              optimizations.mealOptimizationDetails
             )}
           </div>
 
@@ -425,14 +610,13 @@ const VacationResult = ({ result }) => {
                 Optimized Budget
               </div>
               <div className="text-lg font-bold text-green-700">
-                {formatIndianCurrency(optimizedBudget)}
+                {formatIndianCurrency(
+                  totals.totalCost - optimizations.overallSavings
+                )}
               </div>
               <div className="text-xs text-green-600 mt-1">
-                Total Potential Savings: {formatIndianCurrency(totalSavings)}
-              </div>
-              <div className="text-xs text-green-600 mt-1">
-                {formatIndianCurrency(optimizedPerPersonBudget)} per person
-                after optimization
+                Total Potential Savings:{" "}
+                {formatIndianCurrency(optimizations.overallSavings)}
               </div>
             </div>
           </div>
@@ -442,4 +626,4 @@ const VacationResult = ({ result }) => {
   );
 };
 
-export default VacationResult;
+export default VacationPlannerResult;

@@ -991,356 +991,585 @@ export {
   calculateROI,
 };
 
-//Vacation Calculator
+//Enhanced Vacation Calculator with Detailed Transportation Options
 export const calculateVacationBreakdown = ({
   numAdults,
   numChildren,
   destination,
   tripDuration,
-  hotelLuxury,
+  transportMode,
   flightClass,
+  trainClass,
+  roadVehicleType,
+  fuelType,
+  distance,
+  hotelLuxury,
   mealPreference,
   activitiesBudget,
+  shoppingBudget,
+  localTransportType,
+  travelInsurance,
+  visaRequired,
+  seasonalTiming,
+  cityTier,
+  accommodationType,
+  numberOfRooms,
 }) => {
   const totalPeople = numAdults + numChildren;
 
-  // Flight cost calculations with more realistic 2025 pricing
-  let flightCostPerAdult = 0;
-  let flightCostPerChild = 0; // Children typically get 10-25% discount
+  // Transportation cost calculations
+  let transportationCost = 0;
+  let transportationBreakdown = {};
 
-  if (destination === "Domestic") {
-    switch (flightClass) {
-      case "Economy":
-        flightCostPerAdult = 6000; // More realistic domestic pricing
-        flightCostPerChild = 5000;
-        break;
-      case "Premium Economy":
-        flightCostPerAdult = 12000;
-        flightCostPerChild = 10000;
-        break;
-      case "Business":
-        flightCostPerAdult = 20000;
-        flightCostPerChild = 16000;
-        break;
+  // Flight costs
+  if (transportMode === "Flight") {
+    let flightCostPerAdult = 0;
+    let flightCostPerChild = 0;
+
+    if (destination === "Domestic") {
+      const domesticMultiplier =
+        cityTier === "Tier1" ? 1.3 : cityTier === "Tier2" ? 1.1 : 1.0;
+      const seasonMultiplier =
+        seasonalTiming === "Peak" ? 1.5 : seasonalTiming === "Mid" ? 1.2 : 1.0;
+
+      switch (flightClass) {
+        case "Economy":
+          flightCostPerAdult = 6000 * domesticMultiplier * seasonMultiplier;
+          flightCostPerChild = 5000 * domesticMultiplier * seasonMultiplier;
+          break;
+        case "Premium Economy":
+          flightCostPerAdult = 12000 * domesticMultiplier * seasonMultiplier;
+          flightCostPerChild = 10000 * domesticMultiplier * seasonMultiplier;
+          break;
+        case "Business":
+          flightCostPerAdult = 25000 * domesticMultiplier * seasonMultiplier;
+          flightCostPerChild = 20000 * domesticMultiplier * seasonMultiplier;
+          break;
+        case "First Class":
+          flightCostPerAdult = 45000 * domesticMultiplier * seasonMultiplier;
+          flightCostPerChild = 35000 * domesticMultiplier * seasonMultiplier;
+          break;
+      }
+    } else {
+      const seasonMultiplier =
+        seasonalTiming === "Peak" ? 1.6 : seasonalTiming === "Mid" ? 1.3 : 1.0;
+
+      switch (flightClass) {
+        case "Economy":
+          flightCostPerAdult = 45000 * seasonMultiplier;
+          flightCostPerChild = 35000 * seasonMultiplier;
+          break;
+        case "Premium Economy":
+          flightCostPerAdult = 85000 * seasonMultiplier;
+          flightCostPerChild = 68000 * seasonMultiplier;
+          break;
+        case "Business":
+          flightCostPerAdult = 180000 * seasonMultiplier;
+          flightCostPerChild = 144000 * seasonMultiplier;
+          break;
+        case "First Class":
+          flightCostPerAdult = 350000 * seasonMultiplier;
+          flightCostPerChild = 280000 * seasonMultiplier;
+          break;
+      }
     }
-  } else {
-    // International - more realistic pricing
-    switch (flightClass) {
-      case "Economy":
-        flightCostPerAdult = 35000; // Reduced from 45000
-        flightCostPerChild = 28000;
-        break;
-      case "Premium Economy":
-        flightCostPerAdult = 65000; // Reduced from 75000
-        flightCostPerChild = 52000;
-        break;
-      case "Business":
-        flightCostPerAdult = 120000; // Reduced from 150000
-        flightCostPerChild = 95000;
-        break;
-    }
+
+    transportationCost =
+      flightCostPerAdult * numAdults + flightCostPerChild * numChildren;
+
+    // Airport transfers and fees
+    const airportTransfer =
+      destination === "International" ? 3000 * 2 : 1500 * 2; // Round trip
+    const airportFees =
+      destination === "International" ? 5000 * totalPeople : 2000 * totalPeople;
+
+    transportationBreakdown = {
+      adultTickets: flightCostPerAdult * numAdults,
+      childTickets: flightCostPerChild * numChildren,
+      airportTransfers: airportTransfer,
+      airportFees: airportFees,
+      total: transportationCost + airportTransfer + airportFees,
+    };
+
+    transportationCost += airportTransfer + airportFees;
   }
 
-  const totalFlightCost =
-    flightCostPerAdult * numAdults + flightCostPerChild * numChildren;
+  // Train costs
+  else if (transportMode === "Train") {
+    let trainCostPerAdult = 0;
+    let trainCostPerChild = 0;
 
-  // Hotel cost calculations with more realistic pricing
-  let hotelCostPerNight = 0;
-  let seasonalMultiplier = 1.15; // Reduced from 1.2
+    const distanceMultiplier = Math.max(1, distance / 500); // Base 500km
+    const seasonMultiplier =
+      seasonalTiming === "Peak" ? 1.3 : seasonalTiming === "Mid" ? 1.1 : 1.0;
 
-  if (destination === "Domestic") {
-    switch (hotelLuxury) {
-      case "Budget":
-        hotelCostPerNight = 2500 * seasonalMultiplier; // Reduced from 3500
+    switch (trainClass) {
+      case "Sleeper":
+        trainCostPerAdult = 800 * distanceMultiplier * seasonMultiplier;
+        trainCostPerChild = 400 * distanceMultiplier * seasonMultiplier;
         break;
-      case "Mid-range":
-        hotelCostPerNight = 6000 * seasonalMultiplier; // Reduced from 7500
+      case "3AC":
+        trainCostPerAdult = 1500 * distanceMultiplier * seasonMultiplier;
+        trainCostPerChild = 1125 * distanceMultiplier * seasonMultiplier;
         break;
-      case "Luxury":
-        hotelCostPerNight = 15000 * seasonalMultiplier; // Reduced from 18000
+      case "2AC":
+        trainCostPerAdult = 2200 * distanceMultiplier * seasonMultiplier;
+        trainCostPerChild = 1650 * distanceMultiplier * seasonMultiplier;
+        break;
+      case "1AC":
+        trainCostPerAdult = 3500 * distanceMultiplier * seasonMultiplier;
+        trainCostPerChild = 2625 * distanceMultiplier * seasonMultiplier;
+        break;
+      case "Vande Bharat":
+        trainCostPerAdult = 2800 * distanceMultiplier * seasonMultiplier;
+        trainCostPerChild = 2100 * distanceMultiplier * seasonMultiplier;
         break;
     }
-  } else {
-    // International
-    switch (hotelLuxury) {
-      case "Budget":
-        hotelCostPerNight = 5000 * seasonalMultiplier; // Reduced from 6000
-        break;
-      case "Mid-range":
-        hotelCostPerNight = 10000 * seasonalMultiplier; // Reduced from 12000
-        break;
-      case "Luxury":
-        hotelCostPerNight = 20000 * seasonalMultiplier; // Reduced from 25000
-        break;
-    }
+
+    transportationCost =
+      (trainCostPerAdult * numAdults + trainCostPerChild * numChildren) * 2; // Round trip
+
+    // Station transfers and meals
+    const stationTransfer = 800 * 2; // Round trip
+    const trainMeals = destination === "Domestic" ? 500 * totalPeople * 2 : 0;
+
+    transportationBreakdown = {
+      adultTickets: trainCostPerAdult * numAdults * 2,
+      childTickets: trainCostPerChild * numChildren * 2,
+      stationTransfers: stationTransfer,
+      trainMeals: trainMeals,
+      total: transportationCost + stationTransfer + trainMeals,
+    };
+
+    transportationCost += stationTransfer + trainMeals;
   }
 
-  const totalHotelCost = hotelCostPerNight * tripDuration;
+  // Road travel costs
+  else if (transportMode === "Road") {
+    let vehicleCost = 0;
+    let fuelCostPerKm = 0;
 
-  // Meal cost calculations with more realistic pricing
+    // Vehicle rental/ownership costs
+    switch (roadVehicleType) {
+      case "Own Car":
+        vehicleCost = 0; // No rental cost
+        break;
+      case "Rental Car":
+        vehicleCost = 2500 * tripDuration; // Per day rental
+        break;
+      case "Taxi/Cab":
+        vehicleCost = 12 * distance * 2; // Per km both ways
+        break;
+      case "Bus":
+        const busCostPerPerson =
+          destination === "Domestic" ? distance * 1.5 : distance * 2;
+        vehicleCost = busCostPerPerson * totalPeople * 2; // Round trip
+        break;
+    }
+
+    // Fuel costs (for car/taxi)
+    if (roadVehicleType !== "Bus") {
+      switch (fuelType) {
+        case "Petrol":
+          fuelCostPerKm = 8.5; // Rs per km
+          break;
+        case "Diesel":
+          fuelCostPerKm = 7.2; // Rs per km
+          break;
+        case "CNG":
+          fuelCostPerKm = 4.5; // Rs per km
+          break;
+        case "Electric":
+          fuelCostPerKm = 2.5; // Rs per km
+          break;
+      }
+    }
+
+    const fuelCost =
+      roadVehicleType !== "Bus" ? fuelCostPerKm * distance * 2 : 0;
+    const tollCharges = roadVehicleType !== "Bus" ? distance * 2 * 0.8 : 0; // Approx toll
+    const parkingCharges = roadVehicleType !== "Bus" ? 200 * tripDuration : 0;
+
+    transportationCost = vehicleCost + fuelCost + tollCharges + parkingCharges;
+
+    transportationBreakdown = {
+      vehicleRental: vehicleCost,
+      fuelCost: fuelCost,
+      tollCharges: tollCharges,
+      parkingCharges: parkingCharges,
+      total: transportationCost,
+    };
+  }
+
+  // Accommodation costs
+  let accommodationCost = 0;
+  let accommodationBreakdown = {};
+
+  const seasonalMultiplier =
+    seasonalTiming === "Peak" ? 1.4 : seasonalTiming === "Mid" ? 1.2 : 1.0;
+  const cityMultiplier =
+    cityTier === "Tier1" ? 1.5 : cityTier === "Tier2" ? 1.2 : 1.0;
+
+  let costPerNight = 0;
+
+  if (accommodationType === "Hotel") {
+    if (destination === "Domestic") {
+      switch (hotelLuxury) {
+        case "Budget":
+          costPerNight = 2500 * seasonalMultiplier * cityMultiplier;
+          break;
+        case "Mid-range":
+          costPerNight = 6000 * seasonalMultiplier * cityMultiplier;
+          break;
+        case "Luxury":
+          costPerNight = 15000 * seasonalMultiplier * cityMultiplier;
+          break;
+        case "Ultra Luxury":
+          costPerNight = 35000 * seasonalMultiplier * cityMultiplier;
+          break;
+      }
+    } else {
+      switch (hotelLuxury) {
+        case "Budget":
+          costPerNight = 6000 * seasonalMultiplier;
+          break;
+        case "Mid-range":
+          costPerNight = 12000 * seasonalMultiplier;
+          break;
+        case "Luxury":
+          costPerNight = 25000 * seasonalMultiplier;
+          break;
+        case "Ultra Luxury":
+          costPerNight = 60000 * seasonalMultiplier;
+          break;
+      }
+    }
+  } else if (accommodationType === "Resort") {
+    const resortMultiplier = 1.3;
+    if (destination === "Domestic") {
+      switch (hotelLuxury) {
+        case "Budget":
+          costPerNight =
+            2500 * seasonalMultiplier * cityMultiplier * resortMultiplier;
+          break;
+        case "Mid-range":
+          costPerNight =
+            6000 * seasonalMultiplier * cityMultiplier * resortMultiplier;
+          break;
+        case "Luxury":
+          costPerNight =
+            15000 * seasonalMultiplier * cityMultiplier * resortMultiplier;
+          break;
+        case "Ultra Luxury":
+          costPerNight =
+            35000 * seasonalMultiplier * cityMultiplier * resortMultiplier;
+          break;
+      }
+    } else {
+      switch (hotelLuxury) {
+        case "Budget":
+          costPerNight = 6000 * seasonalMultiplier * resortMultiplier;
+          break;
+        case "Mid-range":
+          costPerNight = 12000 * seasonalMultiplier * resortMultiplier;
+          break;
+        case "Luxury":
+          costPerNight = 25000 * seasonalMultiplier * resortMultiplier;
+          break;
+        case "Ultra Luxury":
+          costPerNight = 60000 * seasonalMultiplier * resortMultiplier;
+          break;
+      }
+    }
+  } else if (accommodationType === "Airbnb/Homestay") {
+    const homestayDiscount = 0.7;
+    if (destination === "Domestic") {
+      costPerNight =
+        4000 * seasonalMultiplier * cityMultiplier * homestayDiscount;
+    } else {
+      costPerNight = 8000 * seasonalMultiplier * homestayDiscount;
+    }
+  } else if (accommodationType === "Hostel") {
+    costPerNight =
+      destination === "Domestic" ? 800 * totalPeople : 1500 * totalPeople;
+  }
+
+  accommodationCost = costPerNight * numberOfRooms * tripDuration;
+
+  accommodationBreakdown = {
+    costPerNight: costPerNight,
+    numberOfRooms: numberOfRooms,
+    numberOfNights: tripDuration,
+    total: accommodationCost,
+  };
+
+  // Meal costs
+  let mealCost = 0;
+  let mealBreakdown = {};
+
+  const locationMultiplier = destination === "International" ? 1.4 : 1.0;
+  const tierMultiplier =
+    cityTier === "Tier1" ? 1.3 : cityTier === "Tier2" ? 1.1 : 1.0;
+
   let mealCostPerPersonPerDay = 0;
-  let locationMultiplier = destination === "International" ? 1.3 : 1; // Reduced from 1.5
 
   switch (mealPreference) {
     case "Street Food":
-      mealCostPerPersonPerDay = 600 * locationMultiplier; // Reduced from 800
+      mealCostPerPersonPerDay = 600 * locationMultiplier * tierMultiplier;
+      break;
+    case "Local Restaurants":
+      mealCostPerPersonPerDay = 1200 * locationMultiplier * tierMultiplier;
       break;
     case "Mix":
-      mealCostPerPersonPerDay = 1500 * locationMultiplier; // Reduced from 2000
+      mealCostPerPersonPerDay = 1800 * locationMultiplier * tierMultiplier;
       break;
     case "Fine Dining":
-      mealCostPerPersonPerDay = 3500 * locationMultiplier; // Reduced from 4500
+      mealCostPerPersonPerDay = 3500 * locationMultiplier * tierMultiplier;
+      break;
+    case "Hotel Included":
+      mealCostPerPersonPerDay = 0;
       break;
   }
 
-  // Children typically eat less, so 70% of adult meal cost
   const adultMealCost = mealCostPerPersonPerDay * numAdults * tripDuration;
   const childMealCost =
-    mealCostPerPersonPerDay * 0.7 * numChildren * tripDuration;
-  const totalMealCost = adultMealCost + childMealCost;
+    mealCostPerPersonPerDay * 0.6 * numChildren * tripDuration;
+  mealCost = adultMealCost + childMealCost;
 
-  // Additional cost calculations - more realistic
-  const visaAndDocumentsCost =
-    destination === "International" ? 6000 * totalPeople : 0; // Reduced from 8000
-  const travelInsuranceCost =
-    destination === "International" ? 2000 * totalPeople : 800 * totalPeople; // Reduced
-  const localTransportCost =
-    (destination === "International" ? 1200 : 600) * tripDuration; // Reduced
+  mealBreakdown = {
+    adultMealCost: adultMealCost,
+    childMealCost: childMealCost,
+    perPersonPerDay: mealCostPerPersonPerDay,
+    total: mealCost,
+  };
 
-  // Shopping and miscellaneous budget (reduced to 12% from 15%)
+  // Local transportation
+  let localTransportCost = 0;
+  let localTransportBreakdown = {};
+
+  switch (localTransportType) {
+    case "Public Transport":
+      localTransportCost =
+        (destination === "International" ? 800 : 400) *
+        totalPeople *
+        tripDuration;
+      break;
+    case "Taxi/Uber":
+      localTransportCost =
+        (destination === "International" ? 2000 : 1200) * tripDuration;
+      break;
+    case "Rental Car":
+      localTransportCost =
+        (destination === "International" ? 4000 : 2500) * tripDuration;
+      break;
+    case "Auto/Rickshaw":
+      localTransportCost = 600 * tripDuration;
+      break;
+    case "Walking":
+      localTransportCost = 0;
+      break;
+  }
+
+  localTransportBreakdown = {
+    dailyCost: localTransportCost / Math.max(tripDuration, 1),
+    totalDays: tripDuration,
+    total: localTransportCost,
+  };
+
+  // Documentation and insurance costs
+  let documentationCost = 0;
+  let documentationBreakdown = {};
+
+  if (destination === "International") {
+    const visaCost = visaRequired ? 8000 * totalPeople : 0;
+    const passportCost = 0; // Assuming already have passport
+    const insuranceCost = travelInsurance ? 2500 * totalPeople : 0;
+
+    documentationCost = visaCost + passportCost + insuranceCost;
+
+    documentationBreakdown = {
+      visaCost: visaCost,
+      passportCost: passportCost,
+      insuranceCost: insuranceCost,
+      total: documentationCost,
+    };
+  } else {
+    const insuranceCost = travelInsurance ? 800 * totalPeople : 0;
+    documentationCost = insuranceCost;
+
+    documentationBreakdown = {
+      insuranceCost: insuranceCost,
+      total: documentationCost,
+    };
+  }
+
+  // Shopping and miscellaneous
+  const miscellaneousCost = shoppingBudget;
+
+  // Emergency buffer
   const baseTripCost =
-    totalFlightCost + totalHotelCost + totalMealCost + activitiesBudget;
-  const shoppingAndMiscCost = baseTripCost * 0.12;
-
-  // Emergency buffer (reduced to 8% from 10%)
-  const emergencyBuffer = baseTripCost * 0.08;
-
-  // Total cost breakdown
-  const totalCostBeforeExtras =
-    totalFlightCost + totalHotelCost + totalMealCost + activitiesBudget;
-  const totalExtraCosts =
-    visaAndDocumentsCost +
-    travelInsuranceCost +
+    transportationCost +
+    accommodationCost +
+    mealCost +
+    activitiesBudget +
     localTransportCost +
-    shoppingAndMiscCost;
-  const totalCostWithExtras = totalCostBeforeExtras + totalExtraCosts;
-  const recommendedBudget = totalCostWithExtras + emergencyBuffer;
+    documentationCost +
+    miscellaneousCost;
+  const emergencyBuffer = baseTripCost * 0.1;
 
-  // Cost per person analysis
-  const costPerPerson = recommendedBudget / totalPeople;
-  const costPerDay = recommendedBudget / tripDuration;
-  const costPerPersonPerDay = costPerPerson / tripDuration;
+  // Total calculations
+  const totalCost = baseTripCost + emergencyBuffer;
 
-  // Budget category analysis with updated thresholds
-  const getBudgetCategory = (totalCost) => {
-    if (totalCost < 80000) return "Budget Trip";
-    if (totalCost < 250000) return "Mid-range Trip";
-    if (totalCost < 500000) return "Premium Trip";
+  // Per person analysis
+  const costPerPerson = totalCost / Math.max(totalPeople, 1);
+  const costPerDay = totalCost / Math.max(tripDuration, 1);
+  const costPerPersonPerDay = costPerPerson / Math.max(tripDuration, 1);
+
+  // Budget category
+  const getBudgetCategory = (total) => {
+    if (total < 50000) return "Ultra Budget";
+    if (total < 150000) return "Budget Trip";
+    if (total < 300000) return "Mid-range Trip";
+    if (total < 600000) return "Premium Trip";
     return "Luxury Trip";
   };
 
-  // More realistic optimization calculations
-  const costOptimizations = {
-    // Flight savings: realistic 15-25% savings by downgrading class
-    flightSavings:
-      flightClass === "Business"
-        ? totalFlightCost * 0.25
-        : flightClass === "Premium Economy"
-        ? totalFlightCost * 0.15
-        : 0,
+  // Calculate individual savings based on actual category costs
+  const transportSavings =
+    calculateTransportSavings(
+      transportMode,
+      flightClass,
+      trainClass,
+      roadVehicleType
+    ) * transportationCost;
 
-    // Hotel savings: 20-30% savings by choosing budget option
-    hotelSavings:
-      hotelLuxury === "Luxury"
-        ? totalHotelCost * 0.3
-        : hotelLuxury === "Mid-range"
-        ? totalHotelCost * 0.2
-        : 0,
+  const accommodationSavings =
+    calculateAccommodationSavings(
+      accommodationType,
+      hotelLuxury,
+      numberOfRooms
+    ) * accommodationCost;
 
-    // Meal savings: 25-40% savings by choosing local food
-    mealSavings:
-      mealPreference === "Fine Dining"
-        ? totalMealCost * 0.4
-        : mealPreference === "Mix"
-        ? totalMealCost * 0.25
-        : 0,
-  };
+  const mealSavings = calculateMealSavings(mealPreference) * mealCost;
 
-  const potentialSavings = Object.values(costOptimizations).reduce(
-    (sum, saving) => sum + saving,
-    0
-  );
-
-  // Value analysis with updated thresholds
-  const valueMetrics = {
-    costEfficiency:
-      costPerPersonPerDay < 4000
-        ? "Excellent"
-        : costPerPersonPerDay < 7000
-        ? "Good"
-        : costPerPersonPerDay < 12000
-        ? "Average"
-        : "Premium",
-    tripLength:
-      tripDuration < 4
-        ? "Short Trip"
-        : tripDuration < 8
-        ? "Standard Trip"
-        : tripDuration < 15
-        ? "Extended Trip"
-        : "Long Vacation",
+  // Now safely use them
+  const optimizations = {
+    transportSavings,
+    accommodationSavings,
+    mealSavings,
+    overallSavings: transportSavings + accommodationSavings + mealSavings,
   };
 
   return {
-    // Basic trip details
     tripDetails: {
       totalPeople,
       numAdults,
       numChildren,
       destination,
       tripDuration,
-      budgetCategory: getBudgetCategory(recommendedBudget),
+      transportMode,
+      budgetCategory: getBudgetCategory(totalCost),
     },
 
-    // Main cost breakdown
     costs: {
-      flights: {
-        adults: flightCostPerAdult * numAdults,
-        children: flightCostPerChild * numChildren,
-        total: totalFlightCost,
+      transportation: {
+        mode: transportMode,
+        breakdown: transportationBreakdown,
+        total: transportationCost,
       },
       accommodation: {
-        perNight: hotelCostPerNight,
-        totalNights: tripDuration,
-        total: totalHotelCost,
+        type: accommodationType,
+        breakdown: accommodationBreakdown,
+        total: accommodationCost,
       },
       meals: {
-        adultCost: adultMealCost,
-        childCost: childMealCost,
-        total: totalMealCost,
-        perPersonPerDay: mealCostPerPersonPerDay,
+        preference: mealPreference,
+        breakdown: mealBreakdown,
+        total: mealCost,
       },
-      activities: activitiesBudget,
+      activities: {
+        budget: activitiesBudget,
+        total: activitiesBudget,
+      },
+      localTransport: {
+        type: localTransportType,
+        breakdown: localTransportBreakdown,
+        total: localTransportCost,
+      },
+      documentation: {
+        breakdown: documentationBreakdown,
+        total: documentationCost,
+      },
+      shopping: {
+        budget: shoppingBudget,
+        total: miscellaneousCost,
+      },
     },
 
-    // Additional costs
-    additionalCosts: {
-      visaAndDocuments: visaAndDocumentsCost,
-      travelInsurance: travelInsuranceCost,
-      localTransport: localTransportCost,
-      shoppingAndMisc: shoppingAndMiscCost,
-      total: totalExtraCosts,
-    },
-
-    // Total calculations
     totals: {
-      baseTripCost: totalCostBeforeExtras,
-      totalWithExtras: totalCostWithExtras,
+      baseTripCost: baseTripCost,
       emergencyBuffer: emergencyBuffer,
-      recommendedBudget: recommendedBudget,
+      totalCost: totalCost,
     },
 
-    // Per person/day analysis
     perPersonAnalysis: {
       costPerPerson: costPerPerson,
       costPerDay: costPerDay,
       costPerPersonPerDay: costPerPersonPerDay,
     },
 
-    // Optimization suggestions with realistic savings
-    optimizations: {
-      potentialSavings: potentialSavings,
-      suggestions: costOptimizations,
-      optimizedTotalBudget: recommendedBudget - potentialSavings,
-      optimizedPerPersonBudget:
-        (recommendedBudget - potentialSavings) / totalPeople,
-    },
-
-    // Value metrics
-    valueAnalysis: valueMetrics,
-
-    // Summary for display
-    summary: {
-      isAffordable: costPerPersonPerDay < 10000, // Updated threshold
-      isValueForMoney:
-        valueMetrics.costEfficiency === "Excellent" ||
-        valueMetrics.costEfficiency === "Good",
-      recommendationScore: calculateRecommendation(
-        costPerPersonPerDay,
-        tripDuration,
-        destination
-      ),
-      keyInsights: generateKeyInsights(
-        recommendedBudget,
-        costPerPersonPerDay,
-        destination,
-        tripDuration,
-        totalPeople
-      ),
-    },
+    optimizations: optimizations,
   };
 };
 
-// Helper function to calculate recommendation score
-const calculateRecommendation = (
-  costPerPersonPerDay,
-  duration,
-  destination
+// Helper functions
+const calculateTransportSavings = (
+  mode,
+  flightClass,
+  trainClass,
+  vehicleType
 ) => {
-  let score = 5; // Base score out of 10
-
-  // Cost efficiency factor
-  if (costPerPersonPerDay < 4000) score += 2;
-  else if (costPerPersonPerDay < 7000) score += 1;
-  else if (costPerPersonPerDay > 12000) score -= 1;
-
-  // Duration factor
-  if (duration >= 5 && duration <= 10) score += 1;
-  if (duration < 3) score -= 1;
-
-  // Destination factor
-  if (destination === "International") score += 1;
-
-  return Math.min(Math.max(score, 1), 10);
+  switch (mode) {
+    case "Flight":
+      return flightClass === "First Class"
+        ? 0.3
+        : flightClass === "Business"
+        ? 0.2
+        : 0.1;
+    case "Train":
+      return trainClass === "1AC" ? 0.25 : trainClass === "2AC" ? 0.15 : 0.05;
+    case "Road":
+      return vehicleType === "Taxi/Cab"
+        ? 0.2
+        : vehicleType === "Rental Car"
+        ? 0.15
+        : 0.05;
+    default:
+      return 0;
+  }
 };
 
-// Helper function to generate key insights
-const generateKeyInsights = (
-  totalBudget,
-  costPerPersonPerDay,
-  destination,
-  duration,
-  totalPeople
-) => {
-  const insights = [];
+const calculateAccommodationSavings = (type, luxury, rooms) => {
+  const luxuryFactor =
+    {
+      "Ultra Luxury": 0.3,
+      Luxury: 0.2,
+      "Mid-range": 0.1,
+      Budget: 0.05,
+    }[luxury] || 0;
+  return luxuryFactor * rooms;
+};
 
-  if (costPerPersonPerDay < 4000) {
-    insights.push("Excellent value for money trip");
-  } else if (costPerPersonPerDay > 12000) {
-    insights.push("Premium vacation experience");
-  }
-
-  if (destination === "International" && totalBudget < 150000) {
-    insights.push("Budget-friendly international trip");
-  }
-
-  if (duration > 10) {
-    insights.push("Extended vacation - great for relaxation");
-  }
-
-  if (totalBudget > 400000) {
-    insights.push("Luxury vacation - premium experience");
-  }
-
-  // Add per-person context
-  const perPersonTotal = totalBudget / totalPeople;
-  if (perPersonTotal < 50000) {
-    insights.push(
-      `Affordable at ₹${Math.round(perPersonTotal / 1000)}K per person`
-    );
-  }
-
-  return insights;
+const calculateMealSavings = (preference) => {
+  return (
+    {
+      "Fine Dining": 0.3,
+      Mix: 0.2,
+      "Local Restaurants": 0.1,
+      "Street Food": 0.05,
+      "Hotel Included": 0,
+    }[preference] || 0
+  );
 };
 
 //Wedding Calculations
