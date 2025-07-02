@@ -991,473 +991,141 @@ export {
   calculateROI,
 };
 
-//Enhanced Vacation Calculator with Detailed Transportation Options
-export const calculateVacationBreakdown = ({
-  numAdults,
-  numChildren,
-  destination,
-  tripDuration,
-  transportMode,
-  flightClass,
-  trainClass,
-  roadVehicleType,
-  fuelType,
-  distance,
-  hotelLuxury,
-  mealPreference,
-  activitiesBudget,
-  shoppingBudget,
-  localTransportType,
-  travelInsurance,
-  visaRequired,
-  seasonalTiming,
-  cityTier,
-  accommodationType,
-  numberOfRooms,
-}) => {
+export const calculateVacationBreakdown = (inputs) => {
+  const {
+    numAdults,
+    numChildren,
+    destination,
+    tripDuration,
+    transportMode,
+    flightCost,
+    airportTransferCost,
+    trainTicketCost,
+    stationTransferCost,
+    roadVehicleType,
+    distance,
+    carMileage,
+    fuelPrice,
+    tollAndTaxes,
+    overnightStayCost,
+    rentalCostPerDay,
+    fuelCostEstimate,
+    securityDeposit,
+    totalCabFare,
+    totalBusFare,
+    accommodationType,
+    costPerNight,
+    numberOfRooms,
+    mealCostPerDay,
+    activitiesBudget,
+    shoppingBudget,
+    localTransportType,
+    publicTransportCostPerDay,
+    taxiCostPerDay,
+    localRentalCostPerDay,
+    localRentalFuelCost,
+    travelInsurance,
+    travelInsuranceCost,
+    visaRequired,
+    visaCost,
+  } = inputs;
+
   const totalPeople = numAdults + numChildren;
 
-  // Transportation cost calculations
-  let transportationCost = 0;
-  let transportationBreakdown = {};
+  // 1. Transportation Cost
+  let transportationTotal = 0;
+  const transportationBreakdown = {};
 
-  // Flight costs
   if (transportMode === "Flight") {
-    let flightCostPerAdult = 0;
-    let flightCostPerChild = 0;
-
-    if (destination === "Domestic") {
-      const domesticMultiplier =
-        cityTier === "Tier1" ? 1.3 : cityTier === "Tier2" ? 1.1 : 1.0;
-      const seasonMultiplier =
-        seasonalTiming === "Peak" ? 1.5 : seasonalTiming === "Mid" ? 1.2 : 1.0;
-
-      switch (flightClass) {
-        case "Economy":
-          flightCostPerAdult = 6000 * domesticMultiplier * seasonMultiplier;
-          flightCostPerChild = 5000 * domesticMultiplier * seasonMultiplier;
-          break;
-        case "Premium Economy":
-          flightCostPerAdult = 12000 * domesticMultiplier * seasonMultiplier;
-          flightCostPerChild = 10000 * domesticMultiplier * seasonMultiplier;
-          break;
-        case "Business":
-          flightCostPerAdult = 25000 * domesticMultiplier * seasonMultiplier;
-          flightCostPerChild = 20000 * domesticMultiplier * seasonMultiplier;
-          break;
-        case "First Class":
-          flightCostPerAdult = 45000 * domesticMultiplier * seasonMultiplier;
-          flightCostPerChild = 35000 * domesticMultiplier * seasonMultiplier;
-          break;
-      }
-    } else {
-      const seasonMultiplier =
-        seasonalTiming === "Peak" ? 1.6 : seasonalTiming === "Mid" ? 1.3 : 1.0;
-
-      switch (flightClass) {
-        case "Economy":
-          flightCostPerAdult = 45000 * seasonMultiplier;
-          flightCostPerChild = 35000 * seasonMultiplier;
-          break;
-        case "Premium Economy":
-          flightCostPerAdult = 85000 * seasonMultiplier;
-          flightCostPerChild = 68000 * seasonMultiplier;
-          break;
-        case "Business":
-          flightCostPerAdult = 180000 * seasonMultiplier;
-          flightCostPerChild = 144000 * seasonMultiplier;
-          break;
-        case "First Class":
-          flightCostPerAdult = 350000 * seasonMultiplier;
-          flightCostPerChild = 280000 * seasonMultiplier;
-          break;
-      }
+    transportationTotal = flightCost + airportTransferCost;
+    transportationBreakdown.flightTickets = flightCost;
+    transportationBreakdown.airportTransfers = airportTransferCost;
+  } else if (transportMode === "Train") {
+    transportationTotal = trainTicketCost + stationTransferCost;
+    transportationBreakdown.trainTickets = trainTicketCost;
+    transportationBreakdown.stationTransfers = stationTransferCost;
+  } else if (transportMode === "Road") {
+    if (roadVehicleType === "Own Car") {
+      const calculatedFuelCost =
+        carMileage > 0 ? ((distance * 2) / carMileage) * fuelPrice : 0;
+      transportationTotal =
+        calculatedFuelCost + tollAndTaxes + overnightStayCost;
+      transportationBreakdown.fuelCost = calculatedFuelCost;
+      transportationBreakdown.tollsAndCharges = tollAndTaxes;
+      transportationBreakdown.enrouteStay = overnightStayCost;
+    } else if (roadVehicleType === "Rental Car") {
+      const rentalTotal = rentalCostPerDay * tripDuration;
+      transportationTotal = rentalTotal + fuelCostEstimate;
+      transportationBreakdown.vehicleRental = rentalTotal;
+      transportationBreakdown.fuelEstimate = fuelCostEstimate;
+      transportationBreakdown.securityDeposit = securityDeposit; // Note: Not added to cost
+    } else if (roadVehicleType === "Taxi/Cab") {
+      transportationTotal = totalCabFare;
+      transportationBreakdown.totalFare = totalCabFare;
+    } else if (roadVehicleType === "Bus") {
+      transportationTotal = totalBusFare;
+      transportationBreakdown.totalFare = totalBusFare;
     }
-
-    transportationCost =
-      flightCostPerAdult * numAdults + flightCostPerChild * numChildren;
-
-    // Airport transfers and fees
-    const airportTransfer =
-      destination === "International" ? 3000 * 2 : 1500 * 2; // Round trip
-    const airportFees =
-      destination === "International" ? 5000 * totalPeople : 2000 * totalPeople;
-
-    transportationBreakdown = {
-      adultTickets: flightCostPerAdult * numAdults,
-      childTickets: flightCostPerChild * numChildren,
-      airportTransfers: airportTransfer,
-      airportFees: airportFees,
-      total: transportationCost + airportTransfer + airportFees,
-    };
-
-    transportationCost += airportTransfer + airportFees;
   }
 
-  // Train costs
-  else if (transportMode === "Train") {
-    let trainCostPerAdult = 0;
-    let trainCostPerChild = 0;
-
-    const distanceMultiplier = Math.max(1, distance / 500); // Base 500km
-    const seasonMultiplier =
-      seasonalTiming === "Peak" ? 1.3 : seasonalTiming === "Mid" ? 1.1 : 1.0;
-
-    switch (trainClass) {
-      case "Sleeper":
-        trainCostPerAdult = 800 * distanceMultiplier * seasonMultiplier;
-        trainCostPerChild = 400 * distanceMultiplier * seasonMultiplier;
-        break;
-      case "3AC":
-        trainCostPerAdult = 1500 * distanceMultiplier * seasonMultiplier;
-        trainCostPerChild = 1125 * distanceMultiplier * seasonMultiplier;
-        break;
-      case "2AC":
-        trainCostPerAdult = 2200 * distanceMultiplier * seasonMultiplier;
-        trainCostPerChild = 1650 * distanceMultiplier * seasonMultiplier;
-        break;
-      case "1AC":
-        trainCostPerAdult = 3500 * distanceMultiplier * seasonMultiplier;
-        trainCostPerChild = 2625 * distanceMultiplier * seasonMultiplier;
-        break;
-      case "Vande Bharat":
-        trainCostPerAdult = 2800 * distanceMultiplier * seasonMultiplier;
-        trainCostPerChild = 2100 * distanceMultiplier * seasonMultiplier;
-        break;
-    }
-
-    transportationCost =
-      (trainCostPerAdult * numAdults + trainCostPerChild * numChildren) * 2; // Round trip
-
-    // Station transfers and meals
-    const stationTransfer = 800 * 2; // Round trip
-    const trainMeals = destination === "Domestic" ? 500 * totalPeople * 2 : 0;
-
-    transportationBreakdown = {
-      adultTickets: trainCostPerAdult * numAdults * 2,
-      childTickets: trainCostPerChild * numChildren * 2,
-      stationTransfers: stationTransfer,
-      trainMeals: trainMeals,
-      total: transportationCost + stationTransfer + trainMeals,
-    };
-
-    transportationCost += stationTransfer + trainMeals;
+  // 2. Accommodation Cost
+  let accommodationTotal = 0;
+  if (accommodationType !== "Friends/Family") {
+    accommodationTotal = costPerNight * numberOfRooms * tripDuration;
   }
-
-  // Road travel costs
-  else if (transportMode === "Road") {
-    let vehicleCost = 0;
-    let fuelCostPerKm = 0;
-
-    // Vehicle rental/ownership costs
-    switch (roadVehicleType) {
-      case "Own Car":
-        vehicleCost = 0; // No rental cost
-        break;
-      case "Rental Car":
-        vehicleCost = 2500 * tripDuration; // Per day rental
-        break;
-      case "Taxi/Cab":
-        vehicleCost = 12 * distance * 2; // Per km both ways
-        break;
-      case "Bus":
-        const busCostPerPerson =
-          destination === "Domestic" ? distance * 1.5 : distance * 2;
-        vehicleCost = busCostPerPerson * totalPeople * 2; // Round trip
-        break;
-    }
-
-    // Fuel costs (for car/taxi)
-    if (roadVehicleType !== "Bus") {
-      switch (fuelType) {
-        case "Petrol":
-          fuelCostPerKm = 8.5; // Rs per km
-          break;
-        case "Diesel":
-          fuelCostPerKm = 7.2; // Rs per km
-          break;
-        case "CNG":
-          fuelCostPerKm = 4.5; // Rs per km
-          break;
-        case "Electric":
-          fuelCostPerKm = 2.5; // Rs per km
-          break;
-      }
-    }
-
-    const fuelCost =
-      roadVehicleType !== "Bus" ? fuelCostPerKm * distance * 2 : 0;
-    const tollCharges = roadVehicleType !== "Bus" ? distance * 2 * 0.8 : 0; // Approx toll
-    const parkingCharges = roadVehicleType !== "Bus" ? 200 * tripDuration : 0;
-
-    transportationCost = vehicleCost + fuelCost + tollCharges + parkingCharges;
-
-    transportationBreakdown = {
-      vehicleRental: vehicleCost,
-      fuelCost: fuelCost,
-      tollCharges: tollCharges,
-      parkingCharges: parkingCharges,
-      total: transportationCost,
-    };
-  }
-
-  // Accommodation costs
-  let accommodationCost = 0;
-  let accommodationBreakdown = {};
-
-  const seasonalMultiplier =
-    seasonalTiming === "Peak" ? 1.4 : seasonalTiming === "Mid" ? 1.2 : 1.0;
-  const cityMultiplier =
-    cityTier === "Tier1" ? 1.5 : cityTier === "Tier2" ? 1.2 : 1.0;
-
-  let costPerNight = 0;
-
-  if (accommodationType === "Hotel") {
-    if (destination === "Domestic") {
-      switch (hotelLuxury) {
-        case "Budget":
-          costPerNight = 2500 * seasonalMultiplier * cityMultiplier;
-          break;
-        case "Mid-range":
-          costPerNight = 6000 * seasonalMultiplier * cityMultiplier;
-          break;
-        case "Luxury":
-          costPerNight = 15000 * seasonalMultiplier * cityMultiplier;
-          break;
-        case "Ultra Luxury":
-          costPerNight = 35000 * seasonalMultiplier * cityMultiplier;
-          break;
-      }
-    } else {
-      switch (hotelLuxury) {
-        case "Budget":
-          costPerNight = 6000 * seasonalMultiplier;
-          break;
-        case "Mid-range":
-          costPerNight = 12000 * seasonalMultiplier;
-          break;
-        case "Luxury":
-          costPerNight = 25000 * seasonalMultiplier;
-          break;
-        case "Ultra Luxury":
-          costPerNight = 60000 * seasonalMultiplier;
-          break;
-      }
-    }
-  } else if (accommodationType === "Resort") {
-    const resortMultiplier = 1.3;
-    if (destination === "Domestic") {
-      switch (hotelLuxury) {
-        case "Budget":
-          costPerNight =
-            2500 * seasonalMultiplier * cityMultiplier * resortMultiplier;
-          break;
-        case "Mid-range":
-          costPerNight =
-            6000 * seasonalMultiplier * cityMultiplier * resortMultiplier;
-          break;
-        case "Luxury":
-          costPerNight =
-            15000 * seasonalMultiplier * cityMultiplier * resortMultiplier;
-          break;
-        case "Ultra Luxury":
-          costPerNight =
-            35000 * seasonalMultiplier * cityMultiplier * resortMultiplier;
-          break;
-      }
-    } else {
-      switch (hotelLuxury) {
-        case "Budget":
-          costPerNight = 6000 * seasonalMultiplier * resortMultiplier;
-          break;
-        case "Mid-range":
-          costPerNight = 12000 * seasonalMultiplier * resortMultiplier;
-          break;
-        case "Luxury":
-          costPerNight = 25000 * seasonalMultiplier * resortMultiplier;
-          break;
-        case "Ultra Luxury":
-          costPerNight = 60000 * seasonalMultiplier * resortMultiplier;
-          break;
-      }
-    }
-  } else if (accommodationType === "Airbnb/Homestay") {
-    const homestayDiscount = 0.7;
-    if (destination === "Domestic") {
-      costPerNight =
-        4000 * seasonalMultiplier * cityMultiplier * homestayDiscount;
-    } else {
-      costPerNight = 8000 * seasonalMultiplier * homestayDiscount;
-    }
-  } else if (accommodationType === "Hostel") {
-    costPerNight =
-      destination === "Domestic" ? 800 * totalPeople : 1500 * totalPeople;
-  }
-
-  accommodationCost = costPerNight * numberOfRooms * tripDuration;
-
-  accommodationBreakdown = {
-    costPerNight: costPerNight,
-    numberOfRooms: numberOfRooms,
+  const accommodationBreakdown = {
+    costPerNight,
+    numberOfRooms,
     numberOfNights: tripDuration,
-    total: accommodationCost,
+    total: accommodationTotal,
   };
 
-  // Meal costs
-  let mealCost = 0;
-  let mealBreakdown = {};
+  // 3. Meal Cost
+  const mealsTotal = mealCostPerDay * tripDuration;
 
-  const locationMultiplier = destination === "International" ? 1.4 : 1.0;
-  const tierMultiplier =
-    cityTier === "Tier1" ? 1.3 : cityTier === "Tier2" ? 1.1 : 1.0;
-
-  let mealCostPerPersonPerDay = 0;
-
-  switch (mealPreference) {
-    case "Street Food":
-      mealCostPerPersonPerDay = 600 * locationMultiplier * tierMultiplier;
-      break;
-    case "Local Restaurants":
-      mealCostPerPersonPerDay = 1200 * locationMultiplier * tierMultiplier;
-      break;
-    case "Mix":
-      mealCostPerPersonPerDay = 1800 * locationMultiplier * tierMultiplier;
-      break;
-    case "Fine Dining":
-      mealCostPerPersonPerDay = 3500 * locationMultiplier * tierMultiplier;
-      break;
-    case "Hotel Included":
-      mealCostPerPersonPerDay = 0;
-      break;
+  // 4. Local Transport Cost
+  let localTransportTotal = 0;
+  if (localTransportType === "Public Transport") {
+    localTransportTotal = publicTransportCostPerDay * tripDuration;
+  } else if (localTransportType === "Taxi/Ride-sharing") {
+    localTransportTotal = taxiCostPerDay * tripDuration;
+  } else if (localTransportType === "Rental Car/Scooter") {
+    localTransportTotal =
+      localRentalCostPerDay * tripDuration + localRentalFuelCost;
   }
 
-  const adultMealCost = mealCostPerPersonPerDay * numAdults * tripDuration;
-  const childMealCost =
-    mealCostPerPersonPerDay * 0.6 * numChildren * tripDuration;
-  mealCost = adultMealCost + childMealCost;
-
-  mealBreakdown = {
-    adultMealCost: adultMealCost,
-    childMealCost: childMealCost,
-    perPersonPerDay: mealCostPerPersonPerDay,
-    total: mealCost,
-  };
-
-  // Local transportation
-  let localTransportCost = 0;
-  let localTransportBreakdown = {};
-
-  switch (localTransportType) {
-    case "Public Transport":
-      localTransportCost =
-        (destination === "International" ? 800 : 400) *
-        totalPeople *
-        tripDuration;
-      break;
-    case "Taxi/Uber":
-      localTransportCost =
-        (destination === "International" ? 2000 : 1200) * tripDuration;
-      break;
-    case "Rental Car":
-      localTransportCost =
-        (destination === "International" ? 4000 : 2500) * tripDuration;
-      break;
-    case "Auto/Rickshaw":
-      localTransportCost = 600 * tripDuration;
-      break;
-    case "Walking":
-      localTransportCost = 0;
-      break;
+  // 5. Documentation & Insurance Cost
+  let documentationTotal = 0;
+  const documentationBreakdown = {};
+  if (travelInsurance) {
+    documentationTotal += travelInsuranceCost;
+    documentationBreakdown.insuranceCost = travelInsuranceCost;
+  }
+  if (visaRequired && destination === "International") {
+    documentationTotal += visaCost;
+    documentationBreakdown.visaCost = visaCost;
   }
 
-  localTransportBreakdown = {
-    dailyCost: localTransportCost / Math.max(tripDuration, 1),
-    totalDays: tripDuration,
-    total: localTransportCost,
-  };
-
-  // Documentation and insurance costs
-  let documentationCost = 0;
-  let documentationBreakdown = {};
-
-  if (destination === "International") {
-    const visaCost = visaRequired ? 8000 * totalPeople : 0;
-    const passportCost = 0; // Assuming already have passport
-    const insuranceCost = travelInsurance ? 2500 * totalPeople : 0;
-
-    documentationCost = visaCost + passportCost + insuranceCost;
-
-    documentationBreakdown = {
-      visaCost: visaCost,
-      passportCost: passportCost,
-      insuranceCost: insuranceCost,
-      total: documentationCost,
-    };
-  } else {
-    const insuranceCost = travelInsurance ? 800 * totalPeople : 0;
-    documentationCost = insuranceCost;
-
-    documentationBreakdown = {
-      insuranceCost: insuranceCost,
-      total: documentationCost,
-    };
-  }
-
-  // Shopping and miscellaneous
-  const miscellaneousCost = shoppingBudget;
-
-  // Emergency buffer
+  // Aggregate all costs
   const baseTripCost =
-    transportationCost +
-    accommodationCost +
-    mealCost +
+    transportationTotal +
+    accommodationTotal +
+    mealsTotal +
     activitiesBudget +
-    localTransportCost +
-    documentationCost +
-    miscellaneousCost;
-  const emergencyBuffer = baseTripCost * 0.1;
+    shoppingBudget +
+    localTransportTotal +
+    documentationTotal;
 
-  // Total calculations
+  const emergencyBuffer = baseTripCost * 0.1; // 10% buffer
   const totalCost = baseTripCost + emergencyBuffer;
 
-  // Per person analysis
-  const costPerPerson = totalCost / Math.max(totalPeople, 1);
-  const costPerDay = totalCost / Math.max(tripDuration, 1);
-  const costPerPersonPerDay = costPerPerson / Math.max(tripDuration, 1);
-
-  // Budget category
   const getBudgetCategory = (total) => {
-    if (total < 50000) return "Ultra Budget";
-    if (total < 150000) return "Budget Trip";
-    if (total < 300000) return "Mid-range Trip";
-    if (total < 600000) return "Premium Trip";
+    const perPersonCost = total / Math.max(totalPeople, 1);
+    if (perPersonCost < 10000) return "Ultra Budget";
+    if (perPersonCost < 30000) return "Budget Trip";
+    if (perPersonCost < 75000) return "Mid-range Trip";
+    if (perPersonCost < 150000) return "Premium Trip";
     return "Luxury Trip";
-  };
-
-  // Calculate individual savings based on actual category costs
-  const transportSavings =
-    calculateTransportSavings(
-      transportMode,
-      flightClass,
-      trainClass,
-      roadVehicleType
-    ) * transportationCost;
-
-  const accommodationSavings =
-    calculateAccommodationSavings(
-      accommodationType,
-      hotelLuxury,
-      numberOfRooms
-    ) * accommodationCost;
-
-  const mealSavings = calculateMealSavings(mealPreference) * mealCost;
-
-  // Now safely use them
-  const optimizations = {
-    transportSavings,
-    accommodationSavings,
-    mealSavings,
-    overallSavings: transportSavings + accommodationSavings + mealSavings,
   };
 
   return {
@@ -1468,583 +1136,167 @@ export const calculateVacationBreakdown = ({
       destination,
       tripDuration,
       transportMode,
+      accommodationType,
+      roadVehicleType,
       budgetCategory: getBudgetCategory(totalCost),
     },
-
     costs: {
       transportation: {
-        mode: transportMode,
+        total: transportationTotal,
         breakdown: transportationBreakdown,
-        total: transportationCost,
       },
       accommodation: {
+        total: accommodationTotal,
         type: accommodationType,
         breakdown: accommodationBreakdown,
-        total: accommodationCost,
       },
-      meals: {
-        preference: mealPreference,
-        breakdown: mealBreakdown,
-        total: mealCost,
-      },
-      activities: {
-        budget: activitiesBudget,
-        total: activitiesBudget,
-      },
-      localTransport: {
-        type: localTransportType,
-        breakdown: localTransportBreakdown,
-        total: localTransportCost,
-      },
+      meals: { total: mealsTotal, preference: "User Defined" },
+      activities: { total: activitiesBudget },
+      shopping: { total: shoppingBudget },
+      localTransport: { total: localTransportTotal, type: localTransportType },
       documentation: {
+        total: documentationTotal,
         breakdown: documentationBreakdown,
-        total: documentationCost,
-      },
-      shopping: {
-        budget: shoppingBudget,
-        total: miscellaneousCost,
       },
     },
-
     totals: {
-      baseTripCost: baseTripCost,
-      emergencyBuffer: emergencyBuffer,
-      totalCost: totalCost,
+      baseTripCost,
+      emergencyBuffer,
+      totalCost,
     },
-
     perPersonAnalysis: {
-      costPerPerson: costPerPerson,
-      costPerDay: costPerDay,
-      costPerPersonPerDay: costPerPersonPerDay,
+      costPerPerson: totalCost / Math.max(totalPeople, 1),
+      costPerDay: totalCost / Math.max(tripDuration, 1),
+      costPerPersonPerDay:
+        totalCost / (Math.max(totalPeople, 1) * Math.max(tripDuration, 1)),
     },
-
-    optimizations: optimizations,
+    // Optimizations are removed as they are no longer relevant
   };
 };
 
-// Helper functions
-const calculateTransportSavings = (
-  mode,
-  flightClass,
-  trainClass,
-  vehicleType
-) => {
-  switch (mode) {
-    case "Flight":
-      return flightClass === "First Class"
-        ? 0.3
-        : flightClass === "Business"
-        ? 0.2
-        : 0.1;
-    case "Train":
-      return trainClass === "1AC" ? 0.25 : trainClass === "2AC" ? 0.15 : 0.05;
-    case "Road":
-      return vehicleType === "Taxi/Cab"
-        ? 0.2
-        : vehicleType === "Rental Car"
-        ? 0.15
-        : 0.05;
-    default:
-      return 0;
-  }
-};
+// Wedding
+// calculation.js
 
-const calculateAccommodationSavings = (type, luxury, rooms) => {
-  const luxuryFactor =
-    {
-      "Ultra Luxury": 0.3,
-      Luxury: 0.2,
-      "Mid-range": 0.1,
-      Budget: 0.05,
-    }[luxury] || 0;
-  return luxuryFactor * rooms;
-};
-
-const calculateMealSavings = (preference) => {
-  return (
-    {
-      "Fine Dining": 0.3,
-      Mix: 0.2,
-      "Local Restaurants": 0.1,
-      "Street Food": 0.05,
-      "Hotel Included": 0,
-    }[preference] || 0
-  );
-};
-
-//Wedding Calculations
-// Wedding Calculations
-// Helper functions for formatting and calculations
 export const formatters = {
-  // Format number in Indian currency format (with commas)
   formatIndianCurrency: (amount) => {
-    if (!amount && amount !== 0) return "0";
+    if (amount == null || isNaN(amount)) return "0";
     return Math.round(amount).toLocaleString("en-IN");
   },
-
-  // Format number in short Indian currency format (L, Cr, K)
   formatShortIndianCurrency: (amount) => {
+    if (amount == null || isNaN(amount)) return "0";
     const num = Math.round(amount);
-    if (num >= 10000000) return `₹${(num / 10000000).toFixed(1)}Cr`;
-    if (num >= 100000) return `₹${(num / 100000).toFixed(1)}L`;
+    if (num >= 1e7) return `₹${(num / 1e7).toFixed(1)}Cr`;
+    if (num >= 1e5) return `₹${(num / 1e5).toFixed(1)}L`;
     if (num >= 1000) return `₹${(num / 1000).toFixed(1)}K`;
     return `₹${num}`;
-  },
-
-  // Format percentage with 1 decimal place
-  formatPercentage: (percentage) => {
-    return `${Math.round(percentage * 10) / 10}%`;
-  },
-
-  // Parse formatted Indian number back to integer
-  parseFormattedNumber: (str) => {
-    if (!str) return 0;
-    return parseInt(str.toString().replace(/[^\d]/g, "")) || 0;
-  },
-};
-
-// Budget analysis helpers
-export const budgetAnalysis = {
-  // Check if a category allocation is within recommended range
-  getCategoryStatus: (currentAmount, totalBudget, minPercent, maxPercent) => {
-    const percentage =
-      totalBudget > 0 ? (currentAmount / totalBudget) * 100 : 0;
-    if (percentage < minPercent) return "low";
-    if (percentage > maxPercent) return "high";
-    return "optimal";
-  },
-
-  // Get budget recommendations for Indian weddings
-  getRecommendations: (totalBudget) => ({
-    food: { min: 20, max: 30, recommended: 25 },
-    venue: { min: 15, max: 25, recommended: 20 },
-    decoration: { min: 8, max: 15, recommended: 12 },
-    photography: { min: 5, max: 12, recommended: 8 },
-    clothing: { min: 7, max: 15, recommended: 10 },
-    makeup: { min: 3, max: 8, recommended: 5 },
-    entertainment: { min: 3, max: 10, recommended: 6 },
-    accommodation: { min: 5, max: 15, recommended: 10 },
-    invitations: { min: 2, max: 8, recommended: 4 },
-  }),
-
-  // Generate optimization suggestions
-  generateOptimizations: (expenses, totalBudget, recommendations) => {
-    const suggestions = [];
-    let totalPotentialSavings = 0;
-
-    Object.entries(expenses).forEach(([category, data]) => {
-      if (data.percentage > recommendations[category]?.max) {
-        const recommendedAmount =
-          totalBudget * (recommendations[category].recommended / 100);
-        const savings = data.amount - recommendedAmount;
-
-        const suggestionMap = {
-          food: "Consider buffet style or reduce menu variety",
-          venue: "Choose off-peak dates or simpler venues",
-          decoration: "Use seasonal flowers or DIY elements",
-          photography: "Book for main ceremonies only",
-          clothing: "Shop during sales or consider rentals",
-          makeup: "Book local artists or simplified packages",
-          entertainment: "Use DJ instead of live band",
-          accommodation: "Negotiate group rates with hotels",
-          invitations: "Consider digital invites or simpler designs",
-        };
-
-        suggestions.push({
-          category,
-          suggestion: suggestionMap[category] || `Reduce ${category} expenses`,
-          currentAmount: data.amount,
-          recommendedAmount,
-          savings: Math.max(0, savings),
-        });
-
-        totalPotentialSavings += Math.max(0, savings);
-      }
-    });
-
-    return {
-      suggestions: suggestions.sort((a, b) => b.savings - a.savings),
-      totalPotentialSavings,
-    };
   },
 };
 
 // Main calculation function
 export const calculateWeddingBreakdown = ({
-  totalBudget,
-  guestCount,
-  foodAmount,
-  decorationAmount,
-  photographyAmount,
-  venueAmount,
-  clothingAmount,
-  makeupAmount,
-  entertainmentAmount,
-  accommodationAmount,
-  invitationAmount,
-  weddingPlanner,
   events = [],
+  sharedExpenses = {},
+  weddingDays = 1,
 }) => {
-  // Input validation
-  const validBudget = Math.max(0, totalBudget || 0);
-  const validGuestCount = Math.max(0, guestCount || 0);
+  // 1. Calculate cost for each event based on its unique structure
+  const eventsBreakdown = events.map((event) => {
+    let foodCost = 0;
+    if (event.foodType === "hotel_banquet" || event.foodType === "catered") {
+      foodCost = (event.foodCostPerPlate || 0) * (event.totalGuests || 0);
+    } else if (event.foodType === "home_cooked") {
+      foodCost = event.homeCookingCost || 0;
+    }
 
-  // Calculate wedding planner cost (10-15% of total budget if hired)
-  const weddingPlannerCost = weddingPlanner === "Yes" ? validBudget * 0.12 : 0;
+    const venueCost = event.needsVenue === "Yes" ? event.venueCost || 0 : 0;
 
-  // Main wedding expenses with calculations
-  const mainExpenses = {
-    food: {
-      amount: foodAmount || 0,
-      percentage: validBudget > 0 ? ((foodAmount || 0) / validBudget) * 100 : 0,
-      perGuest: validGuestCount > 0 ? (foodAmount || 0) / validGuestCount : 0,
-      status: budgetAnalysis.getCategoryStatus(
-        foodAmount || 0,
-        validBudget,
-        20,
-        30
-      ),
-    },
-    venue: {
-      amount: venueAmount || 0,
-      percentage:
-        validBudget > 0 ? ((venueAmount || 0) / validBudget) * 100 : 0,
-      status: budgetAnalysis.getCategoryStatus(
-        venueAmount || 0,
-        validBudget,
-        15,
-        25
-      ),
-    },
-    decoration: {
-      amount: decorationAmount || 0,
-      percentage:
-        validBudget > 0 ? ((decorationAmount || 0) / validBudget) * 100 : 0,
-      status: budgetAnalysis.getCategoryStatus(
-        decorationAmount || 0,
-        validBudget,
-        8,
-        15
-      ),
-    },
-    photography: {
-      amount: photographyAmount || 0,
-      percentage:
-        validBudget > 0 ? ((photographyAmount || 0) / validBudget) * 100 : 0,
-      status: budgetAnalysis.getCategoryStatus(
-        photographyAmount || 0,
-        validBudget,
-        5,
-        12
-      ),
-    },
-    clothing: {
-      amount: clothingAmount || 0,
-      percentage:
-        validBudget > 0 ? ((clothingAmount || 0) / validBudget) * 100 : 0,
-      status: budgetAnalysis.getCategoryStatus(
-        clothingAmount || 0,
-        validBudget,
-        7,
-        15
-      ),
-    },
-    makeup: {
-      amount: makeupAmount || 0,
-      percentage:
-        validBudget > 0 ? ((makeupAmount || 0) / validBudget) * 100 : 0,
-      status: budgetAnalysis.getCategoryStatus(
-        makeupAmount || 0,
-        validBudget,
-        3,
-        8
-      ),
-    },
-    entertainment: {
-      amount: entertainmentAmount || 0,
-      percentage:
-        validBudget > 0 ? ((entertainmentAmount || 0) / validBudget) * 100 : 0,
-      status: budgetAnalysis.getCategoryStatus(
-        entertainmentAmount || 0,
-        validBudget,
-        3,
-        10
-      ),
-    },
-    accommodation: {
-      amount: accommodationAmount || 0,
-      percentage:
-        validBudget > 0 ? ((accommodationAmount || 0) / validBudget) * 100 : 0,
-      status: budgetAnalysis.getCategoryStatus(
-        accommodationAmount || 0,
-        validBudget,
-        5,
-        15
-      ),
-    },
-    invitations: {
-      amount: invitationAmount || 0,
-      percentage:
-        validBudget > 0 ? ((invitationAmount || 0) / validBudget) * 100 : 0,
-      status: budgetAnalysis.getCategoryStatus(
-        invitationAmount || 0,
-        validBudget,
-        2,
-        8
-      ),
-    },
-  };
+    const accommodationCost =
+      event.needsVenue === "Yes" && event.stayingOver === "Yes"
+        ? (event.roomsNeeded || 0) * (event.roomCostPerDay || 0) * weddingDays
+        : 0;
 
-  // Calculate total main expenses
-  const totalMainExpenses = Object.values(mainExpenses).reduce(
-    (sum, expense) => sum + expense.amount,
+    const eventTotal =
+      venueCost +
+      foodCost +
+      accommodationCost +
+      (event.decorationCost || 0) +
+      (event.photographyCost || 0) +
+      (event.makeupCost || 0) +
+      (event.entertainmentCost || 0) +
+      (event.otherEventCost || 0);
+
+    return {
+      id: event.id,
+      name: event.name,
+      totalGuests: event.totalGuests,
+      totalCost: eventTotal,
+      breakdown: {
+        Venue: venueCost,
+        Food: foodCost,
+        Accommodation: accommodationCost,
+        Decoration: event.decorationCost || 0,
+        Photography: event.photographyCost || 0,
+        Makeup: event.makeupCost || 0,
+        Entertainment: event.entertainmentCost || 0,
+        Other: event.otherEventCost || 0,
+      },
+    };
+  });
+
+  const totalEventsCost = eventsBreakdown.reduce(
+    (sum, event) => sum + event.totalCost,
     0
   );
 
-  // Miscellaneous expenses (additional costs)
-  const miscellaneousExpenses = {
-    weddingPlanner: {
-      amount: weddingPlannerCost,
-      percentage:
-        validBudget > 0 ? (weddingPlannerCost / validBudget) * 100 : 0,
-      description: "Professional wedding planning services",
+  // 2. Aggregate shared expenses
+  const sharedExpensesList = [
+    {
+      name: "Bride's Attire & Jewelry",
+      amount: sharedExpenses.brideAttireAmount || 0,
     },
-    transportation: {
-      amount: validGuestCount * 150, // ₹150 per guest for transportation
-      percentage:
-        validBudget > 0 ? ((validGuestCount * 150) / validBudget) * 100 : 0,
-      description: "Guest transportation and logistics",
+    {
+      name: "Groom's Attire & Accessories",
+      amount: sharedExpenses.groomAttireAmount || 0,
     },
-    emergencyBuffer: {
-      amount: validBudget * 0.08, // 8% emergency buffer
-      percentage: 8,
-      description: "Emergency fund for unexpected expenses",
+    {
+      name: "Invitations & Gifts",
+      amount: sharedExpenses.invitationAmount || 0,
     },
-    religiousCeremonies: {
-      amount: validBudget * 0.04, // 4% for religious ceremonies
-      percentage: 4,
-      description: "Puja items, pandit fees, ceremonial expenses",
-    },
-    miscellaneous: {
-      amount: validBudget * 0.03, // 3% for other small expenses
-      percentage: 3,
-      description: "Other miscellaneous wedding expenses",
-    },
-  };
+    { name: "Miscellaneous & Buffer", amount: sharedExpenses.miscAmount || 0 },
+  ];
 
-  const totalMiscellaneous = Object.values(miscellaneousExpenses).reduce(
-    (sum, expense) => sum + expense.amount,
+  const totalSharedCost = sharedExpensesList.reduce(
+    (sum, item) => sum + item.amount,
     0
   );
+  const grandTotal = totalEventsCost + totalSharedCost;
 
-  // Calculate event totals with decorations
-  const eventsWithCosts = events.map((event) => ({
-    ...event,
-    calculatedCosts: {
-      food: event.totalGuests * event.foodCostPerPlate,
-      venue: event.venueAmount,
-      decoration: event.decorationAmount || 0,
-      accommodation: event.stayingGuests * event.accommodationCostPerGuest,
-      total:
-        event.totalGuests * event.foodCostPerPlate +
-        event.venueAmount +
-        (event.decorationAmount || 0) +
-        event.stayingGuests * event.accommodationCostPerGuest,
-      perGuest:
-        event.totalGuests > 0
-          ? (event.totalGuests * event.foodCostPerPlate +
-              event.venueAmount +
-              (event.decorationAmount || 0) +
-              event.stayingGuests * event.accommodationCostPerGuest) /
-            event.totalGuests
-          : 0,
-    },
-  }));
-
-  const eventsTotal = eventsWithCosts.reduce(
-    (sum, event) => sum + event.calculatedCosts.total,
+  const maxGuestCount = events.reduce(
+    (max, event) => Math.max(max, event.totalGuests),
     0
   );
-
-  const grandTotal = totalMainExpenses + totalMiscellaneous + eventsTotal;
-
-  // Budget status analysis
-  const budgetStatus = {
-    totalAllocated: totalMainExpenses,
-    totalMiscellaneous,
-    eventsTotal,
-    grandTotal,
-    isOverBudget: grandTotal > validBudget,
-    difference: grandTotal - validBudget,
-    remainingBudget: validBudget - (totalMainExpenses + eventsTotal),
-    utilizationPercentage:
-      validBudget > 0
-        ? ((totalMainExpenses + eventsTotal) / validBudget) * 100
-        : 0,
-    effectiveUtilization:
-      validBudget > 0 ? (grandTotal / validBudget) * 100 : 0,
-  };
-
-  // Per guest analysis
-  const perGuestAnalysis = {
-    totalCostPerGuest: validGuestCount > 0 ? grandTotal / validGuestCount : 0,
-    budgetPerGuest: validGuestCount > 0 ? validBudget / validGuestCount : 0,
-    foodCostPerGuest:
-      validGuestCount > 0 ? (foodAmount || 0) / validGuestCount : 0,
-    mainExpensesPerGuest:
-      validGuestCount > 0 ? totalMainExpenses / validGuestCount : 0,
-  };
-
-  // Category breakdown sorted by amount
-  const categoryBreakdown = Object.entries(mainExpenses)
-    .map(([category, data]) => ({
-      category: category.charAt(0).toUpperCase() + category.slice(1),
-      amount: data.amount,
-      percentage: data.percentage,
-      status: data.status,
-      formattedAmount: formatters.formatIndianCurrency(data.amount),
-      formattedPercentage: formatters.formatPercentage(data.percentage),
-    }))
-    .sort((a, b) => b.amount - a.amount)
-    .filter((item) => item.amount > 0); // Only show categories with expenses
-
-  // Get recommendations and optimizations
-  const recommendations = budgetAnalysis.getRecommendations(validBudget);
-  const optimizations = budgetAnalysis.generateOptimizations(
-    mainExpenses,
-    validBudget,
-    recommendations
-  );
-
-  // Summary insights
-  const insights = {
-    topExpenseCategory: categoryBreakdown[0]?.category || "None",
-    topExpenseAmount: categoryBreakdown[0]?.amount || 0,
-    categoriesOverBudget: categoryBreakdown.filter(
-      (cat) => cat.status === "high"
-    ).length,
-    categoriesUnderBudget: categoryBreakdown.filter(
-      (cat) => cat.status === "low"
-    ).length,
-    averagePercentagePerCategory:
-      categoryBreakdown.length > 0
-        ? categoryBreakdown.reduce((sum, cat) => sum + cat.percentage, 0) /
-          categoryBreakdown.length
-        : 0,
-  };
-
-  // Formatted totals for display
-  const formattedTotals = {
-    totalBudget: formatters.formatIndianCurrency(validBudget),
-    totalMainExpenses: formatters.formatIndianCurrency(totalMainExpenses),
-    totalMiscellaneous: formatters.formatIndianCurrency(totalMiscellaneous),
-    eventsTotal: formatters.formatIndianCurrency(eventsTotal),
-    grandTotal: formatters.formatIndianCurrency(grandTotal),
-    difference: formatters.formatIndianCurrency(
-      Math.abs(budgetStatus.difference)
-    ),
-    remainingBudget: formatters.formatIndianCurrency(
-      budgetStatus.remainingBudget
-    ),
-    shortTotalBudget: formatters.formatShortIndianCurrency(validBudget),
-    shortGrandTotal: formatters.formatShortIndianCurrency(grandTotal),
-  };
 
   return {
-    // Input data
     weddingDetails: {
-      totalBudget: validBudget,
-      guestCount: validGuestCount,
-      hasWeddingPlanner: weddingPlanner === "Yes",
+      guestCount: maxGuestCount,
+      eventCount: events.length,
+      weddingDays: weddingDays,
     },
-
-    // Expense breakdowns
-    mainExpenses,
-    miscellaneousExpenses,
-    events: eventsWithCosts,
-
-    // Analysis
-    budgetStatus,
-    perGuestAnalysis,
-    categoryBreakdown,
-    insights,
-
-    // Recommendations
-    optimizations,
-
-    // Formatted data for display
-    formattedTotals,
-
-    // Status flags
-    isCalculated: true,
-    hasData: totalMainExpenses > 0 || validBudget > 0,
-    timestamp: new Date().toISOString(),
+    costs: {
+      grandTotal,
+      totalEventsCost,
+      totalSharedCost,
+      eventsBreakdown,
+      sharedExpensesBreakdown: sharedExpensesList.filter(
+        (item) => item.amount > 0
+      ),
+    },
+    formattedTotals: {
+      grandTotal: formatters.formatIndianCurrency(grandTotal),
+      totalEventsCost: formatters.formatIndianCurrency(totalEventsCost),
+      totalSharedCost: formatters.formatIndianCurrency(totalSharedCost),
+      perGuestCost: formatters.formatIndianCurrency(
+        maxGuestCount > 0 ? grandTotal / maxGuestCount : 0
+      ),
+    },
   };
-};
-
-// Additional utility functions for the component
-export const calculatorUtils = {
-  // Validate input ranges
-  validateInput: (value, min = 0, max = Infinity) => {
-    const numValue = parseInt(value) || 0;
-    return Math.min(Math.max(numValue, min), max);
-  },
-
-  // Calculate event totals with decorations
-  calculateEventTotals: (events) => {
-    return events.reduce(
-      (totals, event) => {
-        const foodCost = event.totalGuests * event.foodCostPerPlate;
-        const accommodationCost =
-          event.stayingGuests * event.accommodationCostPerGuest;
-        const decorationCost = event.decorationAmount || 0;
-
-        return {
-          totalFoodAmount: totals.totalFoodAmount + foodCost,
-          totalVenueAmount: totals.totalVenueAmount + event.venueAmount,
-          totalDecorationAmount: totals.totalDecorationAmount + decorationCost,
-          totalAccommodationAmount:
-            totals.totalAccommodationAmount + accommodationCost,
-          maxGuestCount: Math.max(totals.maxGuestCount, event.totalGuests),
-          totalEvents: totals.totalEvents + 1,
-        };
-      },
-      {
-        totalFoodAmount: 0,
-        totalVenueAmount: 0,
-        totalDecorationAmount: 0,
-        totalAccommodationAmount: 0,
-        maxGuestCount: 0,
-        totalEvents: 0,
-      }
-    );
-  },
-
-  // Get budget status color
-  getBudgetStatusColor: (status) => {
-    switch (status) {
-      case "optimal":
-        return "#10B981"; // green
-      case "high":
-        return "#EF4444"; // red
-      case "low":
-        return "#F59E0B"; // amber
-      default:
-        return "#6B7280"; // gray
-    }
-  },
-
-  // Get status icon
-  getStatusIcon: (status) => {
-    switch (status) {
-      case "optimal":
-        return "✓";
-      case "high":
-        return "⚠";
-      case "low":
-        return "↗";
-      default:
-        return "—";
-    }
-  },
 };

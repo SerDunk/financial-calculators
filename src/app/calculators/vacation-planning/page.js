@@ -1,3 +1,4 @@
+// app/vacation-planner/page.jsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -17,136 +18,114 @@ import { Info } from "lucide-react";
 import Heading from "@/components/Heading";
 import SliderInput from "@/components/SliderInput";
 import { calculateVacationBreakdown } from "@/utils/calculation";
-import VacationResult from "@/components/VacationPlannerResult";
+import VacationPlannerResult from "@/components/VacationPlannerResult";
 import VacationAssumptions from "@/components/VacationAssumptions";
 
 const VacationPlanner = () => {
-  // Basic trip details
+  // Basic Info
   const [numAdults, setNumAdults] = useState(2);
   const [numChildren, setNumChildren] = useState(0);
   const [destination, setDestination] = useState("Domestic");
   const [tripDuration, setTripDuration] = useState(7);
-  const [seasonalTiming, setSeasonalTiming] = useState("Off-Peak");
-  const [cityTier, setCityTier] = useState("Tier2");
 
-  // Transportation details
+  // Transportation
   const [transportMode, setTransportMode] = useState("Flight");
-  const [flightClass, setFlightClass] = useState("Economy");
-  const [trainClass, setTrainClass] = useState("3AC");
+  // Flight
+  const [flightCost, setFlightCost] = useState(30000);
+  const [airportTransferCost, setAirportTransferCost] = useState(2000);
+  // Train
+  const [trainTicketCost, setTrainTicketCost] = useState(10000);
+  const [stationTransferCost, setStationTransferCost] = useState(1000);
+  // Road
   const [roadVehicleType, setRoadVehicleType] = useState("Own Car");
-  const [fuelType, setFuelType] = useState("Petrol");
   const [distance, setDistance] = useState(500);
+  const [carMileage, setCarMileage] = useState(15);
+  const [fuelPrice, setFuelPrice] = useState(100);
+  const [tollAndTaxes, setTollAndTaxes] = useState(1000);
+  const [overnightStayCost, setOvernightStayCost] = useState(0);
+  const [rentalCostPerDay, setRentalCostPerDay] = useState(2500);
+  const [fuelCostEstimate, setFuelCostEstimate] = useState(5000);
+  const [securityDeposit, setSecurityDeposit] = useState(5000);
+  const [totalCabFare, setTotalCabFare] = useState(12000);
+  const [totalBusFare, setTotalBusFare] = useState(5000);
 
-  // Accommodation details
+  // Accommodation
   const [accommodationType, setAccommodationType] = useState("Hotel");
-  const [hotelLuxury, setHotelLuxury] = useState("Mid-range");
+  const [costPerNight, setCostPerNight] = useState(4000);
   const [numberOfRooms, setNumberOfRooms] = useState(1);
 
-  // Meal and activity preferences
-  const [mealPreference, setMealPreference] = useState("Mix");
-  const [activitiesBudget, setActivitiesBudget] = useState(50000);
-  const [shoppingBudget, setShoppingBudget] = useState(25000);
+  // Meals
+  const [mealCostPerDay, setMealCostPerDay] = useState(2000);
 
-  // Transportation and documentation
+  // Activities & Shopping
+  const [activitiesBudget, setActivitiesBudget] = useState(10000);
+  const [shoppingBudget, setShoppingBudget] = useState(5000);
+
+  // Local Transport
   const [localTransportType, setLocalTransportType] =
-    useState("Public Transport");
-  const [travelInsurance, setTravelInsurance] = useState(false);
-  const [visaRequired, setVisaRequired] = useState(false);
+    useState("Taxi/Ride-sharing");
+  const [publicTransportCostPerDay, setPublicTransportCostPerDay] =
+    useState(500);
+  const [taxiCostPerDay, setTaxiCostPerDay] = useState(1000);
+  const [localRentalCostPerDay, setLocalRentalCostPerDay] = useState(1500);
+  const [localRentalFuelCost, setLocalRentalFuelCost] = useState(2000);
 
-  // Derived amounts
-  const [totalPeople, setTotalPeople] = useState(2);
+  // Documentation & Insurance
+  const [travelInsurance, setTravelInsurance] = useState("No");
+  const [travelInsuranceCost, setTravelInsuranceCost] = useState(3000);
+  const [visaRequired, setVisaRequired] = useState("No");
+  const [visaCost, setVisaCost] = useState(16000);
 
   // Results
   const [result, setResult] = useState(null);
-  const [isCalculated, setIsCalculated] = useState(false);
-  const [calculationError, setCalculationError] = useState(null);
 
-  // Calculate function
   const calculate = () => {
-    try {
-      setCalculationError(null);
-      const calculationResult = calculateVacationBreakdown({
-        numAdults,
-        numChildren,
-        destination,
-        tripDuration,
-        transportMode,
-        flightClass,
-        trainClass,
-        roadVehicleType,
-        fuelType,
-        distance,
-        hotelLuxury,
-        mealPreference,
-        activitiesBudget,
-        shoppingBudget,
-        localTransportType,
-        travelInsurance,
-        visaRequired,
-        seasonalTiming,
-        cityTier,
-        accommodationType,
-        numberOfRooms,
-      });
-
-      // Validate that the result has the expected structure
-      if (
-        calculationResult &&
-        calculationResult.costs &&
-        calculationResult.totals &&
-        calculationResult.perPersonAnalysis
-      ) {
-        setResult(calculationResult);
-        setIsCalculated(true);
-      } else {
-        throw new Error("Invalid calculation result structure");
-      }
-    } catch (error) {
-      console.error("Calculation error:", error);
-      setCalculationError(error.message);
-      setResult(null);
-      setIsCalculated(false);
-    }
+    const calculationResult = calculateVacationBreakdown({
+      numAdults,
+      numChildren,
+      destination,
+      tripDuration,
+      transportMode,
+      flightCost,
+      airportTransferCost,
+      trainTicketCost,
+      stationTransferCost,
+      roadVehicleType,
+      distance,
+      carMileage,
+      fuelPrice,
+      tollAndTaxes,
+      overnightStayCost,
+      rentalCostPerDay,
+      fuelCostEstimate,
+      securityDeposit,
+      totalCabFare,
+      totalBusFare,
+      accommodationType,
+      costPerNight,
+      numberOfRooms,
+      mealCostPerDay,
+      activitiesBudget,
+      shoppingBudget,
+      localTransportType,
+      publicTransportCostPerDay,
+      taxiCostPerDay,
+      localRentalCostPerDay,
+      localRentalFuelCost,
+      travelInsurance: travelInsurance === "Yes",
+      travelInsuranceCost,
+      visaRequired: visaRequired === "Yes",
+      visaCost,
+    });
+    setResult(calculationResult);
   };
 
-  // Calculate total people whenever adults/children change
-  useEffect(() => {
-    const total = numAdults + numChildren;
-    setTotalPeople(total);
-  }, [numAdults, numChildren]);
-
+  // Run calculation on initial load to show a default estimate
   useEffect(() => {
     calculate();
   }, []);
-  // Auto-calculate when significant parameters change
-  useEffect(() => {
-    if (isCalculated) {
-      calculate();
-    }
-  }, [
-    numAdults,
-    numChildren,
-    destination,
-    tripDuration,
-    transportMode,
-    flightClass,
-    trainClass,
-    roadVehicleType,
-    fuelType,
-    distance,
-    hotelLuxury,
-    accommodationType,
-    numberOfRooms,
-    mealPreference,
-    activitiesBudget,
-    shoppingBudget,
-    localTransportType,
-    travelInsurance,
-    visaRequired,
-    seasonalTiming,
-    cityTier,
-  ]);
 
+  // Manual calculation handler for the button
   const handleCalculate = () => {
     calculate();
   };
@@ -156,11 +135,13 @@ const VacationPlanner = () => {
       <div className="max-w-xl mx-auto">
         <Heading
           header="Vacation Planner"
-          desc="Plan and estimate your perfect family vacation budget"
+          desc="Plan and estimate your perfect family vacation budget with your own inputs."
         />
 
         <div className="rounded-2xl p-6 relative bg-white">
-          {/* Number of Adults */}
+          <h3 className="text-lg font-semibold text-[#2C178C] mb-4 pb-2">
+            Basic Information
+          </h3>
           <SliderInput
             label="Number of Adults"
             value={numAdults}
@@ -168,38 +149,22 @@ const VacationPlanner = () => {
             min={1}
             max={10}
             step={1}
-            tooltip="Adults traveling (12+ years)"
             showCurrency={false}
           />
-
-          {/* Number of Children */}
           <SliderInput
             label="Number of Children"
             value={numChildren}
             onChange={setNumChildren}
             min={0}
-            max={8}
+            max={10}
             step={1}
-            tooltip="Children traveling (2-11 years)"
             showCurrency={false}
           />
-
-          {/* Destination Type */}
           <div className="mb-3">
             <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
-              <div className="flex items-center gap-1.5">
-                <label>Destination</label>
-                <Popover>
-                  <PopoverTrigger>
-                    <Info width={15} />
-                  </PopoverTrigger>
-                  <PopoverContent className="text-xs border-[#666666]">
-                    Domestic or International travel
-                  </PopoverContent>
-                </Popover>
-              </div>
+              <label>Destination</label>
               <Select value={destination} onValueChange={setDestination}>
-                <SelectTrigger className="w-32 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
+                <SelectTrigger className="w-30 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -209,89 +174,24 @@ const VacationPlanner = () => {
               </Select>
             </div>
           </div>
-
-          {/* Trip Duration */}
           <SliderInput
             label="Trip Duration (days)"
             value={tripDuration}
             onChange={setTripDuration}
             min={1}
-            max={30}
+            max={60}
             step={1}
-            tooltip="Number of days for the vacation"
             showCurrency={false}
           />
 
-          {/* Seasonal Timing */}
+          <h3 className="text-lg font-semibold text-[#2C178C] my-4 pb-2">
+            Transportation to Destination
+          </h3>
           <div className="mb-3">
             <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
-              <div className="flex items-center gap-1.5">
-                <label>Seasonal Timing</label>
-                <Popover>
-                  <PopoverTrigger>
-                    <Info width={15} />
-                  </PopoverTrigger>
-                  <PopoverContent className="text-xs border-[#666666]">
-                    Travel season affects pricing
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <Select value={seasonalTiming} onValueChange={setSeasonalTiming}>
-                <SelectTrigger className="w-32 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Off-Peak">Off-Peak</SelectItem>
-                  <SelectItem value="Mid">Mid Season</SelectItem>
-                  <SelectItem value="Peak">Peak Season</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* City Tier */}
-          <div className="mb-3">
-            <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
-              <div className="flex items-center gap-1.5">
-                <label>City Tier</label>
-                <Popover>
-                  <PopoverTrigger>
-                    <Info width={15} />
-                  </PopoverTrigger>
-                  <PopoverContent className="text-xs border-[#666666]">
-                    City tier affects accommodation and meal prices
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <Select value={cityTier} onValueChange={setCityTier}>
-                <SelectTrigger className="w-32 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Tier1">Tier 1</SelectItem>
-                  <SelectItem value="Tier2">Tier 2</SelectItem>
-                  <SelectItem value="Tier3">Tier 3</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Transportation Mode */}
-          <div className="mb-3">
-            <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
-              <div className="flex items-center gap-1.5">
-                <label>Transportation</label>
-                <Popover>
-                  <PopoverTrigger>
-                    <Info width={15} />
-                  </PopoverTrigger>
-                  <PopoverContent className="text-xs border-[#666666]">
-                    Mode of transportation to destination
-                  </PopoverContent>
-                </Popover>
-              </div>
+              <label>Mode of Transport</label>
               <Select value={transportMode} onValueChange={setTransportMode}>
-                <SelectTrigger className="w-32 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
+                <SelectTrigger className="w-30 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -303,90 +203,60 @@ const VacationPlanner = () => {
             </div>
           </div>
 
-          {/* Flight Class - Show only if Flight is selected */}
           {transportMode === "Flight" && (
-            <div className="mb-3">
-              <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
-                <div className="flex items-center gap-1.5">
-                  <label>Flight Class</label>
-                  <Popover>
-                    <PopoverTrigger>
-                      <Info width={15} />
-                    </PopoverTrigger>
-                    <PopoverContent className="text-xs border-[#666666]">
-                      Flight class affects ticket pricing
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <Select value={flightClass} onValueChange={setFlightClass}>
-                  <SelectTrigger className="w-32 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Economy">Economy</SelectItem>
-                    <SelectItem value="Premium Economy">
-                      Premium Economy
-                    </SelectItem>
-                    <SelectItem value="Business">Business</SelectItem>
-                    <SelectItem value="First Class">First Class</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+              <SliderInput
+                label="Round-trip Cost"
+                value={flightCost}
+                onChange={setFlightCost}
+                min={1000}
+                max={1000000}
+                step={1000}
+                tooltip="Enter the total cost for all travelers, for the round trip."
+              />
+              <SliderInput
+                label="Airport Transfer Cost"
+                value={airportTransferCost}
+                onChange={setAirportTransferCost}
+                min={0}
+                max={20000}
+                step={500}
+                tooltip="Cost for taxis/cabs to and from the airport."
+              />
             </div>
           )}
-
-          {/* Train Class - Show only if Train is selected */}
           {transportMode === "Train" && (
-            <div className="mb-3">
-              <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
-                <div className="flex items-center gap-1.5">
-                  <label>Train Class</label>
-                  <Popover>
-                    <PopoverTrigger>
-                      <Info width={15} />
-                    </PopoverTrigger>
-                    <PopoverContent className="text-xs border-[#666666]">
-                      Train class affects ticket pricing
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <Select value={trainClass} onValueChange={setTrainClass}>
-                  <SelectTrigger className="w-32 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Sleeper">Sleeper</SelectItem>
-                    <SelectItem value="3AC">3AC</SelectItem>
-                    <SelectItem value="2AC">2AC</SelectItem>
-                    <SelectItem value="1AC">1AC</SelectItem>
-                    <SelectItem value="Vande Bharat">Vande Bharat</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+              <SliderInput
+                label="Total Train Ticket Cost (Round-trip)"
+                value={trainTicketCost}
+                onChange={setTrainTicketCost}
+                min={500}
+                max={200000}
+                step={500}
+                tooltip="Enter the total ticket cost for all travelers for the round trip."
+              />
+              <SliderInput
+                label="Station Transfer Cost"
+                value={stationTransferCost}
+                onChange={setStationTransferCost}
+                min={0}
+                max={10000}
+                step={200}
+                tooltip="Cost for auto/taxi to and from the railway station."
+              />
             </div>
           )}
-
-          {/* Road Vehicle Type - Show only if Road is selected */}
           {transportMode === "Road" && (
-            <>
+            <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
               <div className="mb-3">
                 <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
-                  <div className="flex items-center gap-1.5">
-                    <label>Vehicle Type</label>
-                    <Popover>
-                      <PopoverTrigger>
-                        <Info width={15} />
-                      </PopoverTrigger>
-                      <PopoverContent className="text-xs border-[#666666]">
-                        Type of road vehicle
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                  <label>Vehicle Type</label>
                   <Select
                     value={roadVehicleType}
                     onValueChange={setRoadVehicleType}
                   >
-                    <SelectTrigger className="w-32 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
+                    <SelectTrigger className="w-40 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -399,71 +269,117 @@ const VacationPlanner = () => {
                 </div>
               </div>
 
-              {/* Fuel Type - Show only for car/taxi */}
-              {(roadVehicleType === "Own Car" ||
-                roadVehicleType === "Rental Car" ||
-                roadVehicleType === "Taxi/Cab") && (
-                <div className="mb-3">
-                  <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
-                    <div className="flex items-center gap-1.5">
-                      <label>Fuel Type</label>
-                      <Popover>
-                        <PopoverTrigger>
-                          <Info width={15} />
-                        </PopoverTrigger>
-                        <PopoverContent className="text-xs border-[#666666]">
-                          Fuel type affects running costs
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                    <Select value={fuelType} onValueChange={setFuelType}>
-                      <SelectTrigger className="w-32 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Petrol">Petrol</SelectItem>
-                        <SelectItem value="Diesel">Diesel</SelectItem>
-                        <SelectItem value="CNG">CNG</SelectItem>
-                        <SelectItem value="Electric">Electric</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+              {roadVehicleType === "Own Car" && (
+                <>
+                  <SliderInput
+                    label="One-way Distance (km)"
+                    value={distance}
+                    onChange={setDistance}
+                    min={50}
+                    max={5000}
+                    step={50}
+                    showCurrency={false}
+                  />
+                  <SliderInput
+                    label="Car Mileage (km/l)"
+                    value={carMileage}
+                    onChange={setCarMileage}
+                    min={5}
+                    max={30}
+                    step={1}
+                    showCurrency={false}
+                  />
+                  <SliderInput
+                    label="Fuel Price (₹/litre)"
+                    value={fuelPrice}
+                    onChange={setFuelPrice}
+                    min={80}
+                    max={150}
+                    step={1}
+                  />
+                  <SliderInput
+                    label="Total Toll & Other Charges"
+                    value={tollAndTaxes}
+                    onChange={setTollAndTaxes}
+                    min={0}
+                    max={20000}
+                    step={100}
+                    tooltip="Estimated round-trip cost for tolls, permits, etc."
+                  />
+                  <SliderInput
+                    label="Overnight Stay Cost (En-route)"
+                    value={overnightStayCost}
+                    onChange={setOvernightStayCost}
+                    min={0}
+                    max={50000}
+                    step={1000}
+                    tooltip="Cost for any hotel stays during the journey itself."
+                  />
+                </>
               )}
-
-              {/* Distance - Show only for road travel */}
-              <SliderInput
-                label="Distance (km)"
-                value={distance}
-                onChange={setDistance}
-                min={50}
-                max={2000}
-                step={50}
-                tooltip="Distance to destination"
-                showCurrency={false}
-              />
-            </>
+              {roadVehicleType === "Rental Car" && (
+                <>
+                  <SliderInput
+                    label="Rental Cost per Day"
+                    value={rentalCostPerDay}
+                    onChange={setRentalCostPerDay}
+                    min={1000}
+                    max={10000}
+                    step={250}
+                  />
+                  <SliderInput
+                    label="Total Fuel Cost Estimate"
+                    value={fuelCostEstimate}
+                    onChange={setFuelCostEstimate}
+                    min={500}
+                    max={50000}
+                    step={500}
+                  />
+                  <SliderInput
+                    label="Security Deposit (Refundable)"
+                    value={securityDeposit}
+                    onChange={setSecurityDeposit}
+                    min={0}
+                    max={50000}
+                    step={1000}
+                    tooltip="This is refundable and not added to the total trip cost."
+                  />
+                </>
+              )}
+              {roadVehicleType === "Taxi/Cab" && (
+                <SliderInput
+                  label="Total Cab Fare (Round-trip)"
+                  value={totalCabFare}
+                  onChange={setTotalCabFare}
+                  min={1000}
+                  max={200000}
+                  step={1000}
+                />
+              )}
+              {roadVehicleType === "Bus" && (
+                <SliderInput
+                  label="Total Bus Fare (Round-trip)"
+                  value={totalBusFare}
+                  onChange={setTotalBusFare}
+                  min={500}
+                  max={100000}
+                  step={500}
+                />
+              )}
+            </div>
           )}
 
-          {/* Accommodation Type */}
+          <h3 className="text-lg font-semibold text-[#2C178C] my-4 pb-2">
+            Accommodation
+          </h3>
           <div className="mb-3">
             <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
-              <div className="flex items-center gap-1.5">
-                <label>Accommodation</label>
-                <Popover>
-                  <PopoverTrigger>
-                    <Info width={15} />
-                  </PopoverTrigger>
-                  <PopoverContent className="text-xs border-[#666666]">
-                    Type of accommodation
-                  </PopoverContent>
-                </Popover>
-              </div>
+              <label>Accommodation Type</label>
               <Select
                 value={accommodationType}
                 onValueChange={setAccommodationType}
               >
-                <SelectTrigger className="w-32 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
+                <SelectTrigger className="w-30 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -473,211 +389,209 @@ const VacationPlanner = () => {
                     Airbnb/Homestay
                   </SelectItem>
                   <SelectItem value="Hostel">Hostel</SelectItem>
+                  <SelectItem value="Friends/Family">
+                    With Friends/Family
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
-
-          {/* Hotel Luxury Level */}
-          {(accommodationType === "Hotel" ||
-            accommodationType === "Resort") && (
-            <div className="mb-3">
-              <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
-                <div className="flex items-center gap-1.5">
-                  <label>Luxury Level</label>
-                  <Popover>
-                    <PopoverTrigger>
-                      <Info width={15} />
-                    </PopoverTrigger>
-                    <PopoverContent className="text-xs border-[#666666]">
-                      Luxury level affects pricing
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <Select value={hotelLuxury} onValueChange={setHotelLuxury}>
-                  <SelectTrigger className="w-32 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Budget">Budget</SelectItem>
-                    <SelectItem value="Mid-range">Mid-range</SelectItem>
-                    <SelectItem value="Luxury">Luxury</SelectItem>
-                    <SelectItem value="Ultra Luxury">Ultra Luxury</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+          {accommodationType !== "Friends/Family" && (
+            <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+              <SliderInput
+                label="Room Cost per Night"
+                value={costPerNight}
+                onChange={setCostPerNight}
+                min={500}
+                max={100000}
+                step={500}
+              />
+              <SliderInput
+                label="Number of Rooms"
+                value={numberOfRooms}
+                onChange={setNumberOfRooms}
+                min={1}
+                max={10}
+                step={1}
+                showCurrency={false}
+              />
             </div>
           )}
 
-          {/* Number of Rooms */}
+          <h3 className="text-lg font-semibold text-[#2C178C] my-4 pb-2">
+            Daily Expenses
+          </h3>
           <SliderInput
-            label="Number of Rooms"
-            value={numberOfRooms}
-            onChange={setNumberOfRooms}
-            min={1}
-            max={5}
-            step={1}
-            tooltip="Number of rooms needed"
-            showCurrency={false}
+            label="Daily Food & Dining"
+            value={mealCostPerDay}
+            onChange={setMealCostPerDay}
+            min={100}
+            max={30000}
+            step={100}
+            tooltip="Estimated cost for all meals for the entire group per day."
           />
-
-          {/* Meal Preference */}
-          <div className="mb-3">
-            <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
-              <div className="flex items-center gap-1.5">
-                <label>Meal Preference</label>
-                <Popover>
-                  <PopoverTrigger>
-                    <Info width={15} />
-                  </PopoverTrigger>
-                  <PopoverContent className="text-xs border-[#666666]">
-                    Dining preference affects meal costs
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <Select value={mealPreference} onValueChange={setMealPreference}>
-                <SelectTrigger className="w-32 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Street Food">Street Food</SelectItem>
-                  <SelectItem value="Local Restaurants">
-                    Local Restaurants
-                  </SelectItem>
-                  <SelectItem value="Mix">Mix</SelectItem>
-                  <SelectItem value="Fine Dining">Fine Dining</SelectItem>
-                  <SelectItem value="Hotel Included">Hotel Included</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Activities Budget */}
           <SliderInput
-            label="Activities Budget"
+            label="Activities & Sightseeing"
             value={activitiesBudget}
             onChange={setActivitiesBudget}
-            min={5000}
+            min={0}
             max={200000}
-            step={5000}
-            tooltip="Budget for sightseeing and activities"
-            showCurrency={true}
+            step={1000}
+            tooltip="Includes entry fees, guided tours, local attractions, and entertainment costs for the entire trip. Adjust based on the type and number of activities planned."
           />
-
-          {/* Shopping Budget */}
           <SliderInput
-            label="Shopping Budget"
+            label="Shopping & Souvenirs"
             value={shoppingBudget}
             onChange={setShoppingBudget}
-            min={5000}
+            min={0}
             max={100000}
-            step={2500}
-            tooltip="Budget for shopping and souvenirs"
-            showCurrency={true}
+            step={500}
+            tooltip="Covers personal shopping, local souvenirs, gifts, and miscellaneous purchases made during the trip. This varies by destination and traveler preference."
           />
 
-          {/* Local Transport Type */}
+          <h3 className="text-lg font-semibold text-[#2C178C] my-4 pb-2">
+            Local Transport at Destination
+          </h3>
           <div className="mb-3">
             <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
-              <div className="flex items-center gap-1.5">
-                <label>Local Transport</label>
-                <Popover>
-                  <PopoverTrigger>
-                    <Info width={15} />
-                  </PopoverTrigger>
-                  <PopoverContent className="text-xs border-[#666666]">
-                    Local transportation at destination
-                  </PopoverContent>
-                </Popover>
-              </div>
+              <label>Local Transport Mode</label>
               <Select
                 value={localTransportType}
                 onValueChange={setLocalTransportType}
               >
-                <SelectTrigger className="w-32 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
+                <SelectTrigger className="w-30 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Public Transport">
                     Public Transport
                   </SelectItem>
-                  <SelectItem value="Taxi/Uber">Taxi/Uber</SelectItem>
-                  <SelectItem value="Rental Car">Rental Car</SelectItem>
-                  <SelectItem value="Auto/Rickshaw">Auto/Rickshaw</SelectItem>
-                  <SelectItem value="Walking">Walking</SelectItem>
+                  <SelectItem value="Taxi/Ride-sharing">
+                    Taxi/Ride-sharing
+                  </SelectItem>
+                  <SelectItem value="Rental Car/Scooter">
+                    Rental Car/Scooter
+                  </SelectItem>
+                  <SelectItem value="Walking/None">Walking/None</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          {/* Travel Insurance */}
-          <div className="mb-3">
-            <div className="flex justify-between items-center text-[#323233] font-medium text-sm">
-              <div className="flex items-center gap-1.5">
-                <label>Travel Insurance</label>
-                <Popover>
-                  <PopoverTrigger>
-                    <Info width={15} />
-                  </PopoverTrigger>
-                  <PopoverContent className="text-xs border-[#666666]">
-                    Optional travel insurance coverage
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <input
-                type="checkbox"
-                checked={travelInsurance}
-                onChange={(e) => setTravelInsurance(e.target.checked)}
-                className="w-4 h-4 text-[#020288] bg-gray-100 border-gray-300 rounded focus:ring-[#020288] focus:ring-2"
+          {localTransportType === "Public Transport" && (
+            <SliderInput
+              label="Cost Per Day"
+              value={publicTransportCostPerDay}
+              onChange={setPublicTransportCostPerDay}
+              min={0}
+              max={5000}
+              step={100}
+            />
+          )}
+          {localTransportType === "Taxi/Ride-sharing" && (
+            <SliderInput
+              label="Cost Per Day"
+              value={taxiCostPerDay}
+              onChange={setTaxiCostPerDay}
+              min={0}
+              max={10000}
+              step={200}
+            />
+          )}
+          {localTransportType === "Rental Car/Scooter" && (
+            <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+              <SliderInput
+                label="Rental Cost Per Day"
+                value={localRentalCostPerDay}
+                onChange={setLocalRentalCostPerDay}
+                min={0}
+                max={10000}
+                step={200}
               />
-            </div>
-          </div>
-
-          {/* Visa Required - Show only for International */}
-          {destination === "International" && (
-            <div className="mb-3">
-              <div className="flex justify-between items-center text-[#323233] font-medium text-sm">
-                <div className="flex items-center gap-1.5">
-                  <label>Visa Required</label>
-                  <Popover>
-                    <PopoverTrigger>
-                      <Info width={15} />
-                    </PopoverTrigger>
-                    <PopoverContent className="text-xs border-[#666666]">
-                      Does destination require visa?
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={visaRequired}
-                  onChange={(e) => setVisaRequired(e.target.checked)}
-                  className="w-4 h-4 text-[#020288] bg-[#020288]  border-gray-300 rounded-xl focus:ring-[#020288] focus:ring-2"
-                />
-              </div>
+              <SliderInput
+                label="Total Fuel Cost"
+                value={localRentalFuelCost}
+                onChange={setLocalRentalFuelCost}
+                min={0}
+                max={20000}
+                step={500}
+              />
             </div>
           )}
 
-          {/* Error Display */}
-          {calculationError && (
-            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-600 text-sm">Error: {calculationError}</p>
+          <h3 className="text-lg font-semibold text-[#2C178C] my-4 pb-2">
+            Documentation & Insurance
+          </h3>
+          <div className="mb-3">
+            <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
+              <label>Travel Insurance</label>
+              <Select
+                value={travelInsurance}
+                onValueChange={setTravelInsurance}
+              >
+                <SelectTrigger className="w-30 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="No">No</SelectItem>
+                  <SelectItem value="Yes">Yes</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+          </div>
+          {travelInsurance === "Yes" && (
+            <SliderInput
+              label="Total Insurance Cost"
+              value={travelInsuranceCost}
+              onChange={setTravelInsuranceCost}
+              min={500}
+              max={50000}
+              step={500}
+            />
+          )}
+
+          {destination === "International" && (
+            <>
+              <div className="mt-3 mb-3">
+                <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
+                  <label>Visa Required</label>
+                  <Select value={visaRequired} onValueChange={setVisaRequired}>
+                    <SelectTrigger className="w-40 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="No">No</SelectItem>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              {visaRequired === "Yes" && (
+                <SliderInput
+                  label="Total Visa Cost for All"
+                  value={visaCost}
+                  onChange={setVisaCost}
+                  min={1000}
+                  max={200000}
+                  step={1000}
+                />
+              )}
+            </>
           )}
         </div>
       </div>
-      {/* Calculate Button */}
-      <div>
+      <div className="max-w-xl mx-auto">
+        {/* Calculate Button */}
         <button
           onClick={handleCalculate}
           className="w-full mt-2 bg-gradient-to-r from-[#583FCA] to-[#2D14A0] text-white font-bold py-3 rounded-2xl text-sm hover:opacity-90"
         >
           CALCULATE
         </button>
-        {/* Results Section */}
 
+        {/* Results Section */}
         <div className="mt-2">
-          <VacationResult result={result} />
+          <VacationPlannerResult result={result} />
         </div>
 
         {/* Assumptions Section */}

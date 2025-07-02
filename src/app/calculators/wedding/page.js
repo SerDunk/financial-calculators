@@ -1,13 +1,8 @@
+// HybridWeddingCalculator.jsx
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
 import { Info, Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
-import { Slider } from "@mui/material";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
 import {
   Select,
   SelectTrigger,
@@ -16,90 +11,30 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import Heading from "@/components/Heading";
-import {
-  calculateWeddingBreakdown,
-  formatters,
-  calculatorUtils,
-} from "@/utils/calculation";
+import { calculateWeddingBreakdown, formatters } from "@/utils/calculation";
 import WeddingResult from "@/components/WeddingResult";
 import WeddingAssumptions from "@/components/WeddingAssumptions";
-import SliderInput from "@/components/SliderInput";
+import SliderInput from "@/components/SliderInput"; // The only component for numerical input
 
-const NumberInput = ({
-  label,
-  value,
-  onChange,
-  tooltip,
-  min = 0,
-  max = 10000,
-}) => {
-  const [inputValue, setInputValue] = useState(value.toString());
-
-  // Update input value when prop value changes
-  useEffect(() => {
-    setInputValue(value.toString());
-  }, [value]);
-
-  const handleChange = (e) => {
-    const raw = e.target.value.replace(/[^0-9]/g, "");
-    setInputValue(raw);
-    const numValue = raw ? parseInt(raw) : 0;
-    onChange(calculatorUtils.validateInput(numValue, min, max));
-  };
-
-  const handleBlur = () => {
-    setInputValue(value.toString());
-  };
-
-  return (
-    <div className="mb-1">
-      <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
-        <div className="flex items-center gap-1.5">
-          <label>{label}</label>
-          {tooltip && (
-            <Popover>
-              <PopoverTrigger>
-                <Info width={15} />
-              </PopoverTrigger>
-              <PopoverContent className="text-xs border-[#666666] max-w-xs">
-                {tooltip}
-              </PopoverContent>
-            </Popover>
-          )}
-        </div>
-        <div className="flex bg-[#EAE9F0] px-2 py-1 rounded-lg">
-          <input
-            type="text"
-            className="text-[#020288] text-xs w-16 text-center border-none outline-none focus:ring-0 bg-transparent"
-            value={inputValue}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const EventCard = ({ event, onUpdate, onDelete, isLast }) => {
+const EventCard = ({ event, onUpdate, onDelete }) => {
   const [isExpanded, setIsExpanded] = useState(true);
+  const updateEvent = (field, value) =>
+    onUpdate(event.id, { ...event, [field]: value });
 
-  const updateEvent = useCallback(
-    (field, value) => {
-      onUpdate(event.id, { ...event, [field]: value });
-    },
-    [event, onUpdate]
-  );
-
-  const totalFoodCost = event.totalGuests * event.foodCostPerPlate;
-  const totalVenueCost = event.venueAmount;
-  const accommodationCost =
-    event.stayingGuests * event.accommodationCostPerGuest;
-  const eventTotal =
-    totalFoodCost +
-    totalVenueCost +
-    accommodationCost +
-    (event.decorationAmount || 0);
+  // Calculation for the total cost of this specific event
+  const totalEventCost =
+    (event.needsVenue === "Yes" ? event.venueCost : 0) +
+    (event.foodType === "hotel_banquet" || event.foodType === "catered"
+      ? event.foodCostPerPlate * event.totalGuests
+      : event.homeCookingCost) +
+    (event.needsVenue === "Yes" && event.stayingOver === "Yes"
+      ? event.roomsNeeded * event.roomCostPerDay
+      : 0) +
+    event.decorationCost +
+    event.photographyCost +
+    event.makeupCost +
+    event.entertainmentCost +
+    event.otherEventCost;
 
   return (
     <div className="border border-[#E0E0E0] rounded-xl p-4 mb-4 bg-white">
@@ -109,112 +44,203 @@ const EventCard = ({ event, onUpdate, onDelete, isLast }) => {
             type="text"
             value={event.name}
             onChange={(e) => updateEvent("name", e.target.value)}
-            className="text-[#020288] bg-[#EAE9F0] font-semibold w-[80px] p-2 rounded-lg text-base border-none outline-none focus:ring-0 flex-1 min-w-0"
+            className="text-[#020288] bg-[#EAE9F0] w-20 font-semibold p-2 rounded-lg text-base border-none outline-none focus:ring-0 flex-1 min-w-0"
             placeholder="Event Name"
           />
-          <span className="text-[#666666] text-xs">
-            {formatters.formatShortIndianCurrency(eventTotal)}
+          <span className="text-[#666666] text-xs flex-shrink-0">
+            {formatters.formatShortIndianCurrency(totalEventCost)}
           </span>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
             className="text-[#020288] p-1 flex-shrink-0"
           >
-            {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            <ChevronUp
+              size={16}
+              className={`transition-transform duration-200 ${
+                !isExpanded && "rotate-180"
+              }`}
+            />
           </button>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {!isLast && (
-            <button
-              onClick={() => onDelete(event.id)}
-              className="text-red-500 p-1 hover:bg-red-50 rounded"
-              title="Delete Event"
-            >
-              <Trash2 size={14} />
-            </button>
-          )}
-        </div>
+        <button
+          onClick={() => onDelete(event.id)}
+          className="text-red-500 p-1 hover:bg-red-50 rounded"
+          title="Delete Event"
+        >
+          <Trash2 size={14} />
+        </button>
       </div>
-
       {isExpanded && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <NumberInput
-              label="Total Guests"
-              value={event.totalGuests}
-              onChange={(value) => updateEvent("totalGuests", value)}
-              tooltip="Total number of guests for this event"
-              max={2000}
-            />
-            <NumberInput
-              label="Staying Guests"
-              value={event.stayingGuests}
-              onChange={(value) =>
-                updateEvent("stayingGuests", Math.min(value, event.totalGuests))
-              }
-              tooltip="Number of guests requiring accommodation"
-              max={event.totalGuests}
-            />
+        <div className="space-y-5 pt-2 mt-2">
+          <SliderInput
+            label="Total Guests"
+            value={event.totalGuests}
+            onChange={(v) => updateEvent("totalGuests", v)}
+            showCurrency={false}
+            min={0}
+            max={2000}
+            step={10}
+            tooltip="The total number of people attending this specific event."
+          />
+
+          <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100 space-y-4">
+            <div className="flex justify-between items-center text-[#323233] font-medium text-sm">
+              <label>Venue</label>
+              <Select
+                value={event.needsVenue}
+                onValueChange={(v) => updateEvent("needsVenue", v)}
+              >
+                <SelectTrigger className="w-20 h-8 bg-white text-[#020288] text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Yes">Professional Venue</SelectItem>
+                  <SelectItem value="No">At Home</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {event.needsVenue === "Yes" && (
+              <>
+                <SliderInput
+                  label="Venue Cost"
+                  value={event.venueCost}
+                  onChange={(v) => updateEvent("venueCost", v)}
+                  min={0}
+                  max={3000000}
+                  step={10000}
+                  tooltip="The rental cost for the banquet hall, lawn, or resort for this event."
+                />
+                <div className="flex justify-between items-center text-[#323233] font-medium text-sm pt-2 border-t">
+                  <label>Staying Guests</label>
+                  <Select
+                    value={event.stayingOver}
+                    onValueChange={(v) => updateEvent("stayingOver", v)}
+                  >
+                    <SelectTrigger className="w-28 h-8 bg-white text-[#020288] text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {event.stayingOver === "Yes" && (
+                  <>
+                    <SliderInput
+                      label="Rooms"
+                      value={event.roomsNeeded}
+                      onChange={(v) => updateEvent("roomsNeeded", v)}
+                      showCurrency={false}
+                      min={0}
+                      max={500}
+                      step={1}
+                      tooltip="Total number of hotel rooms required for all staying guests."
+                    />
+                    <SliderInput
+                      label="Room Cost/Day"
+                      value={event.roomCostPerDay}
+                      onChange={(v) => updateEvent("roomCostPerDay", v)}
+                      min={0}
+                      max={50000}
+                      step={500}
+                      tooltip="The average cost for a single hotel room per day."
+                    />
+                  </>
+                )}
+              </>
+            )}
           </div>
 
-          <SliderInput
-            label="Food Cost Per Plate"
-            value={event.foodCostPerPlate}
-            onChange={(val) => updateEvent("foodCostPerPlate", val)}
-            min={200}
-            max={5000}
-            step={50}
-            tooltip="Cost per plate for this event including all food items"
-          />
-
-          <div className="bg-[#F8F8FA] p-3 rounded-lg">
-            <div className="text-[#020288] font-medium text-sm mb-2">
-              Total Food Cost: ₹{formatters.formatIndianCurrency(totalFoodCost)}
+          <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100 space-y-4">
+            <div className="flex justify-between items-center text-[#323233] font-medium text-sm">
+              <label>Food Arrangement</label>
+              <Select
+                value={event.foodType}
+                onValueChange={(v) => updateEvent("foodType", v)}
+              >
+                <SelectTrigger className="w-20 h-8 bg-white text-[#020288] text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="hotel_banquet">
+                    Hotel/Venue Banquet
+                  </SelectItem>
+                  <SelectItem value="catered">Caterer</SelectItem>
+                  <SelectItem value="home_cooked">Home-Cooked</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </div>
-
-          <SliderInput
-            label="Venue Cost"
-            value={event.venueAmount}
-            onChange={(val) => updateEvent("venueAmount", val)}
-            min={0}
-            max={1000000}
-            step={5000}
-            tooltip="Total venue cost for this event"
-          />
-
-          <SliderInput
-            label="Accommodation Cost Per Guest"
-            value={event.accommodationCostPerGuest}
-            onChange={(val) => updateEvent("accommodationCostPerGuest", val)}
-            min={0}
-            max={5000}
-            step={100}
-            tooltip="Cost per staying guest for accommodation"
-          />
-
-          <div className="bg-[#F8F8FA] p-3 rounded-lg">
-            <div className="text-[#020288] font-medium text-sm mb-2">
-              Total Accommodation Cost: ₹
-              {formatters.formatIndianCurrency(accommodationCost)}
-            </div>
+            {(event.foodType === "hotel_banquet" ||
+              event.foodType === "catered") && (
+              <SliderInput
+                label="Cost Per Plate"
+                value={event.foodCostPerPlate}
+                onChange={(v) => updateEvent("foodCostPerPlate", v)}
+                min={0}
+                max={10000}
+                step={100}
+                tooltip="The all-inclusive cost per person for the main meal."
+              />
+            )}
+            {event.foodType === "home_cooked" && (
+              <SliderInput
+                label="Cooking Cost"
+                value={event.homeCookingCost}
+                onChange={(v) => updateEvent("homeCookingCost", v)}
+                min={0}
+                max={500000}
+                step={2500}
+                tooltip="Estimated cost for all groceries, ingredients, and any hired help for home cooking."
+              />
+            )}
           </div>
 
           <SliderInput
             label="Decoration Cost"
-            value={event.decorationAmount || 0}
-            onChange={(val) => updateEvent("decorationAmount", val)}
+            value={event.decorationCost}
+            onChange={(v) => updateEvent("decorationCost", v)}
             min={0}
-            max={200000}
-            step={2500}
-            tooltip="Decoration cost for this specific event including flowers, lighting, and stage setup"
+            max={1500000}
+            step={5000}
+            tooltip="The cost for flowers, lighting, stage setup, and other decor for this event."
           />
-
-          <div className="bg-[#F8F8FA] p-3 rounded-lg">
-            <div className="text-[#020288] font-medium text-sm mb-2">
-              Total Decoration Cost: ₹
-              {formatters.formatIndianCurrency(event.decorationAmount || 0)}
-            </div>
-          </div>
+          <SliderInput
+            label="Photo & Video"
+            value={event.photographyCost}
+            onChange={(v) => updateEvent("photographyCost", v)}
+            min={0}
+            max={500000}
+            step={5000}
+            tooltip="The fee for photographers and videographers to cover this specific event."
+          />
+          <SliderInput
+            label="Hair & Makeup"
+            value={event.makeupCost}
+            onChange={(v) => updateEvent("makeupCost", v)}
+            min={0}
+            max={150000}
+            step={2500}
+            tooltip="Cost for makeup artists, hairstylists, and grooming services for this event."
+          />
+          <SliderInput
+            label="Entertainment"
+            value={event.entertainmentCost}
+            onChange={(v) => updateEvent("entertainmentCost", v)}
+            min={0}
+            max={1000000}
+            step={5000}
+            tooltip="Cost for a DJ, live band, dancers, or other performers."
+          />
+          <SliderInput
+            label="Other Event Costs"
+            value={event.otherEventCost}
+            onChange={(v) => updateEvent("otherEventCost", v)}
+            min={0}
+            max={500000}
+            step={2500}
+            tooltip="Budget for any other costs specific to this event, like pandit fees, special entry items, etc."
+          />
         </div>
       )}
     </div>
@@ -222,313 +248,202 @@ const EventCard = ({ event, onUpdate, onDelete, isLast }) => {
 };
 
 const HybridWeddingCalculator = () => {
-  // Event-based state
   const [events, setEvents] = useState([
     {
       id: 1,
-      name: "Engagement",
+      name: "Sangeet",
       totalGuests: 150,
-      stayingGuests: 20,
-      foodCostPerPlate: 800,
-      venueAmount: 80000,
-      accommodationCostPerGuest: 2000,
-      decorationAmount: 25000,
+      needsVenue: "Yes",
+      venueCost: 150000,
+      stayingOver: "No",
+      roomsNeeded: 0,
+      roomCostPerDay: 0,
+      foodType: "catered",
+      foodCostPerPlate: 1200,
+      homeCookingCost: 0,
+      decorationCost: 80000,
+      photographyCost: 50000,
+      makeupCost: 25000,
+      entertainmentCost: 75000,
+      otherEventCost: 0,
+    },
+    {
+      id: 2,
+      name: "Wedding Day",
+      totalGuests: 200,
+      needsVenue: "Yes",
+      venueCost: 250000,
+      stayingOver: "Yes",
+      roomsNeeded: 25,
+      roomCostPerDay: 4000,
+      foodType: "hotel_banquet",
+      foodCostPerPlate: 2000,
+      homeCookingCost: 0,
+      decorationCost: 150000,
+      photographyCost: 100000,
+      makeupCost: 50000,
+      entertainmentCost: 50000,
+      otherEventCost: 21000,
     },
   ]);
 
-  // Budget and expense state
-  const [totalBudget, setTotalBudget] = useState(1500000);
-  const [photographyAmount, setPhotographyAmount] = useState(120000);
-  const [clothingAmount, setClothingAmount] = useState(150000);
-  const [makeupAmount, setMakeupAmount] = useState(75000);
-  const [invitationAmount, setInvitationAmount] = useState(30000);
+  const [weddingDays, setWeddingDays] = useState(3);
+  const [sharedExpenses, setSharedExpenses] = useState({
+    brideAttireAmount: 400000,
+    groomAttireAmount: 150000,
+    invitationAmount: 50000,
+    miscAmount: 50000,
+  });
 
-  const [entertainmentAmount, setEntertainmentAmount] = useState(75000);
-  const [weddingPlanner, setWeddingPlanner] = useState("No");
-
-  // Results and UI state
   const [result, setResult] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
-  // Memoize the calculation function to prevent unnecessary recalculations
   const calculateResults = useCallback(() => {
     setIsCalculating(true);
-
-    try {
-      // Calculate totals from events
-      const eventTotals = calculatorUtils.calculateEventTotals(events);
-
-      const calculationResult = calculateWeddingBreakdown({
-        totalBudget,
-        guestCount: eventTotals.maxGuestCount,
-        foodAmount: eventTotals.totalFoodAmount,
-        photographyAmount,
-        venueAmount: eventTotals.totalVenueAmount,
-        clothingAmount,
-        makeupAmount,
-        entertainmentAmount,
-        accommodationAmount: eventTotals.totalAccommodationAmount,
-        invitationAmount,
-        weddingPlanner,
-        events,
-      });
-
-      setResult(calculationResult);
-    } catch (error) {
-      console.error("Calculation error:", error);
-      setResult(null);
-    } finally {
-      setIsCalculating(false);
-    }
-  }, [
-    events,
-    totalBudget,
-    photographyAmount,
-    clothingAmount,
-    makeupAmount,
-    entertainmentAmount,
-    invitationAmount,
-    weddingPlanner,
-  ]);
-
-  // Auto-calculate when dependencies change with debouncing
-  useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      calculateResults();
-    }, 300); // Debounce for 300ms
-
-    return () => clearTimeout(debounceTimer);
-  }, [calculateResults]);
+    const calculationResult = calculateWeddingBreakdown({
+      events,
+      sharedExpenses,
+      weddingDays,
+    });
+    setResult(calculationResult);
+    setIsCalculating(false);
+  }, [events, sharedExpenses, weddingDays]);
 
   // Initial calculation on mount
   useEffect(() => {
     calculateResults();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Event management functions
-  const addEvent = useCallback(() => {
-    const newEvent = {
-      id: Date.now(),
-      name: "New Event",
-      totalGuests: 100,
-      stayingGuests: 10,
-      foodCostPerPlate: 600,
-      venueAmount: 50000,
-      accommodationCostPerGuest: 2000,
-      decorationAmount: 25000,
-    };
-    setEvents((prev) => [...prev, newEvent]);
   }, []);
 
-  const updateEvent = useCallback((id, updatedEvent) => {
-    setEvents((prev) =>
-      prev.map((event) => (event.id === id ? updatedEvent : event))
-    );
-  }, []);
-
-  const deleteEvent = useCallback((id) => {
-    setEvents((prev) => {
-      if (prev.length > 1) {
-        return prev.filter((event) => event.id !== id);
-      }
-      return prev;
-    });
-  }, []);
-
-  // Manual calculation trigger
   const handleCalculate = () => {
     calculateResults();
   };
 
-  // Handle budget input change with validation
-  const handleBudgetChange = useCallback((value) => {
-    const parsed =
-      typeof value === "string"
-        ? formatters.parseFormattedNumber(value)
-        : value;
-    setTotalBudget(calculatorUtils.validateInput(parsed, 500000, 50000000));
-  }, []);
+  const addEvent = () => {
+    setEvents((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        name: "New Event",
+        totalGuests: 100,
+        needsVenue: "No",
+        venueCost: 0,
+        stayingOver: "No",
+        roomsNeeded: 0,
+        roomCostPerDay: 0,
+        foodType: "home_cooked",
+        foodCostPerPlate: 0,
+        homeCookingCost: 50000,
+        decorationCost: 40000,
+        photographyCost: 25000,
+        makeupCost: 15000,
+        entertainmentCost: 0,
+        otherEventCost: 0,
+      },
+    ]);
+  };
+
+  const updateEvent = (id, updatedEvent) =>
+    setEvents((prev) => prev.map((e) => (e.id === id ? updatedEvent : e)));
+  const deleteEvent = (id) => {
+    if (events.length > 0) {
+      setEvents((prev) => prev.filter((e) => e.id !== id));
+    }
+  };
 
   return (
     <div className="min-h-screen font-lexend bg-[#EFEDF4] xs:px-0 px-1.5">
       <div className="max-w-xl mx-auto">
         <Heading
-          header="Wedding Budget Calculator"
-          desc="Plan and allocate your wedding budget with event-wise breakdown"
+          header="Wedding Cost Calculator"
+          desc="Plan your dream wedding from the ground up, event by event."
         />
-
-        {/* Total Budget Input */}
-        <div className="rounded-2xl p-4 relative bg-white mb-4">
-          <h2 className="text-[#020288] font-semibold text-lg mb-4">
-            Overall Budget
-          </h2>
-
-          <div className="mb-1">
-            <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
-              <div className="flex items-center gap-1.5">
-                <label>Total Wedding Budget</label>
-                <Popover>
-                  <PopoverTrigger>
-                    <Info width={15} />
-                  </PopoverTrigger>
-                  <PopoverContent className="text-xs border-[#666666]">
-                    Total amount you plan to spend on the wedding including all
-                    ceremonies
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="flex bg-[#EAE9F0] px-1 py-1 rounded-lg items-center">
-                <span className="text-[#020288]">₹</span>
-                <input
-                  type="text"
-                  className="text-[#020288] text-xs w-18 text-center border-none outline-none focus:ring-0 bg-transparent"
-                  value={formatters.formatIndianCurrency(totalBudget)}
-                  onChange={(e) => handleBudgetChange(e.target.value)}
-                  placeholder="0"
-                />
-              </div>
-            </div>
-            <div className="text-[10px] text-[#020288] flex justify-end pt-2 px-2">
-              {formatters.formatShortIndianCurrency(totalBudget)}
-            </div>
-
-            <Slider
-              value={totalBudget}
-              min={500000}
-              max={50000000}
-              step={50000}
-              onChange={(e, val) => setTotalBudget(val)}
-              sx={{
-                color: "#020288",
-                height: 6,
-                "& .MuiSlider-thumb": {
-                  backgroundImage: "url('/slider.svg')",
-                  backgroundPosition: "center",
-                  width: 18,
-                  height: 18,
-                  transition:
-                    "box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                  "&:hover, &.Mui-focusVisible": {
-                    boxShadow: "0 0 0 8px rgba(255, 255, 255, 0.16)",
-                  },
-                },
-                "& .MuiSlider-track": {
-                  transition: "width 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
-                },
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Event-based Inputs */}
         <div className="rounded-2xl p-6 relative bg-white mb-4">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3">
+          <h2 className="text-[#020288] font-semibold text-lg mb-4">
+            Wedding Details
+          </h2>
+          <SliderInput
+            label="Total Wedding Days"
+            value={weddingDays}
+            onChange={setWeddingDays}
+            min={1}
+            max={10}
+            step={1}
+            showCurrency={false}
+            tooltip="Total number of days the wedding ceremonies will last. This affects multi-day accommodation costs."
+          />
+        </div>
+        <div className="rounded-2xl p-6 relative bg-white mb-4">
+          <div className="flex justify-between items-center mb-4">
             <h2 className="text-[#020288] font-semibold text-lg">
               Wedding Events
             </h2>
             <button
               onClick={addEvent}
-              className="flex items-center justify-center gap-2 bg-[#020288] text-white px-3 py-2 rounded-lg text-sm hover:opacity-90 transition-opacity w-full sm:w-auto"
+              className="flex items-center gap-2 bg-[#020288] text-white px-3 py-2 rounded-lg text-sm hover:opacity-90"
             >
               <Plus size={16} />
               Add Event
             </button>
           </div>
-
-          {events.map((event, index) => (
+          {events.map((event) => (
             <EventCard
               key={event.id}
               event={event}
               onUpdate={updateEvent}
               onDelete={deleteEvent}
-              isLast={events.length === 1}
             />
           ))}
         </div>
-
-        {/* Fixed Category Inputs */}
         <div className="rounded-2xl p-6 relative bg-white mb-2">
           <h2 className="text-[#020288] font-semibold text-lg mb-4">
-            Other Wedding Expenses
+            Shared Wedding Expenses
           </h2>
-
           <SliderInput
-            label="Photography & Videography"
-            value={photographyAmount}
-            onChange={setPhotographyAmount}
-            tooltip="Professional photography and videography for all ceremonies"
-            min={0}
-            max={500000}
-            step={5000}
+            label="Bride's Attire & Jewelry"
+            value={sharedExpenses.brideAttireAmount}
+            onChange={(v) =>
+              setSharedExpenses((p) => ({ ...p, brideAttireAmount: v }))
+            }
+            min={50000}
+            max={5000000}
+            step={25000}
+            tooltip="The total budget for all of the bride's outfits, jewelry, shoes, and accessories across all events."
           />
-
           <SliderInput
-            label="Clothing & Jewelry"
-            value={clothingAmount}
-            onChange={setClothingAmount}
-            tooltip="Wedding outfits, jewelry, and accessories for bride and groom"
-            min={0}
+            label="Groom's Outfit"
+            value={sharedExpenses.groomAttireAmount}
+            onChange={(v) =>
+              setSharedExpenses((p) => ({ ...p, groomAttireAmount: v }))
+            }
+            min={20000}
             max={1000000}
             step={10000}
+            tooltip="The total budget for all of the groom's outfits, shoes, and accessories across all events."
           />
-
           <SliderInput
-            label="Makeup & Grooming"
-            value={makeupAmount}
-            onChange={setMakeupAmount}
-            tooltip="Professional makeup, hair styling, and grooming services"
+            label="Invitations & Gifts"
+            value={sharedExpenses.invitationAmount}
+            onChange={(v) =>
+              setSharedExpenses((p) => ({ ...p, invitationAmount: v }))
+            }
             min={0}
             max={500000}
-            step={5000}
-          />
-
-          <SliderInput
-            label="Entertainment"
-            value={entertainmentAmount}
-            onChange={setEntertainmentAmount}
-            min={0}
-            max={500000}
-            step={5000}
-            tooltip="DJ, live band, sound system, and other entertainment arrangements"
-          />
-
-          <SliderInput
-            label="Invitation Cards & Gifts"
-            value={invitationAmount}
-            onChange={setInvitationAmount}
-            tooltip="Wedding invitations, return gifts, and ceremonial gifts"
-            min={0}
-            max={100000}
             step={2500}
+            tooltip="Combined cost for printing invitation cards and purchasing return gifts for guests."
           />
-
-          <div className="mb-1">
-            <div className="flex justify-between items-center text-[#323233] font-medium text-sm mb-1">
-              <div className="flex items-center gap-1.5">
-                <label>Wedding Planner</label>
-                <Popover>
-                  <PopoverTrigger>
-                    <Info width={15} />
-                  </PopoverTrigger>
-                  <PopoverContent className="text-xs border-[#666666]">
-                    Do you plan to hire a professional wedding planner?
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <Select value={weddingPlanner} onValueChange={setWeddingPlanner}>
-                <SelectTrigger className="w-24 h-8 bg-[#EAE9F0] text-[#020288] text-xs border-none">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Yes">Yes</SelectItem>
-                  <SelectItem value="No">No</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <SliderInput
+            label="Miscellaneous & Buffer"
+            value={sharedExpenses.miscAmount}
+            onChange={(v) =>
+              setSharedExpenses((p) => ({ ...p, miscAmount: v }))
+            }
+            min={0}
+            max={1000000}
+            step={5000}
+            tooltip="A safety fund for tips, local transport, ritual items, and other small, unforeseen costs."
+          />
         </div>
 
-        {/* Calculate Button */}
         <button
           onClick={handleCalculate}
           disabled={isCalculating}
@@ -541,12 +456,10 @@ const HybridWeddingCalculator = () => {
           {isCalculating ? "CALCULATING..." : "CALCULATE"}
         </button>
 
-        {/* Results Section */}
         <WeddingResult result={result} />
         <WeddingAssumptions />
       </div>
     </div>
   );
 };
-
 export default HybridWeddingCalculator;

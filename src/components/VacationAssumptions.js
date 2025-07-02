@@ -1,4 +1,12 @@
 import React, { useState } from "react";
+import {
+  CheckCircle,
+  Info,
+  TrendingUp,
+  AlertTriangle,
+  LifeBuoy,
+  XCircle,
+} from "lucide-react";
 
 export default function VacationAssumptions() {
   const [activeTab, setActiveTab] = useState("methodology");
@@ -39,125 +47,77 @@ export default function VacationAssumptions() {
         {activeTab === "methodology" && (
           <div className="space-y-3">
             <div className="bg-gradient-to-r from-[#F8F6FF] to-[#FFF5FA] p-3 rounded-xl border border-[#E5E2F2]">
-              <div className="text-xs font-semibold text-[#2C178C] mb-2">
-                ✈️ Comprehensive Vacation Cost Analysis
+              <div className="text-xs font-semibold text-[#2C178C] mb-2 flex items-center">
+                <Info size={14} className="mr-2" /> How It Works
               </div>
               <div className="text-xs text-[#323233] space-y-2">
                 <p>
-                  • <strong>Base Trip Costs:</strong> Flight tickets +
-                  accommodation + meals + activities for all travelers
+                  This tool acts as a powerful aggregator for your own travel
+                  research. Instead of using pre-filled estimates, it relies
+                  entirely on the cost inputs you provide for maximum accuracy
+                  and personalization.
                 </p>
                 <p>
-                  • <strong>Additional Expenses:</strong> Visa & documents +
-                  travel insurance + local transport + shopping & miscellaneous
+                  • <strong>You Input Costs:</strong> You enter your estimated
+                  costs for every category, from flights to food.
                 </p>
                 <p>
-                  • <strong>Emergency Buffer:</strong> 8% of total trip cost
-                  added as safety margin for unexpected expenses
+                  • <strong>It Calculates Totals:</strong> The tool sums up your
+                  inputs to provide a comprehensive trip total.
                 </p>
                 <p>
-                  • <strong>Per Person Analysis:</strong> Total cost divided by
-                  number of travelers for individual budgeting
+                  • <strong>It Adds a Buffer:</strong> A standard 10% emergency
+                  buffer is added to your total for financial safety.
                 </p>
-                <p>
-                  • <strong>Cost Optimization:</strong> Potential savings by
-                  choosing budget options for flights, hotels, and meals
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-[#F5F4F7] p-3 rounded-xl">
-              <div className="text-xs font-semibold text-[#2C178C] mb-2">
-                📊 Cost Calculation Components
-              </div>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-[#AB78FF] rounded-full mr-2"></div>
-                  <span>Flight Costs</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-[#CAF5BD] rounded-full mr-2"></div>
-                  <span>Accommodation</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-[#45D099] rounded-full mr-2"></div>
-                  <span>Meals & Dining</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-2 h-2 bg-[#97A9FF] rounded-full mr-2"></div>
-                  <span>Activities</span>
-                </div>
               </div>
             </div>
 
             <div className="bg-gradient-to-r from-[#F0F9FF] to-[#FFF1F2] p-3 rounded-xl border border-blue-200">
-              <div className="text-xs font-semibold text-[#2C178C] mb-2">
-                💰 Flight Cost Structure
+              <div className="text-xs font-semibold text-[#2C178C] mb-2 flex items-center">
+                <TrendingUp size={14} className="mr-2" /> Calculation Formula
               </div>
               <div className="text-xs text-[#323233] space-y-2">
                 <p>
-                  • <strong>Domestic Flights:</strong> Economy (₹6K), Premium
-                  Economy (₹12K), Business (₹20K) per adult
+                  The total cost is a direct sum of your inputs plus a safety
+                  buffer:
                 </p>
                 <p>
-                  • <strong>International Flights:</strong> Economy (₹35K),
-                  Premium Economy (₹65K), Business (₹1.2L) per adult
+                  <strong>
+                    Total Cost = (Base Costs) + (10% of Base Costs)
+                  </strong>
                 </p>
                 <p>
-                  • <strong>Children Discount:</strong> 10-20% discount on
-                  flight prices for children under 12
-                </p>
-                <p>
-                  • <strong>Round Trip:</strong> All flight costs include return
-                  journey
+                  <strong>Base Costs =</strong> Transportation + Accommodation +
+                  Daily Expenses + Local Transport + Documentation
                 </p>
               </div>
             </div>
 
             <div className="bg-gradient-to-r from-[#ECFDF5] to-[#F0FDF4] p-3 rounded-xl border border-green-200">
-              <div className="text-xs font-semibold text-[#2C178C] mb-2">
-                🏨 Accommodation & Living Expenses
+              <div className="text-xs font-semibold text-[#2C178C] mb-2 flex items-center">
+                <CheckCircle size={14} className="mr-2" /> Your Cost Components
               </div>
               <div className="text-xs text-[#323233] space-y-2">
                 <p>
-                  • <strong>Hotel Categories:</strong> Budget, Mid-range, and
-                  Luxury options with seasonal pricing
+                  • <strong>Transportation:</strong> Your total estimated cost
+                  for flights, train, or road travel.
                 </p>
                 <p>
-                  • <strong>Meal Preferences:</strong> Street Food (₹600), Mix
-                  (₹1500), Fine Dining (₹3500) per person per day
+                  • <strong>Accommodation:</strong> Calculated as (Cost per
+                  Night × Number of Rooms × Trip Duration).
                 </p>
                 <p>
-                  • <strong>Children Meals:</strong> 70% of adult meal cost for
-                  children
+                  • <strong>Daily Expenses:</strong> Includes (Food Cost per Day
+                  × Trip Duration) plus your total budgets for Activities and
+                  Shopping.
                 </p>
                 <p>
-                  • <strong>Local Transport:</strong> Daily transport costs for
-                  getting around the destination
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-[#FFF7ED] to-[#FEFCE8] p-3 rounded-xl border border-orange-200">
-              <div className="text-xs font-semibold text-[#2C178C] mb-2">
-                📋 Additional Cost Calculations
-              </div>
-              <div className="text-xs text-[#323233] space-y-2">
-                <p>
-                  • <strong>Visa & Documents:</strong> ₹6,000 per person for
-                  international travel
+                  • <strong>Local Transport:</strong> Your estimated cost for
+                  getting around at the destination.
                 </p>
                 <p>
-                  • <strong>Travel Insurance:</strong> ₹2,000 per person
-                  (international), ₹800 (domestic)
-                </p>
-                <p>
-                  • <strong>Shopping & Miscellaneous:</strong> 12% of base trip
-                  cost for souvenirs and extras
-                </p>
-                <p>
-                  • <strong>Emergency Buffer:</strong> 8% of total cost as
-                  safety margin
+                  • <strong>Documentation:</strong> The sum of your inputs for
+                  Travel Insurance and Visa fees.
                 </p>
               </div>
             </div>
@@ -167,215 +127,74 @@ export default function VacationAssumptions() {
         {activeTab === "assumptions" && (
           <div className="space-y-3">
             <div className="bg-gradient-to-r from-[#FEF2F2] to-[#FFF5F5] p-3 rounded-xl border border-red-200">
-              <div className="text-xs font-semibold text-[#FF6B6B] mb-2">
-                ⚠️ Important Disclaimer
+              <div className="text-xs font-semibold text-red-600 mb-2 flex items-center">
+                <AlertTriangle size={14} className="mr-2" /> Important
+                Disclaimer
               </div>
               <div className="text-xs text-[#323233] space-y-2">
                 <p>
-                  • <strong>Estimates Only:</strong> All costs are approximate
-                  estimates based on average market rates and may vary
-                  significantly
+                  • <strong>Your Estimates Matter:</strong> The accuracy of this
+                  budget is 100% dependent on the accuracy of the numbers you
+                  provide.
                 </p>
                 <p>
-                  • <strong>Market Fluctuations:</strong> Flight prices, hotel
-                  rates, and other costs change frequently based on demand,
-                  seasonality, and availability
+                  • <strong>Planning Tool Only:</strong> This is a budgeting
+                  tool, not a final quote. Real-world prices can and will vary.
                 </p>
                 <p>
-                  • <strong>Individual Variations:</strong> Your actual costs
-                  may be higher or lower depending on specific choices, timing,
-                  and personal preferences
-                </p>
-                <p>
-                  • <strong>Currency Changes:</strong> International costs may
-                  vary due to exchange rate fluctuations
+                  • <strong>Market Fluctuations:</strong> Use up-to-date
+                  research for your inputs, as flight and hotel prices change
+                  constantly.
                 </p>
               </div>
             </div>
 
             <div className="bg-gradient-to-r from-[#F8F6FF] to-[#FFF5FA] p-3 rounded-xl border border-[#E5E2F2]">
-              <div className="text-xs font-semibold text-[#2C178C] mb-2">
-                📅 Pricing & Timing Assumptions
+              <div className="text-xs font-semibold text-[#2C178C] mb-2 flex items-center">
+                <LifeBuoy size={14} className="mr-2" /> The Only Built-in
+                Assumption
               </div>
               <div className="text-xs text-[#323233] space-y-2">
+                <p>This calculator makes only ONE assumption on your behalf:</p>
                 <p>
-                  • <strong>Seasonal Pricing:</strong> 15% markup applied for
-                  peak season travel (holidays, summer)
-                </p>
-                <p>
-                  • <strong>Advance Booking:</strong> Costs assume booking 30-60
-                  days in advance for better rates
-                </p>
-                <p>
-                  • <strong>Standard Dates:</strong> Prices based on typical
-                  travel dates, not during festivals or major events
-                </p>
-                <p>
-                  • <strong>Mid-week Travel:</strong> Some savings possible for
-                  Tuesday-Thursday departures not included
-                </p>
-                <p>
-                  • <strong>Group Bookings:</strong> Potential group discounts
-                  for 6+ people not factored in
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-[#F5F4F7] p-3 rounded-xl">
-              <div className="text-xs font-semibold text-[#2C178C] mb-2">
-                🌍 Regional Cost Standards (2025)
-              </div>
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between items-center p-2 bg-white rounded-lg">
-                  <span className="text-[#686868]">
-                    Domestic Economy Flight
-                  </span>
-                  <span className="text-[#2C178C] font-medium">₹6,000</span>
-                </div>
-                <div className="flex justify-between items-center p-2 bg-white rounded-lg">
-                  <span className="text-[#686868]">
-                    International Economy Flight
-                  </span>
-                  <span className="text-[#2C178C] font-medium">₹35,000</span>
-                </div>
-                <div className="flex justify-between items-center p-2 bg-white rounded-lg">
-                  <span className="text-[#686868]">
-                    Budget Hotel (Domestic)
-                  </span>
-                  <span className="text-[#2C178C] font-medium">
-                    ₹2,500/night
-                  </span>
-                </div>
-                <div className="flex justify-between items-center p-2 bg-white rounded-lg">
-                  <span className="text-[#686868]">
-                    Budget Hotel (International)
-                  </span>
-                  <span className="text-[#2C178C] font-medium">
-                    ₹5,000/night
-                  </span>
-                </div>
-                <div className="flex justify-between items-center p-2 bg-white rounded-lg">
-                  <span className="text-[#686868]">Street Food Per Day</span>
-                  <span className="text-[#2C178C] font-medium">₹600</span>
-                </div>
-                <div className="flex justify-between items-center p-2 bg-white rounded-lg">
-                  <span className="text-[#686868]">International Visa</span>
-                  <span className="text-[#2C178C] font-medium">₹6,000</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-[#ECFDF5] to-[#F0FDF4] p-3 rounded-xl border border-green-200">
-              <div className="text-xs font-semibold text-[#2C178C] mb-2">
-                ✅ What's Included in Calculations
-              </div>
-              <div className="text-xs text-[#323233] space-y-2">
-                <p>
-                  • <strong>Round-trip flights:</strong> Complete air travel
-                  costs for all passengers
-                </p>
-                <p>
-                  • <strong>Full accommodation:</strong> Hotel stays for entire
-                  duration
-                </p>
-                <p>
-                  • <strong>All meals:</strong> Breakfast, lunch, and dinner
-                  costs based on preference
-                </p>
-                <p>
-                  • <strong>Activities budget:</strong> Sightseeing and
-                  entertainment as specified
-                </p>
-                <p>
-                  • <strong>Visa & documents:</strong> Passport, visa, and
-                  permit costs for international travel
-                </p>
-                <p>
-                  • <strong>Travel insurance:</strong> Basic coverage for
-                  medical and trip cancellation
-                </p>
-                <p>
-                  • <strong>Local transport:</strong> Getting around the
-                  destination
-                </p>
-                <p>
-                  • <strong>Shopping allowance:</strong> 12% buffer for
-                  souvenirs and miscellaneous expenses
-                </p>
-                <p>
-                  • <strong>Emergency fund:</strong> 8% safety margin for
-                  unexpected costs
+                  • <strong>10% Emergency Buffer:</strong> We automatically add
+                  a 10% buffer to the total of all your costs. This is a
+                  standard travel planning practice to account for unforeseen
+                  expenses like price surges, medical needs, or other
+                  emergencies. You should always travel with a safety fund.
                 </p>
               </div>
             </div>
 
             <div className="bg-gradient-to-r from-[#FEF2F2] to-[#FFF5F5] p-3 rounded-xl border border-red-200">
-              <div className="text-xs font-semibold text-[#2C178C] mb-2">
-                ❌ What's NOT Included
+              <div className="text-xs font-semibold text-[#2C178C] mb-2 flex items-center">
+                <XCircle size={14} className="mr-2" /> What's NOT Included
+                (Unless You Add It)
               </div>
               <div className="text-xs text-[#323233] space-y-2">
                 <p>
-                  • <strong>Airport transfers:</strong> Transport to/from home
-                  airport
+                  Remember to account for these costs within your budgets (e.g.,
+                  in Shopping or Activities), as they are not listed separately:
                 </p>
                 <p>
-                  • <strong>Excess baggage:</strong> Additional charges for
-                  overweight luggage
+                  • <strong>Pre-trip Expenses:</strong> Passports, vaccinations,
+                  travel gear.
                 </p>
                 <p>
-                  • <strong>Premium activities:</strong> High-end experiences
-                  beyond basic sightseeing
+                  • <strong>Excess Baggage Fees:</strong> Charges by airlines
+                  for extra luggage.
                 </p>
                 <p>
-                  • <strong>Alcoholic beverages:</strong> Drinks and bar
-                  expenses
+                  • <strong>Communication Costs:</strong> International roaming
+                  charges or local SIM cards.
                 </p>
                 <p>
-                  • <strong>Spa & wellness:</strong> Massage, spa treatments,
-                  and luxury services
+                  • <strong>Tips & Gratuities:</strong> For guides, drivers, and
+                  restaurant staff.
                 </p>
                 <p>
-                  • <strong>Communication costs:</strong> International roaming,
-                  SIM cards, WiFi
-                </p>
-                <p>
-                  • <strong>Tips & gratuities:</strong> Service charges and tips
-                </p>
-                <p>
-                  • <strong>Travel gear:</strong> Luggage, clothing, and travel
-                  accessories
-                </p>
-                <p>
-                  • <strong>Medical expenses:</strong> Medications, treatments
-                  beyond insurance coverage
-                </p>
-                <p>
-                  • <strong>Pre-trip expenses:</strong> Vaccinations, medical
-                  check-ups, gear shopping
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-[#FFF7ED] to-[#FEFCE8] p-3 rounded-xl border border-orange-200">
-              <div className="text-xs font-semibold text-[#2C178C] mb-2">
-                🔄 Cost Optimization Logic
-              </div>
-              <div className="text-xs text-[#323233] space-y-2">
-                <p>
-                  • <strong>Flight Savings:</strong> 15-25% savings by choosing
-                  lower class of service
-                </p>
-                <p>
-                  • <strong>Hotel Savings:</strong> 20-30% savings by selecting
-                  budget accommodation
-                </p>
-                <p>
-                  • <strong>Food Savings:</strong> 25-40% savings by choosing
-                  local food over fine dining
-                </p>
-                <p>
-                  • <strong>Combined Effect:</strong> Total potential savings
-                  calculated across all categories
+                  • <strong>Currency Exchange Fees:</strong> Fees charged by
+                  banks or exchange counters.
                 </p>
               </div>
             </div>
@@ -388,36 +207,27 @@ export default function VacationAssumptions() {
               className="p-3 rounded-xl text-white"
             >
               <div className="text-xs font-semibold mb-2">
-                💡 Smart Travel Tips
+                💡 Smart Budgeting Tips
               </div>
               <div className="text-xs space-y-1">
                 <p>
-                  • <strong>Book Early:</strong> Flight and hotel prices
-                  increase closer to travel dates
+                  • <strong>Research First:</strong> Use sites like Google
+                  Flights, Skyscanner, Booking.com, and Agoda to find realistic
+                  costs to input into this calculator.
                 </p>
                 <p>
-                  • <strong>Flexible Dates:</strong> Traveling on weekdays can
-                  save 10-20% on flights
+                  • <strong>Be Honest:</strong> Input realistic daily spending
+                  habits for food and shopping for an accurate budget.
                 </p>
                 <p>
-                  • <strong>Compare Options:</strong> Check multiple booking
-                  platforms for best deals
+                  • <strong>Overestimate Slightly:</strong> It's always better
+                  to budget a little more and have money left over, than to
+                  budget too little and run out.
                 </p>
                 <p>
-                  • <strong>Local Research:</strong> Study destination costs and
-                  local transportation options
-                </p>
-                <p>
-                  • <strong>Currency Planning:</strong> Monitor exchange rates
-                  for international travel
-                </p>
-                <p>
-                  • <strong>Travel Insurance:</strong> Don't skip insurance -
-                  medical costs abroad can be huge
-                </p>
-                <p>
-                  • <strong>Emergency Fund:</strong> Always keep extra money for
-                  unexpected situations
+                  • <strong>Check Local Blogs:</strong> Search for "cost of
+                  travel in [your destination]" to find articles with detailed
+                  cost breakdowns to help you fill out the fields.
                 </p>
               </div>
             </div>
