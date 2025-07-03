@@ -17,7 +17,7 @@ import WeddingAssumptions from "@/components/WeddingAssumptions";
 import SliderInput from "@/components/SliderInput"; // The only component for numerical input
 
 const EventCard = ({ event, onUpdate, onDelete }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const updateEvent = (field, value) =>
     onUpdate(event.id, { ...event, [field]: value });
 
@@ -37,8 +37,8 @@ const EventCard = ({ event, onUpdate, onDelete }) => {
     event.otherEventCost;
 
   return (
-    <div className="border border-[#E0E0E0] rounded-xl p-4 mb-4 bg-white">
-      <div className="flex justify-between items-center mb-3">
+    <div className="border border-[#E0E0E0] rounded-xl p-2 mb-2 bg-white">
+      <div className="flex justify-between items-center bg-[#EAE9F0] rounded-lg p-2">
         <div className="flex items-center gap-2 flex-1">
           <input
             type="text"

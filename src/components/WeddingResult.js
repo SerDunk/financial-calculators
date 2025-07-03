@@ -5,11 +5,11 @@ import {
   Calculator,
   PieChart,
   Users,
-  DollarSign,
   Calendar,
-  ChevronDown,
   ChevronUp,
 } from "lucide-react";
+import Image from "next/image";
+import HeartResult from "../../public/hearts.png";
 import { formatters } from "@/utils/calculation";
 
 const WeddingResult = ({ result }) => {
@@ -39,7 +39,12 @@ const WeddingResult = ({ result }) => {
       <div className="text-center mb-6">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-3 bg-[#AB78FF]">
           <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-            <Heart className="text-[#AB78FF]" size={24} />
+            <Image
+              src={HeartResult}
+              width={30}
+              height={30}
+              alt="Wedding Result"
+            />
           </div>
         </div>
         <h2 className="text-2xl font-semibold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent mb-2">

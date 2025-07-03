@@ -8,6 +8,8 @@ import {
   FileText,
   CreditCard,
 } from "lucide-react";
+import Image from "next/image";
+import HomeResult from "../../public/profit.png";
 
 const HomeInvestmentResult = ({ result }) => {
   const formatCurrency = (amount) => {
@@ -70,7 +72,7 @@ const HomeInvestmentResult = ({ result }) => {
       <div className="text-center mb-6">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-3 bg-[#AB78FF]">
           <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-            <Home className="text-[#AB78FF]" size={24} />
+            <Image src={HomeResult} width={28} height={28} alt="Home Result" />
           </div>
         </div>
         <h2 className="text-2xl font-semibold bg-gradient-to-r from-[#320992] to-[#F04393] bg-clip-text text-transparent mb-2">
