@@ -4,6 +4,8 @@ import Car from "../../public/accept-car.png";
 import Invest from "../../public/benefit.png";
 import Vacation from "../../public/beach.png";
 import Rings from "../../public/wedding-rings.png";
+import CreditCard from "../../public/credit-card.png";
+import Investment from "../../public/money.png";
 
 import Image from "next/image";
 
@@ -79,5 +81,19 @@ export const calculatorData = [
       "Create a personalized budget to plan your dream wedding with ease.",
     icon: <Image src={Rings} alt="wedding-ring" />,
     link: "/calculators/wedding",
+  },
+  {
+    id: 7,
+    title: "Credit Card",
+    description: "Calculate your credit card EMI and total cost of ownership",
+    icon: <Image src={CreditCard} alt="Credit Card" />,
+    link: "/calculators/credit-card",
+  },
+  {
+    id: 8,
+    title: "Investment",
+    description: "Calculate your investment returns and growth",
+    icon: <Image src={Investment} alt="Investment" />,
+    link: "/calculators/investment",
   },
 ];
