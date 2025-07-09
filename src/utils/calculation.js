@@ -1,5 +1,3 @@
-// Updated calculation functions for mortgage calculator
-
 // New function to calculate total monthly payment including all costs
 export const calculateTotalMonthlyPayment = (
   principal,
@@ -1299,4 +1297,114 @@ export const calculateWeddingBreakdown = ({
       ),
     },
   };
+};
+
+// --- NEW CREDIT CARD CALCULATION LOGIC ---
+
+export const calculateCreditCardPayoff = ({ inputs, calculationMode }) => {
+  const {
+    cardBalance,
+    annualInterestRate,
+    monthlyPayment,
+    payoffTimeInMonths,
+  } = inputs;
+
+  const monthlyInterestRate = annualInterestRate / 100 / 12;
+
+  if (calculationMode === "fixedPayment") {
+    if (monthlyPayment <= cardBalance * monthlyInterestRate) {
+      return {
+        isError: true,
+        title: "Payment Too Low",
+        summaryText:
+          "Your monthly payment must be higher than the interest charged each month to reduce your balance.",
+      };
+    }
+
+    const months =
+      -Math.log(1 - (cardBalance * monthlyInterestRate) / monthlyPayment) /
+      Math.log(1 + monthlyInterestRate);
+    const totalMonths = Math.ceil(months);
+    const years = Math.floor(totalMonths / 12);
+    const remainingMonths = totalMonths % 12;
+    const totalPaid = totalMonths * monthlyPayment;
+    const totalInterest = totalPaid - cardBalance;
+
+    return {
+      isError: false,
+      title: "Payoff Timeline",
+      mainResult: {
+        value: totalMonths,
+        label: "Payoff In",
+        suffix: totalMonths > 1 ? "Months" : "Month",
+      },
+      summaryText: `It will take ${
+        years > 0 ? `${years} years and ` : ""
+      }${remainingMonths} months to be debt-free.`,
+      breakdown: [
+        {
+          label: "Principal Balance",
+          value: formatters.formatIndianCurrency(cardBalance),
+        },
+        {
+          label: "Total Interest Paid",
+          value: formatters.formatIndianCurrency(totalInterest),
+        },
+      ],
+      analysis: [
+        {
+          label: "Your Monthly Payment",
+          value: formatters.formatIndianCurrency(monthlyPayment),
+        },
+        {
+          label: "Total Amount You'll Pay",
+          value: formatters.formatIndianCurrency(totalPaid),
+        },
+      ],
+    };
+  } else if (calculationMode === "fixedTime") {
+    if (payoffTimeInMonths <= 0) {
+      return {
+        isError: true,
+        title: "Invalid Timeframe",
+        summaryText: "Please enter a payoff time greater than zero months.",
+      };
+    }
+    const requiredPayment =
+      (cardBalance *
+        monthlyInterestRate *
+        Math.pow(1 + monthlyInterestRate, payoffTimeInMonths)) /
+      (Math.pow(1 + monthlyInterestRate, payoffTimeInMonths) - 1);
+    const totalPaid = requiredPayment * payoffTimeInMonths;
+    const totalInterest = totalPaid - cardBalance;
+
+    return {
+      isError: false,
+      title: "Your Required Payment",
+      mainResult: {
+        value: requiredPayment,
+        label: "Required Monthly Payment",
+        isCurrency: true,
+      },
+      summaryText: `To be debt-free in ${payoffTimeInMonths} months, you'll need to make this payment.`,
+      breakdown: [
+        {
+          label: "Principal Balance",
+          value: formatters.formatIndianCurrency(cardBalance),
+        },
+        {
+          label: "Total Interest You'll Pay",
+          value: formatters.formatIndianCurrency(totalInterest),
+        },
+      ],
+      analysis: [
+        { label: "Desired Payoff Time", value: `${payoffTimeInMonths} Months` },
+        {
+          label: "Amount You'll Pay",
+          value: formatters.formatIndianCurrency(totalPaid),
+        },
+      ],
+    };
+  }
+  return null;
 };
