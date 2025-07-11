@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/select";
 import Heading from "@/components/Heading";
 import { calculateCreditCardPayoff } from "@/utils/calculation";
-// import CreditCardResult from "@/components/CalculationResult"; // Using the specific result component
-// import CalculationAssumptions from "@/components/CalculationAssumptions";
+import CreditCardResult from "@/components/CalculationResult"; // Using the specific result component
+import CreditCardAssumptions from "@/components/CreditCardAssumptions";
 import SliderInput from "@/components/SliderInput";
 
 const CreditCardCalculator = () => {
@@ -43,7 +43,6 @@ const CreditCardCalculator = () => {
     setTimeout(() => setIsCalculating(false), 300);
   }, [inputs, calculationMode]);
 
-  // --- MODIFIED BEHAVIOR ---
   // Calculate once on initial component mount to show the default result.
   // After this, calculations will only be triggered by the button click.
   useEffect(() => {
@@ -141,8 +140,8 @@ const CreditCardCalculator = () => {
           {isCalculating ? "CALCULATING..." : "CALCULATE"}
         </button>
 
-        {/* <CreditCardResult result={result} /> */}
-        {/* <CalculationAssumptions /> */}
+        <CreditCardResult result={result} />
+        <CreditCardAssumptions />
       </div>
     </div>
   );
