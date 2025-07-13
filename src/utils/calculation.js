@@ -1408,3 +1408,78 @@ export const calculateCreditCardPayoff = ({ inputs, calculationMode }) => {
   }
   return null;
 };
+
+// utils/calculation.js
+
+// ... (keep formatters, calculateWeddingBreakdown, and calculateCreditCardPayoff)
+
+// --- NEW INVESTMENT CALCULATION LOGIC ---
+
+/**
+ * Calculates the future value of an investment based on regular contributions.
+ * @param {object} params - The investment parameters.
+ * @param {object} params.inputs - The user-provided values.
+ * @returns {object} A result object for the InvestmentResult component.
+ */
+export const calculateInvestmentGrowth = ({ inputs }) => {
+  const { initialAmount, monthlyContribution, annualRate, years } = inputs;
+
+  const monthlyRate = annualRate / 100 / 12;
+  const totalMonths = years * 12;
+
+  // Calculate the future value of the initial lump sum investment
+  const futureOfInitial =
+    initialAmount * Math.pow(1 + monthlyRate, totalMonths);
+
+  // Calculate the future value of the monthly SIP contributions (Future Value of a Series)
+  const futureOfContributions =
+    monthlyContribution *
+    ((Math.pow(1 + monthlyRate, totalMonths) - 1) / monthlyRate);
+
+  const totalCorpus = futureOfInitial + futureOfContributions;
+  const totalInvested = initialAmount + monthlyContribution * totalMonths;
+  const wealthGained = totalCorpus - totalInvested;
+
+  // Generate year-by-year breakdown data
+  const yearlyData = [];
+  let currentBalance = initialAmount;
+  for (let year = 1; year <= years; year++) {
+    let yearEndBalance = currentBalance;
+    for (let month = 1; month <= 12; month++) {
+      yearEndBalance =
+        (yearEndBalance + monthlyContribution) * (1 + monthlyRate);
+    }
+    const totalInvestedThisYear =
+      initialAmount + monthlyContribution * year * 12;
+    const interestThisYear = yearEndBalance - totalInvestedThisYear;
+    yearlyData.push({
+      year,
+      endBalance: formatters.formatIndianCurrency(yearEndBalance),
+      totalInvestment: formatters.formatIndianCurrency(totalInvestedThisYear),
+      interestEarned: formatters.formatIndianCurrency(interestThisYear),
+    });
+    currentBalance = yearEndBalance;
+  }
+
+  return {
+    isError: false,
+    title: "Your Projected Investment Growth",
+    mainResult: {
+      value: totalCorpus,
+      label: "Total Corpus After " + years + " Years",
+      isCurrency: true,
+    },
+    summaryText: `With consistent investment, your portfolio could grow significantly over time.`,
+    breakdown: [
+      {
+        label: "Total Amount Invested",
+        value: formatters.formatIndianCurrency(totalInvested),
+      },
+      {
+        label: "Wealth Gained (Interest)",
+        value: formatters.formatIndianCurrency(wealthGained),
+      },
+    ],
+    yearlyData: yearlyData,
+  };
+};
