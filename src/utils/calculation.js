@@ -1409,57 +1409,66 @@ export const calculateCreditCardPayoff = ({ inputs, calculationMode }) => {
   return null;
 };
 
-// utils/calculation.js
-
-// ... (keep formatters, calculateWeddingBreakdown, and calculateCreditCardPayoff)
-
 // --- NEW INVESTMENT CALCULATION LOGIC ---
 
+// utils/calculation.js
+
+// ... (keep formatters and other calculator functions as they are) ...
+
+// --- UPDATED INVESTMENT CALCULATION LOGIC ---
+
 /**
- * Calculates the future value of an investment based on regular contributions.
+ * Calculates the future value of an investment with an optional annual step-up.
  * @param {object} params - The investment parameters.
  * @param {object} params.inputs - The user-provided values.
  * @returns {object} A result object for the InvestmentResult component.
  */
 export const calculateInvestmentGrowth = ({ inputs }) => {
-  const { initialAmount, monthlyContribution, annualRate, years } = inputs;
+  const {
+    initialAmount,
+    monthlyContribution,
+    annualRate,
+    years,
+    annualStepUp, // New input
+  } = inputs;
 
   const monthlyRate = annualRate / 100 / 12;
-  const totalMonths = years * 12;
 
-  // Calculate the future value of the initial lump sum investment
-  const futureOfInitial =
-    initialAmount * Math.pow(1 + monthlyRate, totalMonths);
-
-  // Calculate the future value of the monthly SIP contributions (Future Value of a Series)
-  const futureOfContributions =
-    monthlyContribution *
-    ((Math.pow(1 + monthlyRate, totalMonths) - 1) / monthlyRate);
-
-  const totalCorpus = futureOfInitial + futureOfContributions;
-  const totalInvested = initialAmount + monthlyContribution * totalMonths;
-  const wealthGained = totalCorpus - totalInvested;
-
-  // Generate year-by-year breakdown data
-  const yearlyData = [];
   let currentBalance = initialAmount;
+  let currentMonthlySip = monthlyContribution;
+  let totalInvested = initialAmount;
+  const yearlyData = [];
+
+  // Loop through each year to apply the annual step-up
   for (let year = 1; year <= years; year++) {
-    let yearEndBalance = currentBalance;
-    for (let month = 1; month <= 12; month++) {
-      yearEndBalance =
-        (yearEndBalance + monthlyContribution) * (1 + monthlyRate);
-    }
-    const totalInvestedThisYear =
-      initialAmount + monthlyContribution * year * 12;
-    const interestThisYear = yearEndBalance - totalInvestedThisYear;
+    // Calculate the future value of the balance at the start of the year
+    const fvOfCurrentBalance = currentBalance * Math.pow(1 + monthlyRate, 12);
+
+    // Calculate the future value of this year's SIP contributions
+    const fvOfSipForYear =
+      currentMonthlySip * ((Math.pow(1 + monthlyRate, 12) - 1) / monthlyRate);
+
+    // The balance at the end of this year
+    currentBalance = fvOfCurrentBalance + fvOfSipForYear;
+
+    // Track total amount invested so far
+    totalInvested += currentMonthlySip * 12;
+
+    const interestThisYear = currentBalance - totalInvested;
+
     yearlyData.push({
       year,
-      endBalance: formatters.formatIndianCurrency(yearEndBalance),
-      totalInvestment: formatters.formatIndianCurrency(totalInvestedThisYear),
+      endBalance: formatters.formatIndianCurrency(currentBalance),
+      totalInvestment: formatters.formatIndianCurrency(totalInvested),
       interestEarned: formatters.formatIndianCurrency(interestThisYear),
     });
-    currentBalance = yearEndBalance;
+
+    // Apply the step-up for the next year
+    currentMonthlySip *= 1 + annualStepUp / 100;
   }
+
+  const totalCorpus = currentBalance;
+  const wealthGained = totalCorpus - totalInvested;
 
   return {
     isError: false,
@@ -1469,7 +1478,7 @@ export const calculateInvestmentGrowth = ({ inputs }) => {
       label: "Total Corpus After " + years + " Years",
       isCurrency: true,
     },
-    summaryText: `With consistent investment, your portfolio could grow significantly over time.`,
+    summaryText: `With consistent investment and a ${annualStepUp}% annual step-up.`,
     breakdown: [
       {
         label: "Total Amount Invested",

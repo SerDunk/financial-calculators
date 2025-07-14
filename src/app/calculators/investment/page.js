@@ -14,6 +14,7 @@ const InvestmentCalculator = () => {
     monthlyContribution: 10000,
     annualRate: 12,
     years: 10,
+    annualStepUp: 10, // New state for annual increase
   });
 
   const [result, setResult] = useState(null);
@@ -43,7 +44,7 @@ const InvestmentCalculator = () => {
     <div className="min-h-screen font-lexend bg-[#EFEDF4] xs:px-0 px-1.5">
       <div className="max-w-xl mx-auto">
         <Heading
-          header="Investment Growth Calculator"
+          header="Investment Growth Calculator (SIP)"
           desc="Project the future value of your investments with regular contributions."
         />
         <div className="rounded-2xl p-6 relative bg-white mb-4">
@@ -69,6 +70,17 @@ const InvestmentCalculator = () => {
               step={1000}
               tooltip="The fixed amount you plan to invest every month."
             />
+            {/* New Slider for Annual Step-Up */}
+            <SliderInput
+              label="Annual Contribution Increase (%)"
+              value={inputs.annualStepUp}
+              onChange={(v) => handleInputChange("annualStepUp", v)}
+              showCurrency={false}
+              min={0}
+              max={25}
+              step={1}
+              tooltip="The percentage by which you'll increase your monthly SIP amount each year (e.g., 10%)."
+            />
             <SliderInput
               label="Expected Annual Return (%)"
               value={inputs.annualRate}
@@ -77,7 +89,7 @@ const InvestmentCalculator = () => {
               min={1}
               max={30}
               step={0.5}
-              tooltip="The estimated annual growth rate of your investment (e.g., 12% for equity mutual funds)."
+              tooltip="The estimated annual growth rate of your investment."
             />
             <SliderInput
               label="Investment Tenure (Years)"
