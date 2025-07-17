@@ -6,6 +6,7 @@ import Vacation from "../../public/beach.png";
 import Rings from "../../public/wedding-rings.png";
 import CreditCard from "../../public/credit-card.png";
 import Investment from "../../public/money.png";
+import Salary from "../../public/salary.png";
 
 import Image from "next/image";
 
@@ -95,5 +96,12 @@ export const calculatorData = [
     description: "Calculate your investment returns and growth",
     icon: <Image src={Investment} alt="Investment" />,
     link: "/calculators/investment",
+  },
+  {
+    id: 9,
+    title: "In-Hand Salary",
+    description: "Calculate your in-hand salary and tax",
+    icon: <Image src={Salary} alt="Salary" />,
+    link: "/calculators/in-hand-salary",
   },
 ];

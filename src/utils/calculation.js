@@ -1492,3 +1492,107 @@ export const calculateInvestmentGrowth = ({ inputs }) => {
     yearlyData: yearlyData,
   };
 };
+
+// --- NEW IN-HAND SALARY CALCULATION LOGIC ---
+
+// utils/calculation.js
+
+// ... (keep formatters)
+
+export const calculateInHandSalary = ({ inputs, selectedRegime }) => {
+  const {
+    annualCTC,
+    variablePay,
+    monthlyPF,
+    annualGratuity,
+    standardDeduction,
+    monthlyRent,
+    custom80C,
+    section80D,
+  } = inputs;
+
+  // --- Step 1: Employer-Side Deductions from CTC ---
+  const employerPF = monthlyPF * 12; // Assume employer matches employee contribution
+  const grossAnnualSalary = annualCTC - employerPF - annualGratuity;
+  const monthlyGross = grossAnnualSalary / 12;
+
+  // --- Step 2: Calculate Taxable Income ---
+  let taxableIncome,
+    hraExemption = 0,
+    investments = 0;
+  const employeePFAnnual = monthlyPF * 12;
+
+  if (selectedRegime === "old") {
+    const basicSalary = grossAnnualSalary * 0.4; // Needed for HRA calculation
+    const hraReceived = basicSalary * 0.5;
+    hraExemption = Math.max(
+      0,
+      Math.min(
+        hraReceived,
+        monthlyRent * 12 - basicSalary * 0.1,
+        basicSalary * 0.5
+      )
+    );
+    investments =
+      Math.min(150000, employeePFAnnual + custom80C) +
+      Math.min(25000, section80D);
+    taxableIncome = Math.max(
+      0,
+      grossAnnualSalary - standardDeduction - hraExemption - investments
+    );
+  } else {
+    // New Regime
+    taxableIncome = Math.max(0, grossAnnualSalary - standardDeduction);
+  }
+
+  // --- Step 3: Calculate Tax on Taxable Income ---
+  let tax = 0;
+  if (selectedRegime === "old") {
+    if (taxableIncome > 500000) {
+      // Rebate handled by this check
+      if (taxableIncome > 1000000)
+        tax = 112500 + (taxableIncome - 1000000) * 0.3;
+      else if (taxableIncome > 500000)
+        tax = 12500 + (taxableIncome - 500000) * 0.2;
+    }
+  } else {
+    if (taxableIncome > 700000) {
+      // Rebate handled by this check
+      if (taxableIncome > 1500000)
+        tax = 150000 + (taxableIncome - 1500000) * 0.3;
+      else if (taxableIncome > 1200000)
+        tax = 90000 + (taxableIncome - 1200000) * 0.2;
+      else if (taxableIncome > 900000)
+        tax = 45000 + (taxableIncome - 900000) * 0.15;
+      else if (taxableIncome > 600000)
+        tax = 15000 + (taxableIncome - 600000) * 0.1;
+      else if (taxableIncome > 300000) tax = (taxableIncome - 300000) * 0.05;
+    }
+  }
+  const totalAnnualTax = tax * 1.04;
+  const professionalTax = 2400;
+
+  // --- Step 4: Final In-Hand Calculation ---
+  const totalAnnualDeductions =
+    totalAnnualTax + employeePFAnnual + professionalTax;
+  const netAnnualTakeHome = grossAnnualSalary - totalAnnualDeductions;
+
+  // --- Step 5: Structure the final breakdown object ---
+  return {
+    breakdown: {
+      monthlyCTC: annualCTC / 12,
+      epfEmployer: employerPF / 12,
+      gratuity: annualGratuity / 12,
+      grossSalary: monthlyGross,
+      standardDeduction: standardDeduction / 12,
+      hraExemption: hraExemption / 12,
+      investments: investments / 12,
+      taxableIncome: taxableIncome / 12,
+      incomeTax: totalAnnualTax / 12,
+      professionalTax: professionalTax / 12,
+      epfEmployee: monthlyPF,
+      monthlyInHand: netAnnualTakeHome / 12,
+    },
+    annualVariablePay: variablePay,
+  };
+};
