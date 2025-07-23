@@ -1596,3 +1596,30 @@ export const calculateInHandSalary = ({ inputs, selectedRegime }) => {
     annualVariablePay: variablePay,
   };
 };
+
+// utils/calculation.js
+
+// ... (keep formatters and other calculator functions)
+
+// --- NEW SIP CALCULATION LOGIC ---
+
+export const calculateSip = ({ inputs }) => {
+  const { monthlyInvestment, annualRate, years } = inputs;
+
+  const monthlyRate = annualRate / 100 / 12;
+  const totalMonths = years * 12;
+  const totalInvested = monthlyInvestment * totalMonths;
+
+  // Future Value of a Series formula: P * [({(1+i)^n}-1)/i] * (1+i)
+  const totalValue =
+    monthlyInvestment *
+    ((Math.pow(1 + monthlyRate, totalMonths) - 1) / monthlyRate);
+
+  const estimatedReturns = totalValue - totalInvested;
+
+  return {
+    investedAmount: totalInvested,
+    estimatedReturns: estimatedReturns,
+    totalValue: totalValue,
+  };
+};

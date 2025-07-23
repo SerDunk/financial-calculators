@@ -7,6 +7,7 @@ import Rings from "../../public/wedding-rings.png";
 import CreditCard from "../../public/credit-card.png";
 import Investment from "../../public/money.png";
 import Salary from "../../public/salary.png";
+import SIP from "../../public/SIP.png";
 
 import Image from "next/image";
 
@@ -103,5 +104,12 @@ export const calculatorData = [
     description: "Calculate your in-hand salary and tax",
     icon: <Image src={Salary} alt="Salary" />,
     link: "/calculators/in-hand-salary",
+  },
+  {
+    id: 10,
+    title: "SIP Calculator",
+    description: "Calculate your SIP returns and growth",
+    icon: <Image src={SIP} alt="Invest" />,
+    link: "/calculators/sip",
   },
 ];
