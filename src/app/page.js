@@ -1,12 +1,30 @@
+"use client";
 import Image from "next/image";
+import { useState } from "react";
 
 import CalculatorCard from "../components/CalculatorCard";
 import { calculatorData } from "@/constants/calculatorData";
 
 export default function Home() {
+  const [activeCategory, setActiveCategory] = useState("all");
+
+  const filters = [
+    { label: "All", value: "all" },
+    { label: "Investing & Wealth", value: "investing" },
+    { label: "Salary & Tax", value: "salary" },
+    { label: "Home & Big Decisions", value: "home" },
+    { label: "Lifestyle & Goals", value: "lifestyle" },
+    { label: "Debt & Credit", value: "debt" },
+  ];
+
+  const filtered =
+    activeCategory === "all"
+      ? calculatorData
+      : calculatorData.filter((c) => c.categories?.includes(activeCategory));
+
   return (
     <div className="min-h-screen bg-[#EFEDF4] px-1.5 xs:px-0 font-lexend">
-      <div className="max-w-md mx-auto space-y-6">
+      <div className="max-w-md mx-auto space-y-4">
         {/* Header Card */}
         <div
           className="rounded-xl px-6 py-5 text-white relative overflow-hidden"
@@ -35,9 +53,29 @@ export default function Home() {
           </p>
         </div>
 
+        {/* Filter Bar */}
+        <div
+          className="flex overflow-x-auto scrollbar-width-none gap-1.5"
+          style={{ scrollbarWidth: "none" }}
+        >
+          {filters.map((filter) => (
+            <button
+              key={filter.value}
+              onClick={() => setActiveCategory(filter.value)}
+              className={`rounded-full text-xs px-6 py-1.5 border whitespace-nowrap shrink-0 ${
+                activeCategory === filter.value
+                  ? "bg-[#6239A8] border-[#6239A8] text-white" // Use a darker color for the active category
+                  : "bg-white border-gray-200 text-gray-500"
+              }`}
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
+
         {/* Calculator Cards */}
-        <div className="flex flex-col gap-5">
-          {calculatorData.map((calculator) => (
+        <div className="flex flex-col gap-6">
+          {filtered.map((calculator) => (
             <CalculatorCard
               key={calculator.id}
               title={calculator.title}

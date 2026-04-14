@@ -1,11 +1,25 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { ChevronLeft } from "lucide-react";
 
 export default function Navbar() {
+  const pathname = usePathname();
+
+  if (pathname === "/") {
+    return null;
+  }
+
   return (
-    <div className="text-[#020288] p-3 flex justify-between items-center">
-      <div className="font-semibold text-md">
-        <Link href="/">Home</Link>
-      </div>
+    <div className="w-full max-w-xl px-6 pt-6 pb-0">
+      <Link
+        href="/"
+        className="inline-flex items-center text-sm font-medium text-[#686868] hover:text-[#020288] transition-colors"
+      >
+        <ChevronLeft size={16} className="mr-1 -ml-1" />
+        Back
+      </Link>
     </div>
   );
 }
