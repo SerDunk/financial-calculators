@@ -1623,3 +1623,114 @@ export const calculateSip = ({ inputs }) => {
     totalValue: totalValue,
   };
 };
+
+// --- NEW CAR LEASE VS LOAN CALCULATION LOGIC ---
+
+export const calculateCarLeaseVsLoanBreakdown = ({
+  exShowroomPrice,
+  gstSlabPercent,
+  isEV,
+  engineAbove1600cc,
+  driverProvided,
+  tenureYears,
+  residualValuePercent,
+  annualCTC,
+  interestRate,
+  monthlyMaintenance
+}) => {
+  const roadTaxPercent = 10;
+  const initialInsurancePercent = 4;
+  const tenureMonths = tenureYears * 12;
+
+  // Ex-Showroom Price already INCLUDES the vehicle's GST initially. 
+  // On-Road adds Road Tax and Insurance.
+  const roadTaxAmount = exShowroomPrice * (roadTaxPercent / 100);
+  const initialInsuranceAmount = exShowroomPrice * (initialInsurancePercent / 100);
+  const onRoadPrice = exShowroomPrice + roadTaxAmount + initialInsuranceAmount;
+
+  // Marginal Tax Rate (FY 2025-26 New Regime slabs simplified)
+  let marginalTaxRate = 0;
+  if (annualCTC > 2400000) marginalTaxRate = 0.312;
+  else if (annualCTC > 2000000) marginalTaxRate = 0.26;
+  else if (annualCTC > 1600000) marginalTaxRate = 0.208;
+  else if (annualCTC > 1200000) marginalTaxRate = 0.156;
+  else if (annualCTC > 800000) marginalTaxRate = 0.104;
+  else if (annualCTC > 400000) marginalTaxRate = 0.052;
+  else marginalTaxRate = 0;
+
+  // Residual Value is typically a percentage of Ex-Showroom
+  const residualValue = exShowroomPrice * (residualValuePercent / 100);
+  const monthlyRate = (interestRate / 100) / 12;
+
+  // ---------------------------------
+  // LEASE CALCULATION
+  // ---------------------------------
+  // Lessor capitalizes Ex-showroom.
+  // Principal = Ex-showroom - Residual (Plus road tax/insurance if included in lease capital)
+  // Let's assume the full On-Road is financed to be fair against Loan.
+  const leasePrincipalAmount = onRoadPrice - residualValue;
+  
+  const emiOnPrincipalLease = monthlyRate > 0 
+    ? (leasePrincipalAmount * monthlyRate * Math.pow(1 + monthlyRate, tenureMonths)) / (Math.pow(1 + monthlyRate, tenureMonths) - 1)
+    : leasePrincipalAmount / tenureMonths;
+  
+  const interestOnRV = residualValue * monthlyRate;
+  const preGstLeaseRental = emiOnPrincipalLease + interestOnRV;
+  
+  // Lease Rentals attract the car's GST slab
+  const monthlyLeaseRental = preGstLeaseRental * (1 + (gstSlabPercent / 100));
+
+  // Perquisite Valuation (Taxed purely on the perk value at marginal rate)
+  let basePerk = 0;
+  if (isEV) basePerk = 5000;
+  else if (!engineAbove1600cc) basePerk = 5000;
+  else basePerk = 7000;
+  
+  if (driverProvided) basePerk += 3000;
+  const monthlyPerquisiteTax = basePerk * marginalTaxRate;
+
+  // Tax Savings: Corporate Lease allows deducting (Lease Rental + Maintenance) from taxable CTC
+  const monthlyTaxSavings = (monthlyLeaseRental + monthlyMaintenance) * marginalTaxRate;
+  
+  // Net Effective Cost of Leasing
+  const netEffectiveMonthlyLeaseCost = (monthlyLeaseRental + monthlyMaintenance) - monthlyTaxSavings + monthlyPerquisiteTax;
+
+  // End of Tenure Buyback Outflow (Paying the Residual + applicable GST on resale of used car, typically 18% or same as slab)
+  const residualBuyback = residualValue * (1 + (gstSlabPercent / 100));
+  
+  const totalOutflowLease = (netEffectiveMonthlyLeaseCost * tenureMonths) + residualBuyback;
+
+  // ---------------------------------
+  // LOAN CALCULATION
+  // ---------------------------------
+  // Auto Loan typically finances up to 100% of On-Road Price.
+  const loanEMI = monthlyRate > 0 
+    ? (onRoadPrice * monthlyRate * Math.pow(1 + monthlyRate, tenureMonths)) / (Math.pow(1 + monthlyRate, tenureMonths) - 1)
+    : onRoadPrice / tenureMonths;
+
+  // You also pay maintenance and insurance out of pocket post-tax.
+  const monthlyInsurance = initialInsuranceAmount / 12; // Assuming flat mapping over years
+  const totalMonthlyOutflowLoan = loanEMI + monthlyMaintenance + monthlyInsurance;
+
+  const totalOutflowLoan = totalMonthlyOutflowLoan * tenureMonths;
+
+  return {
+    onRoadPrice,
+    monthlyLeaseRental,
+    monthlyTaxSavings,
+    netEffectiveMonthlyLeaseCost,
+    residualBuyback,
+    perquisiteValue: basePerk,
+    monthlyPerquisiteTax,
+    loanEMI,
+    totalMonthlyOutflowLoan,
+    totalOutflowLoan,
+    totalOutflowLease,
+    totalTaxSaved: monthlyTaxSavings * tenureMonths,
+    betterOption: totalOutflowLease < totalOutflowLoan ? "Leasing" : "Loan",
+    wealthDifference: Math.abs(totalOutflowLoan - totalOutflowLease),
+    comparisonPeriod: tenureYears,
+    tenureMonths,
+    displayedTenure: tenureYears,
+  };
+};

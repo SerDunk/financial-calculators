@@ -128,4 +128,11 @@ export const calculatorData = [
     link: "/calculators/car-lease",
     categories: ["home", "debt"],
   },
+  {
+  id: 12,
+  title: "Old vs New Tax Regime",
+  description: "Compare your tax liability under both regimes to identify the most tax-efficient option for you",
+  link: "/calculators/old-vs-new-tax-regime",
+  categories: ["salary"]
+}
 ];
