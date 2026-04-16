@@ -8,35 +8,10 @@ import CreditCard from "../../public/credit-card.png";
 import Investment from "../../public/money.png";
 import Salary from "../../public/salary.png";
 import SIP from "../../public/SIP.png";
-
+import CarLease from "../../public/car-lease.png";
+import Tax from "../../public/tax.png"
 import Image from "next/image";
 
-const FAQIcon = () => (
-  <svg
-    width="40"
-    height="40"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className="text-[#8362D1]"
-  >
-    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
-    <path
-      d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M12 17h.01"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 export const calculatorData = [
   {
@@ -126,6 +101,7 @@ export const calculatorData = [
     title: "Car Lease",
     description: "Calculate your car lease EMI and total cost of ownership",
     link: "/calculators/car-lease",
+    icon: <Image src={CarLease} alt="Car" />,
     categories: ["home", "debt"],
   },
   {
@@ -133,6 +109,7 @@ export const calculatorData = [
   title: "Old vs New Tax Regime",
   description: "Compare your tax liability under both regimes to identify the most tax-efficient option for you",
   link: "/calculators/old-vs-new-tax-regime",
+  icon:<Image src={Tax} alt="Money in Hand"/>,
   categories: ["salary"]
 }
 ];

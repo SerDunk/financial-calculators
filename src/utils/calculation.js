@@ -1734,3 +1734,209 @@ export const calculateCarLeaseVsLoanBreakdown = ({
     displayedTenure: tenureYears,
   };
 };
+
+// =====================================================
+// INCOME TAX (OLD VS NEW REGIME) CALCULATION FUNCTIONS
+// =====================================================
+
+const formatCurrencyIT = (num) => {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0
+  }).format(num);
+};
+
+const getNewRegimeSlabs = () => [
+  { limit: 400000, rate: 0 },
+  { limit: 800000, rate: 0.05 },
+  { limit: 1200000, rate: 0.10 },
+  { limit: 1600000, rate: 0.15 },
+  { limit: 2000000, rate: 0.20 },
+  { limit: 2400000, rate: 0.25 },
+  { limit: Infinity, rate: 0.30 }
+];
+
+const getOldRegimeSlabs = (ageGroup) => {
+  if (ageGroup === "super") {
+    // 80+
+    return [
+      { limit: 500000, rate: 0 },
+      { limit: 1000000, rate: 0.20 },
+      { limit: Infinity, rate: 0.30 }
+    ];
+  } else if (ageGroup === "senior") {
+    // 60-79
+    return [
+      { limit: 300000, rate: 0 },
+      { limit: 500000, rate: 0.05 },
+      { limit: 1000000, rate: 0.20 },
+      { limit: Infinity, rate: 0.30 }
+    ];
+  } else {
+    // < 60
+    return [
+      { limit: 250000, rate: 0 },
+      { limit: 500000, rate: 0.05 },
+      { limit: 1000000, rate: 0.20 },
+      { limit: Infinity, rate: 0.30 }
+    ];
+  }
+};
+
+const calculateTaxBySlabs = (taxableIncome, slabs) => {
+  let tax = 0;
+  let previousLimit = 0;
+  const breakdown = [];
+
+  for (const slab of slabs) {
+    if (taxableIncome > previousLimit) {
+      const taxableAmountInSlab = Math.min(taxableIncome, slab.limit) - previousLimit;
+      const taxForSlab = taxableAmountInSlab * slab.rate;
+      if (taxForSlab > 0 || (slab.rate === 0 && taxableAmountInSlab > 0)) {
+         breakdown.push({
+          range: `₹${(previousLimit).toLocaleString('en-IN')} - ${slab.limit === Infinity ? 'Above' : '₹' + slab.limit.toLocaleString('en-IN')} (${slab.rate * 100}%)`,
+          taxForSlab
+         });
+      }
+      tax += taxForSlab;
+      previousLimit = slab.limit;
+    } else {
+      break;
+    }
+  }
+  return { tax, breakdown };
+};
+
+const calculateRebateAndMarginalRelief = (taxBeforeRebate, taxableIncome, regime) => {
+  if (regime === "new") {
+    if (taxableIncome <= 1200000) {
+      return Math.min(taxBeforeRebate, 60000); // 100% rebate limit
+    } else {
+      const limit = 1200000;
+      const incomeAboveLimit = taxableIncome - limit;
+      if (taxBeforeRebate > incomeAboveLimit) {
+        return taxBeforeRebate - incomeAboveLimit;
+      }
+    }
+  } else {
+    if (taxableIncome <= 500000) {
+      return Math.min(taxBeforeRebate, 12500); // 100% rebate limit
+    }
+  }
+  return 0;
+};
+
+const calculateSurchargeWithMarginalRelief = (taxableIncome, taxBeforeSurcharge, isNewRegime, slabs) => {
+  const getThresholdAndRate = (income) => {
+    if (income > 50000000) return { threshold: 50000000, rate: isNewRegime ? 0.25 : 0.37 };
+    if (income > 20000000) return { threshold: 20000000, rate: 0.25 };
+    if (income > 10000000) return { threshold: 10000000, rate: 0.15 };
+    if (income > 5000000) return { threshold: 5000000, rate: 0.10 };
+    return { threshold: 0, rate: 0 };
+  };
+
+  const { threshold, rate } = getThresholdAndRate(taxableIncome);
+  if (rate === 0) return { surcharge: 0, marginalRelief: 0 };
+
+  let surchargeAmount = taxBeforeSurcharge * rate;
+  let totalWithSurcharge = taxBeforeSurcharge + surchargeAmount;
+
+  // Calculate tax exactly on the boundary threshold to find relief
+  const { tax: taxOnThreshold } = calculateTaxBySlabs(threshold, slabs);
+  const thresholdRate = getThresholdAndRate(threshold).rate; 
+  const surchargeOnThreshold = taxOnThreshold * thresholdRate;
+  const totalOnThreshold = taxOnThreshold + surchargeOnThreshold;
+
+  const extraIncome = taxableIncome - threshold;
+  const extraTax = totalWithSurcharge - totalOnThreshold;
+
+  let marginalRelief = 0;
+  if (extraTax > extraIncome) {
+    marginalRelief = extraTax - extraIncome;
+    surchargeAmount -= marginalRelief;
+  }
+
+  return { surcharge: surchargeAmount, marginalRelief };
+};
+
+export const calculateIncomeTaxBreakdown = (inputs) => {
+  const {
+    grossIncome = 1200000,
+    ageGroup = "below60",
+    taxpayerType = "salaried",
+    oldSection80C = 0,
+    oldSection80D = 0,
+    oldHRA = 0,
+    oldHomeLoan = 0,
+    oldNPS = 0,
+    oldOther = 0,
+    newEmployerNPS = 0,
+    newAgniveer = 0
+  } = inputs;
+
+  // Old Regime Logic
+  const oldStandardDeduction = taxpayerType === "salaried" ? 50000 : 0;
+  const oldTotalDeductions = oldStandardDeduction + oldSection80C + oldSection80D + oldHRA + oldHomeLoan + oldNPS + oldOther;
+  const oldTaxableIncome = Math.max(0, grossIncome - oldTotalDeductions);
+  const oldSlabs = getOldRegimeSlabs(ageGroup);
+  
+  let { tax: oldTaxBeforeRebate, breakdown: oldBreakdown } = calculateTaxBySlabs(oldTaxableIncome, oldSlabs);
+  const oldRebate = calculateRebateAndMarginalRelief(oldTaxBeforeRebate, oldTaxableIncome, "old");
+  let oldTaxAfterRebate = Math.max(0, oldTaxBeforeRebate - oldRebate);
+  
+  const { surcharge: oldSurcharge, marginalRelief: oldSurchargeMR } = calculateSurchargeWithMarginalRelief(oldTaxableIncome, oldTaxAfterRebate, false, oldSlabs);
+  const oldCess = (oldTaxAfterRebate + oldSurcharge) * 0.04;
+  const oldTotalTax = oldTaxAfterRebate + oldSurcharge + oldCess;
+
+  // New Regime Logic
+  const newStandardDeduction = taxpayerType === "salaried" ? 75000 : 0;
+  const newTotalDeductions = newStandardDeduction + newEmployerNPS + newAgniveer;
+  const newTaxableIncome = Math.max(0, grossIncome - newTotalDeductions);
+  const newSlabs = getNewRegimeSlabs();
+  
+  let { tax: newTaxBeforeRebate, breakdown: newBreakdown } = calculateTaxBySlabs(newTaxableIncome, newSlabs);
+  const newRebate = calculateRebateAndMarginalRelief(newTaxBeforeRebate, newTaxableIncome, "new");
+  let newTaxAfterRebate = Math.max(0, newTaxBeforeRebate - newRebate);
+  
+  const { surcharge: newSurcharge, marginalRelief: newSurchargeMR } = calculateSurchargeWithMarginalRelief(newTaxableIncome, newTaxAfterRebate, true, newSlabs);
+  const newCess = (newTaxAfterRebate + newSurcharge) * 0.04;
+  const newTotalTax = newTaxAfterRebate + newSurcharge + newCess;
+
+  const winner = newTotalTax < oldTotalTax ? 'new' : (oldTotalTax < newTotalTax ? 'old' : 'tie');
+  const savings = Math.abs(oldTotalTax - newTotalTax);
+
+  return {
+    grossIncome,
+    oldRegime: {
+      totalDeductions: oldTotalDeductions,
+      taxableIncome: oldTaxableIncome,
+      breakdown: oldBreakdown,
+      taxBeforeCess: oldTaxAfterRebate,
+      rebate: oldRebate,
+      surcharge: oldSurcharge,
+      surchargeMarginalRelief: oldSurchargeMR,
+      cess: oldCess,
+      totalTax: Math.round(oldTotalTax),
+      effectiveTaxRate: grossIncome > 0 ? (oldTotalTax / grossIncome) * 100 : 0,
+      monthlyOutflow: Math.round(oldTotalTax / 12),
+      inHandAnnual: Math.round(grossIncome - oldTotalTax)
+    },
+    newRegime: {
+      totalDeductions: newTotalDeductions,
+      taxableIncome: newTaxableIncome,
+      breakdown: newBreakdown,
+      taxBeforeCess: newTaxAfterRebate,
+      rebate: newRebate,
+      surcharge: newSurcharge,
+      surchargeMarginalRelief: newSurchargeMR,
+      cess: newCess,
+      totalTax: Math.round(newTotalTax),
+      effectiveTaxRate: grossIncome > 0 ? (newTotalTax / grossIncome) * 100 : 0,
+      monthlyOutflow: Math.round(newTotalTax / 12),
+      inHandAnnual: Math.round(grossIncome - newTotalTax)
+    },
+    winner,
+    savings: Math.round(savings)
+  };
+};

@@ -52,7 +52,7 @@ const CarLeaseCalculator = () => {
 
   return (
     <div className="min-h-screen font-lexend bg-[#EFEDF4] px-1.5 xs:px-0">
-      <div className="max-w-xl mx-auto pb-10">
+      <div className="max-w-xl mx-auto">
         <Heading
           header="Car Lease Calculator"
           desc="Compare the financial impact of a Corporate Lease versus an Auto Loan"
