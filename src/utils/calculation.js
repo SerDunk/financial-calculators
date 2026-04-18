@@ -1940,3 +1940,181 @@ export const calculateIncomeTaxBreakdown = (inputs) => {
     savings: Math.round(savings)
   };
 };
+
+export const calculateGratuityBreakdown = (inputs) => {
+  const {
+    employmentType = "Private (Act Covered)",
+    separationReason = "Retirement / Superannuation",
+    yearsOfService = 5,
+    additionalMonths = 0,
+    basicSalary = 0,
+    da = 0,
+    retainingAllowance = 0,
+    taxRegime = "New Regime",
+    incomeTaxSlab = 0
+  } = inputs;
+
+  const wages = basicSalary + da + retainingAllowance;
+
+  // Step 2 - Completed Years
+  let completedYears = yearsOfService;
+  if (employmentType === "Private (Act Covered)") {
+    if (additionalMonths >= 6) {
+      completedYears += 1;
+    }
+  }
+
+  // Step 3 - Gratuity Formula
+  let formulaUsed = "Act-Covered (÷26)";
+  let grossGratuity = 0;
+  if (employmentType === "Government / PSU" || employmentType === "Private (Act Covered)") {
+    grossGratuity = (wages * 15 * completedYears) / 26;
+  } else {
+    formulaUsed = "Not-Covered (÷30)";
+    grossGratuity = (wages * 15 * completedYears) / 30;
+  }
+
+  // Step 4 - Statutory Cap
+  let statutoryCapApplied = null;
+  if (employmentType === "Government / PSU") {
+    if (grossGratuity > 2500000) statutoryCapApplied = 2500000;
+  } else {
+    if (grossGratuity > 2000000) statutoryCapApplied = 2000000;
+  }
+
+  let gratuityPayable = statutoryCapApplied !== null ? statutoryCapApplied : grossGratuity;
+
+  // Step 5 - Eligibility Check
+  let isEligible = true;
+  if (separationReason !== "Death / Disability" && yearsOfService < 5) {
+    isEligible = false;
+    gratuityPayable = 0;
+  }
+
+  // Step 6 - Tax Calculation
+  let exemptPortion = 0;
+  if (!isEligible) {
+    exemptPortion = 0;
+  } else if (employmentType === "Government / PSU") {
+    exemptPortion = gratuityPayable; // Fully exempt
+  } else if (employmentType === "Private (Act Covered)") {
+    exemptPortion = Math.min(gratuityPayable, (wages * 15 * completedYears) / 26, 2000000);
+  } else if (employmentType === "Private (Not Covered)") {
+    exemptPortion = Math.min(gratuityPayable, (wages / 2) * completedYears, 2000000);
+  }
+
+  let taxablePortion = Math.max(0, gratuityPayable - exemptPortion);
+  let taxRatePercent = parseInt(incomeTaxSlab.replace("%", "")) || 0;
+  let estimatedTax = taxablePortion * (taxRatePercent / 100);
+  let netGratuity = gratuityPayable - estimatedTax;
+
+  return {
+    wages,
+    effectiveYears: completedYears,
+    formulaUsed,
+    grossGratuity,
+    statutoryCapApplied,
+    isEligible,
+    gratuityPayable,
+    exemptPortion,
+    taxablePortion,
+    estimatedTax,
+    netGratuity
+  };
+};
+
+export const calculateESPPBreakdown = (inputs) => {
+  const {
+    shareType = "Foreign Listed (MNC)",
+    lookback = true,
+    fmv1 = 1000,
+    fmv2 = 1200,
+    discountPercent = 15,
+    numberOfShares = 100,
+    incomeTaxSlab = "30%",
+    salePrice = 1500,
+    holdingPeriodMonths = 25,
+    isSTTpaid = false // Unused logically here but passed over
+  } = inputs;
+
+  const slabRate = parseInt(incomeTaxSlab.replace("%", "")) / 100 || 0;
+
+  // Stage 1: Purchase Setup
+  const basePrice = lookback ? Math.min(fmv1, fmv2) : fmv2;
+  const purchasePrice = basePrice * (1 - (discountPercent / 100));
+  
+  const perquisitePerShare = Math.max(0, fmv2 - purchasePrice);
+  const totalPerquisite = perquisitePerShare * numberOfShares;
+  const perquisiteTaxBeforeCess = totalPerquisite * slabRate;
+  const perquisiteTax = perquisiteTaxBeforeCess * 1.04;
+  
+  // Stage 2: Sale Setup
+  const capitalGainPerShare = salePrice - fmv2; // Could be negative
+  const totalCapitalGain = capitalGainPerShare * numberOfShares;
+  
+  let cgTaxBeforeCess = 0;
+  let cgClassification = "";
+  let ltcgExemptionApplied = 0;
+  
+  // Rule branching based on share type
+  if (shareType === "Indian Listed Company") {
+    if (holdingPeriodMonths <= 12) {
+      cgClassification = "STCG";
+      if (totalCapitalGain > 0) cgTaxBeforeCess = totalCapitalGain * 0.20; // 20%
+    } else {
+      cgClassification = "LTCG";
+      if (totalCapitalGain > 0) {
+         if (totalCapitalGain <= 125000) {
+            ltcgExemptionApplied = totalCapitalGain;
+         } else {
+            ltcgExemptionApplied = 125000;
+            cgTaxBeforeCess = (totalCapitalGain - 125000) * 0.125;
+         }
+      }
+    }
+  } else {
+    // Foreign Listed (Unlisted mapping)
+    if (holdingPeriodMonths <= 24) {
+      cgClassification = "STCG";
+      if (totalCapitalGain > 0) cgTaxBeforeCess = totalCapitalGain * slabRate;
+    } else {
+      cgClassification = "LTCG";
+      if (totalCapitalGain > 0) cgTaxBeforeCess = totalCapitalGain * 0.125;
+    }
+  }
+
+  const capitalGainsTax = cgTaxBeforeCess > 0 ? cgTaxBeforeCess * 1.04 : 0;
+  
+  // Totals
+  const totalInvestment = purchasePrice * numberOfShares;
+  const totalSaleProceeds = salePrice * numberOfShares;
+  const grossProfit = totalSaleProceeds - totalInvestment;
+  const totalTax = perquisiteTax + capitalGainsTax;
+  const netProfitAfterAllTaxes = grossProfit - totalTax;
+  const effectiveReturnPercent = totalInvestment > 0 ? (netProfitAfterAllTaxes / totalInvestment) * 100 : 0;
+  
+  // Lookback Savings
+  const lookbackSavingsPerShare = (!lookback || fmv1 >= fmv2) ? 0 : ((fmv2 - fmv1) * (1 - (discountPercent / 100)));
+  const totalLookbackSavings = lookbackSavingsPerShare * numberOfShares;
+
+  return {
+    basePrice,
+    purchasePrice,
+    discountBenefitPerShare: fmv2 - purchasePrice,
+    totalPerquisite,
+    perquisiteTax,
+    capitalGainPerShare,
+    totalCapitalGain,
+    cgClassification,
+    ltcgExemptionApplied,
+    capitalGainsTax,
+    totalInvestment,
+    totalSaleProceeds,
+    grossProfit,
+    totalTax,
+    netProfitAfterAllTaxes,
+    effectiveReturnPercent,
+    totalLookbackSavings,
+    actualDiscountRate: fmv2 > 0 ? ((fmv2 - purchasePrice) / fmv2) * 100 : 0
+  };
+};

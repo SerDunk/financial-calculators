@@ -10,6 +10,9 @@ import Salary from "../../public/salary.png";
 import SIP from "../../public/SIP.png";
 import CarLease from "../../public/car-lease.png";
 import Tax from "../../public/tax.png"
+import Gratuity from "../../public/gratuity.png"
+import ESPP from "../../public/ESPP.png"
+
 import Image from "next/image";
 
 
@@ -111,5 +114,21 @@ export const calculatorData = [
   link: "/calculators/old-vs-new-tax-regime",
   icon:<Image src={Tax} alt="Money in Hand"/>,
   categories: ["salary"]
-}
+  },
+  {
+  id: 13,
+  title: "Gratuity Calculator",
+  description: "Calculate your estimated gratuity based on the latest 2026 Code on Social Security rules",
+  link: "/calculators/gratuity-calculator",
+  icon: <Image src={Gratuity} alt="Gratuity" />,
+  categories: ["salary"]
+  },
+  {
+  id: 14,
+  title: "ESPP Tax Calculator",
+  description: "Calculate your post-tax return on Employee Stock Purchase Plans including perquisite and capital gains stages",
+  link: "/calculators/espp-calculator",
+  icon: <Image src={ESPP} alt="ESPP" />,
+  categories: ["salary", "investing"]
+  }
 ];
