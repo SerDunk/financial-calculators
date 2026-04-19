@@ -12,6 +12,8 @@ import CarLease from "../../public/car-lease.png";
 import Tax from "../../public/tax.png"
 import Gratuity from "../../public/gratuity.png"
 import ESPP from "../../public/ESPP.png"
+import HealthInsurance from "../../public/health-premium.png"
+
 
 import Image from "next/image";
 
@@ -130,5 +132,13 @@ export const calculatorData = [
   link: "/calculators/espp-calculator",
   icon: <Image src={ESPP} alt="ESPP" />,
   categories: ["salary", "investing"]
+  },
+  {
+  id: 15,
+  title: "Health Insurance Adequacy",
+  description: "Check if your health cover is adequate for 2026 costs, see your gap",
+  link: "/calculators/health-insurance",
+  icon: <Image src={HealthInsurance} alt="Health Insurance" />,
+  categories: ["salary", "lifestyle"]
   }
 ];
