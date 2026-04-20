@@ -13,6 +13,7 @@ import Tax from "../../public/tax.png"
 import Gratuity from "../../public/gratuity.png"
 import ESPP from "../../public/ESPP.png"
 import HealthInsurance from "../../public/health-premium.png"
+import HRAIcon from "../../public/house-for-sale.png"
 
 
 import Image from "next/image";
@@ -140,5 +141,13 @@ export const calculatorData = [
   link: "/calculators/health-insurance",
   icon: <Image src={HealthInsurance} alt="Health Insurance" />,
   categories: ["salary", "lifestyle"]
+  },
+  {
+  id: 16,
+  title: "HRA Tax Exemption",
+  description: "Calculate your HRA exemption under Sec 10(13A) or 80GG for FY 2026-27 — including new metro cities",
+  link: "/calculators/hra-calculator",
+  icon: <Image src={HRAIcon} alt="HRA" />,
+  categories: ["salary"]
   }
 ];
