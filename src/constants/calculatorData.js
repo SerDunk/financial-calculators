@@ -14,6 +14,7 @@ import Gratuity from "../../public/gratuity.png"
 import ESPP from "../../public/ESPP.png"
 import HealthInsurance from "../../public/health-premium.png"
 import HRAIcon from "../../public/house-for-sale.png"
+import FIRE from "../../public/fire.png"
 
 
 import Image from "next/image";
@@ -149,5 +150,13 @@ export const calculatorData = [
   link: "/calculators/hra-calculator",
   icon: <Image src={HRAIcon} alt="HRA" />,
   categories: ["salary"]
+  },
+  {
+  id: 17,
+  title: "Retirement Corpus & FIRE",
+  description: "Calculate your target retirement corpus and FIRE age using India-specific safe withdrawal rates and NPS 2026 rules",
+  link: "/calculators/retirement-corpus",
+  icon: <Image src={FIRE} alt="FIRE" />,
+  categories: ["investing", "lifestyle"]
   }
 ];

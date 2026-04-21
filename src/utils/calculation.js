@@ -2118,3 +2118,241 @@ export const calculateESPPBreakdown = (inputs) => {
     actualDiscountRate: fmv2 > 0 ? ((fmv2 - purchasePrice) / fmv2) * 100 : 0
   };
 };
+
+export const calculateRetirementCorpus = (inputs) => {
+  const {
+    currentAge,
+    targetAge,
+    employmentType,
+    currentExpenses,
+    inflationRate,
+    fireVariantMultiplier, // 25, 33, 40
+    safeWithdrawalRate, // 4, 3, 2.5
+    epfBalance,
+    epfMonthly,
+    npsBalance,
+    npsMonthly,
+    equityBalance,
+    equityMonthly,
+    ppfBalance,
+    ppfMonthly,
+    debtBalance,
+    
+    epfReturn,
+    npsReturn,
+    equityReturn,
+    ppfReturn,
+    debtReturn,
+    postRetirementReturn,
+    
+    npsSubscriberType,
+    taxSlab,
+    annuityRate,
+    
+    medicalInflationRate = 14
+  } = inputs;
+
+  const yearsToRetirement = Math.max(0, targetAge - currentAge);
+  const monthsToRetirement = yearsToRetirement * 12;
+  
+  // Step 1: Target Corpus
+  const futureMonthlyExpenses = currentExpenses * Math.pow(1 + inflationRate / 100, yearsToRetirement);
+  const annualRetirementExpenses = futureMonthlyExpenses * 12;
+  const targetCorpus = annualRetirementExpenses * fireVariantMultiplier;
+
+  // Helper for FV of SIP
+  const calculateFVofSIP = (monthlySip, rate, months) => {
+    if (months <= 0) return 0;
+    const monthlyRate = rate / 100 / 12;
+    if (monthlyRate === 0) return monthlySip * months;
+    return monthlySip * ( (Math.pow(1 + monthlyRate, months) - 1) / monthlyRate ) * (1 + monthlyRate);
+  };
+
+  const calculateFV = (presentValue, rate, years) => {
+    return presentValue * Math.pow(1 + rate / 100, years);
+  };
+
+  // Step 2: Future Value for each asset
+  const fvEpf = calculateFV(epfBalance, epfReturn, yearsToRetirement) + calculateFVofSIP(epfMonthly, epfReturn, monthsToRetirement);
+  const fvNps = calculateFV(npsBalance, npsReturn, yearsToRetirement) + calculateFVofSIP(npsMonthly, npsReturn, monthsToRetirement);
+  const fvEquity = calculateFV(equityBalance, equityReturn, yearsToRetirement) + calculateFVofSIP(equityMonthly, equityReturn, monthsToRetirement);
+  const fvPpf = calculateFV(ppfBalance, ppfReturn, yearsToRetirement) + calculateFVofSIP(ppfMonthly, ppfReturn, monthsToRetirement);
+  const fvDebt = calculateFV(debtBalance, debtReturn, yearsToRetirement);
+
+  const totalProjectedCorpus = fvEpf + fvNps + fvEquity + fvPpf + fvDebt;
+
+  // Step 3: NPS Corpus Split at Retirement (2026 Rules)
+  let npsTaxFreeLumpSum = 0;
+  let npsTaxableLumpSum = 0;
+  let npsAnnuityCorpus = 0;
+
+  if (npsSubscriberType === "government") {
+    npsTaxFreeLumpSum = 0.60 * fvNps;
+    npsTaxableLumpSum = 0;
+    npsAnnuityCorpus = 0.40 * fvNps;
+  } else {
+    // non-government
+    if (fvNps <= 800000) {
+      npsTaxFreeLumpSum = 0.60 * fvNps;
+      npsTaxableLumpSum = 0.40 * fvNps; // 100% lump sum, 60% tax-free
+      npsAnnuityCorpus = 0;
+    } else if (fvNps <= 1200000) {
+      npsTaxFreeLumpSum = 600000;
+      npsTaxableLumpSum = 0;
+      npsAnnuityCorpus = Math.max(0, fvNps - 600000);
+    } else {
+      // > 12L => 80% lump sum (60% tax-free, 20% taxable), 20% annuity
+      npsTaxFreeLumpSum = 0.60 * fvNps;
+      npsTaxableLumpSum = 0.20 * fvNps;
+      npsAnnuityCorpus = 0.20 * fvNps;
+    }
+  }
+
+  const npsTaxableValue = npsTaxableLumpSum * (taxSlab / 100);
+  const npsMonthlyAnnuity = (npsAnnuityCorpus * (annuityRate / 100)) / 12;
+  const npsAnnuityTax = npsMonthlyAnnuity * (taxSlab / 100);
+
+  // Step 4: Corpus Gap / Surplus
+  const gap = targetCorpus - totalProjectedCorpus;
+
+  // Step 5: Additional SIP (if gap > 0)
+  let additionalSipNeeded = 0;
+  if (gap > 0 && monthsToRetirement > 0) {
+    const monthlyRate = equityReturn / 100 / 12;
+    additionalSipNeeded = gap * monthlyRate / ( (Math.pow(1 + monthlyRate, monthsToRetirement) - 1) * (1 + monthlyRate) );
+  }
+
+  // Step 6: FIRE Age (if surplus)
+  let fireAge = null;
+  let fireAgeMonths = 0;
+  if (gap <= 0) {
+    let currentBalanceEpf = epfBalance;
+    let currentBalanceNps = npsBalance;
+    let currentBalanceEquity = equityBalance;
+    let currentBalancePpf = ppfBalance;
+    let currentBalanceDebt = debtBalance;
+
+    for (let m = 1; m <= monthsToRetirement; m++) {
+      currentBalanceEpf = currentBalanceEpf * Math.pow(1 + epfReturn/100, 1/12) + epfMonthly;
+      currentBalanceNps = currentBalanceNps * Math.pow(1 + npsReturn/100, 1/12) + npsMonthly;
+      currentBalanceEquity = currentBalanceEquity * Math.pow(1 + equityReturn/100, 1/12) + equityMonthly;
+      currentBalancePpf = currentBalancePpf * Math.pow(1 + ppfReturn/100, 1/12) + ppfMonthly;
+      currentBalanceDebt = currentBalanceDebt * Math.pow(1 + debtReturn/100, 1/12);
+      
+      const totalNow = currentBalanceEpf + currentBalanceNps + currentBalanceEquity + currentBalancePpf + currentBalanceDebt;
+      
+      const currentYears = m / 12;
+      const targetNow = (currentExpenses * Math.pow(1 + inflationRate/100, currentYears) * 12) * fireVariantMultiplier;
+      
+      if (totalNow >= targetNow) {
+        fireAge = currentAge + Math.floor(currentYears);
+        fireAgeMonths = m;
+        break;
+      }
+    }
+  }
+
+  // Step 7: CoastFIRE
+  const coastFireNumber = targetCorpus / Math.pow(1 + equityReturn / 100, yearsToRetirement);
+  const currentTotalCorpus = epfBalance + npsBalance + equityBalance + ppfBalance + debtBalance;
+
+  // Step 8: Post-Retirement Sustainability
+  let corpusSustainsYears = 0;
+  let startingCorpus = totalProjectedCorpus;
+  let currentAnnualExpense = annualRetirementExpenses;
+  
+  for (let y = 1; y <= 40; y++) {
+    startingCorpus = startingCorpus * (1 + postRetirementReturn / 100) - currentAnnualExpense;
+    if (startingCorpus < 0) {
+      corpusSustainsYears = y;
+      break;
+    }
+    currentAnnualExpense *= (1 + inflationRate / 100);
+  }
+  
+  if (startingCorpus >= 0) {
+    corpusSustainsYears = 40; // max out at 40 years for safety
+  }
+
+  const buildUpChartData = [];
+  let balEpf = epfBalance;
+  let balNps = npsBalance;
+  let balEquity = equityBalance;
+  let balPpf = ppfBalance;
+  let balDebt = debtBalance;
+
+  for (let year = 0; year <= yearsToRetirement; year++) {
+    const expensesAtYear = currentExpenses * Math.pow(1 + inflationRate/100, year) * 12;
+    const targetAtYear = expensesAtYear * fireVariantMultiplier;
+    
+    buildUpChartData.push({
+      age: currentAge + year,
+      EPF: Math.round(balEpf),
+      NPS: Math.round(balNps),
+      Equity: Math.round(balEquity),
+      PPF: Math.round(balPpf),
+      Debt: Math.round(balDebt),
+      Total: Math.round(balEpf + balNps + balEquity + balPpf + balDebt),
+      Target: Math.round(targetAtYear),
+    });
+
+    if (year < yearsToRetirement) {
+      balEpf = calculateFV(balEpf, epfReturn, 1) + calculateFVofSIP(epfMonthly, epfReturn, 12);
+      balNps = calculateFV(balNps, npsReturn, 1) + calculateFVofSIP(npsMonthly, npsReturn, 12);
+      balEquity = calculateFV(balEquity, equityReturn, 1) + calculateFVofSIP(equityMonthly, equityReturn, 12);
+      balPpf = calculateFV(balPpf, ppfReturn, 1) + calculateFVofSIP(ppfMonthly, ppfReturn, 12);
+      balDebt = calculateFV(balDebt, debtReturn, 1);
+    }
+  }
+
+  const depletionChartData = [];
+  let postRetCorpus = totalProjectedCorpus;
+  let postRetExpense = annualRetirementExpenses;
+  
+  for (let year = 0; year <= 30; year++) {
+    depletionChartData.push({
+      age: targetAge + year,
+      CorpusVal: Math.max(0, Math.round(postRetCorpus)),
+      Withdrawal: Math.round(postRetExpense)
+    });
+    
+    if (postRetCorpus <= 0 && year > 0) {
+       break; // Stop plotting once it's fully depleted, but show at least the point of depletion
+    }
+
+    postRetCorpus = postRetCorpus * (1 + postRetirementReturn / 100) - postRetExpense;
+    postRetExpense *= (1 + inflationRate / 100);
+  }
+
+  return {
+    yearsToRetirement,
+    futureMonthlyExpenses,
+    annualRetirementExpenses,
+    targetCorpus,
+    totalProjectedCorpus,
+    
+    fvEpf, fvNps, fvEquity, fvPpf, fvDebt,
+    
+    npsTaxFreeLumpSum,
+    npsTaxableLumpSum,
+    npsAnnuityCorpus,
+    npsTaxableValue,
+    npsMonthlyAnnuity,
+    npsAnnuityTax,
+    
+    gap,
+    additionalSipNeeded,
+    fireAge,
+    coastFireNumber,
+    currentTotalCorpus,
+    isCoastFire: currentTotalCorpus >= coastFireNumber,
+    
+    corpusSustainsYears,
+    corpusDepletionAge: (corpusSustainsYears < 40) ? (targetAge + corpusSustainsYears) : null,
+    
+    buildUpChartData,
+    depletionChartData,
+
+    monthlySWRWithdrawal: (totalProjectedCorpus - fvNps) * (safeWithdrawalRate / 100) / 12,
+  };
+};
