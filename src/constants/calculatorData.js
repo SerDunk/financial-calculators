@@ -158,5 +158,13 @@ export const calculatorData = [
   link: "/calculators/retirement-corpus",
   icon: <Image src={FIRE} alt="FIRE" />,
   categories: ["investing", "lifestyle"]
+  },
+  {
+  id: 18,
+  title: "ESOP Tax Calculator",
+  description: "Calculate perquisite and capital gains tax on Employee Stock Option Plans for FY 2026-27",
+  link: "/calculators/esop-tax",
+  icon: <Image src={ESPP} alt="ESOP" />,
+  categories: ["salary", "investing"]
   }
 ];

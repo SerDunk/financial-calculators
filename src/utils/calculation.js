@@ -2356,3 +2356,262 @@ export const calculateRetirementCorpus = (inputs) => {
     monthlySWRWithdrawal: (totalProjectedCorpus - fvNps) * (safeWithdrawalRate / 100) / 12,
   };
 };
+
+// =====================================================
+// ESOP TAX CALCULATION (FY 2026-27 / ITA 2025)
+// =====================================================
+
+export const calculateESOPTaxBreakdown = ({
+  companyType,
+  taxRegime,
+  optionsGranted,
+  optionsVested,
+  exercisePrice,
+  fmvAtExercise,
+  annualSalary,
+  startupDeferralOptions = { isAvailing: false, trigger: 'sale' },
+  saleDetails = { isSelling: false, salePrice: 0, monthsHeld: 0, sttPaid: true },
+  advancedDetails = { showOldvsNew: false, manualSurcharge: -1, manualSlab: -1 }
+}) => {
+  // Input processing
+  const shares = Math.min(optionsVested, optionsGranted);
+
+  // Stage 1: Perquisite Calculation
+  const perquisitePerShare = fmvAtExercise - exercisePrice;
+  const isUnderwater = perquisitePerShare <= 0;
+  const taxablePerquisitePerShare = isUnderwater ? 0 : perquisitePerShare;
+  const totalPerquisite = taxablePerquisitePerShare * shares;
+
+  // Marginal Slab Rate & Surcharge determination
+  let marginalSlabRate = 0;
+  let taxRegimeOutflow = 0; // Exactly how much extra tax perquisite adds
+  let alternateRegimeOutflow = 0; 
+  let alternateRegime = taxRegime === 'new' ? 'old' : 'new';
+
+  const computeTax = (income, regime) => {
+    let tax = 0;
+    if (regime === "new") {
+      if (income <= 300000) tax = 0;
+      else if (income <= 700000) tax = (income - 300000) * 0.05;
+      else if (income <= 1000000) tax = 20000 + (income - 700000) * 0.10;
+      else if (income <= 1200000) tax = 50000 + (income - 1000000) * 0.15;
+      else if (income <= 1500000) tax = 80000 + (income - 1200000) * 0.20;
+      else tax = 140000 + (income - 1500000) * 0.30;
+      // 87A rebate
+      if (income <= 700000) tax = 0; 
+    } else {
+      let taxable = Math.max(0, income - 50000); // base std deduction for old
+      if (taxable <= 250000) tax = 0;
+      else if (taxable <= 500000) tax = (taxable - 250000) * 0.05;
+      else if (taxable <= 1000000) tax = 12500 + (taxable - 500000) * 0.20;
+      else tax = 112500 + (taxable - 1000000) * 0.30;
+      if (taxable <= 500000) tax = 0;
+    }
+    return tax;
+  };
+
+  const totalIncome = annualSalary + totalPerquisite;
+
+  if (advancedDetails.manualSlab !== -1) {
+    marginalSlabRate = advancedDetails.manualSlab;
+    taxRegimeOutflow = totalPerquisite * (marginalSlabRate / 100);
+    alternateRegimeOutflow = taxRegimeOutflow;
+  } else {
+    if (taxRegime === "new") {
+      if (totalIncome <= 700000) marginalSlabRate = 5;
+      else if (totalIncome <= 1000000) marginalSlabRate = 10;
+      else if (totalIncome <= 1200000) marginalSlabRate = 15;
+      else if (totalIncome <= 1500000) marginalSlabRate = 20;
+      else marginalSlabRate = 30; 
+    } else {
+      if (totalIncome <= 500000) marginalSlabRate = 5;
+      else if (totalIncome <= 1000000) marginalSlabRate = 20;
+      else marginalSlabRate = 30;
+    }
+
+    // Tax difference due to perquisite
+    const baseTax = computeTax(annualSalary, taxRegime);
+    const taxWithPerq = computeTax(totalIncome, taxRegime);
+    taxRegimeOutflow = taxWithPerq - baseTax;
+
+    const baseTaxAlt = computeTax(annualSalary, alternateRegime);
+    const taxWithPerqAlt = computeTax(totalIncome, alternateRegime);
+    alternateRegimeOutflow = taxWithPerqAlt - baseTaxAlt;
+  }
+
+  const perquisiteTaxBeforeSurcharge = taxRegimeOutflow;
+
+  let surchargeRate = 0;
+  if (advancedDetails.manualSurcharge !== -1) {
+    surchargeRate = advancedDetails.manualSurcharge;
+  } else {
+    const totalIncome = annualSalary + totalPerquisite;
+    if (totalIncome > 50000000) surchargeRate = 37;
+    else if (totalIncome > 20000000) surchargeRate = 25;
+    else if (totalIncome > 10000000) surchargeRate = 15;
+    else if (totalIncome > 5000000) surchargeRate = 10;
+  }
+
+  const surchargeAmount = perquisiteTaxBeforeSurcharge * (surchargeRate / 100);
+  const cess = (perquisiteTaxBeforeSurcharge + surchargeAmount) * 0.04;
+  const totalPerquisiteTaxLiability = perquisiteTaxBeforeSurcharge + surchargeAmount + cess;
+
+  const isDeferralEligible = companyType === 'startup';
+  const taxDueNow = (isDeferralEligible && startupDeferralOptions.isAvailing) ? 0 : totalPerquisiteTaxLiability;
+  const taxDeferred = (isDeferralEligible && startupDeferralOptions.isAvailing) ? totalPerquisiteTaxLiability : 0;
+
+  let deferralTriggerDate = null;
+  if (taxDeferred > 0) {
+    const currentYear = new Date().getFullYear();
+    if (startupDeferralOptions.trigger === '48-months') {
+      deferralTriggerDate = `31/03/${currentYear + 4}`;
+    } else if (startupDeferralOptions.trigger === 'leave') {
+      deferralTriggerDate = "Upon exiting company";
+    } else {
+      deferralTriggerDate = "Upon sale of shares";
+    }
+  }
+
+  // Stage 2: Capital Gains Calculation
+  let capitalGainsData = null;
+
+  if (saleDetails.isSelling && shares > 0) {
+    const saleProceeds = saleDetails.salePrice * shares;
+    const costOfAcquisition = fmvAtExercise; // Rule of double taxation prevention
+    const capitalGainPerShare = saleDetails.salePrice - costOfAcquisition;
+    const totalCapitalGain = capitalGainPerShare * shares;
+
+    let cgClassification = "";
+    let cgTaxRate = 0;
+    let cgTaxBeforeSurcharge = 0;
+    let ltcgExemptionUsed = 0;
+    let taxableCapitalGain = 0;
+
+    if (companyType === "listed") {
+      cgClassification = saleDetails.monthsHeld <= 12 ? "STCG" : "LTCG";
+      if (cgClassification === "STCG") {
+        if (saleDetails.sttPaid) {
+          cgTaxRate = 20;
+          taxableCapitalGain = Math.max(0, totalCapitalGain);
+          cgTaxBeforeSurcharge = taxableCapitalGain * 0.20;
+        } else {
+          cgTaxRate = marginalSlabRate;
+          taxableCapitalGain = Math.max(0, totalCapitalGain);
+          cgTaxBeforeSurcharge = taxableCapitalGain * (cgTaxRate / 100);
+        }
+      } else {
+        if (saleDetails.sttPaid) {
+          cgTaxRate = 12.5; // Budget 2024 revised rules / 2026 valid
+          ltcgExemptionUsed = 125000;
+          taxableCapitalGain = Math.max(0, totalCapitalGain - ltcgExemptionUsed);
+          cgTaxBeforeSurcharge = taxableCapitalGain * 0.125;
+        } else {
+          cgTaxRate = 12.5; 
+          taxableCapitalGain = Math.max(0, totalCapitalGain);
+          cgTaxBeforeSurcharge = taxableCapitalGain * 0.125;
+        }
+      }
+    } else { // Unlisted / Startup
+      cgClassification = saleDetails.monthsHeld <= 24 ? "STCG" : "LTCG";
+      if (cgClassification === "STCG") {
+        cgTaxRate = marginalSlabRate;
+        taxableCapitalGain = Math.max(0, totalCapitalGain);
+        cgTaxBeforeSurcharge = taxableCapitalGain * (cgTaxRate / 100);
+      } else {
+        cgTaxRate = 12.5; // No indexation, no 1.25L exemption
+        taxableCapitalGain = Math.max(0, totalCapitalGain);
+        cgTaxBeforeSurcharge = taxableCapitalGain * 0.125;
+      }
+    }
+
+    // Capital gains surcharge is capped at 15% for 111A/112A equity
+    let cgSurchargeRate = surchargeRate;
+    if (["listed"].includes(companyType) || cgClassification === "LTCG") {
+      cgSurchargeRate = Math.min(surchargeRate, 15);
+    }
+    const cgSurcharge = cgTaxBeforeSurcharge * (cgSurchargeRate / 100);
+    const cgCess = (cgTaxBeforeSurcharge + cgSurcharge) * 0.04;
+    const totalCGTax = totalCapitalGain <= 0 ? 0 : cgTaxBeforeSurcharge + cgSurcharge + cgCess;
+
+    capitalGainsData = {
+      saleProceeds,
+      costOfAcquisition,
+      capitalGainPerShare,
+      totalCapitalGain,
+      cgClassification,
+      ltcgExemptionUsed: ltcgExemptionUsed > 0 ? "₹1,25,000" : "N/A",
+      taxableCapitalGain,
+      cgTaxRate,
+      cgTaxBeforeSurcharge,
+      totalCGTax,
+      cgSurcharge,
+      cgCess
+    };
+  }
+
+  // Aggregate Stage
+  const cashPaidToExercise = exercisePrice * shares;
+  const totalSaleProceeds = capitalGainsData ? capitalGainsData.saleProceeds : 0;
+  const grossGain = capitalGainsData ? (totalSaleProceeds - cashPaidToExercise) : 0; // if not selling, unrealized
+
+  const totalCGTaxFinal = capitalGainsData ? capitalGainsData.totalCGTax : 0;
+  // If selling today, and deferring tax, deferral is triggered instantly, so tax outflow includes all of it.
+  const totalTaxOutflow = totalPerquisiteTaxLiability + totalCGTaxFinal;
+  
+  const netGainAfterTax = grossGain - totalTaxOutflow;
+  const effectiveReturnPercent = cashPaidToExercise > 0 ? (netGainAfterTax / cashPaidToExercise) * 100 : 0;
+  
+  const breakEvenSalePrice = shares > 0 ? exercisePrice + (totalPerquisiteTaxLiability / shares) : 0;
+
+  // Comparison Data for Advanced
+  let oldRegimeComparison = null;
+  if (advancedDetails.showOldvsNew) {
+      // Calculate exactly what the tax and surcharge would be under the unselected regime
+      const baseAltSurchargeAmount = alternateRegimeOutflow * (surchargeRate / 100);
+      const altCess = (alternateRegimeOutflow + baseAltSurchargeAmount) * 0.04;
+      const totalAlternatePerquisiteTax = alternateRegimeOutflow + baseAltSurchargeAmount + altCess;
+
+      // CG tax remains the same because it uses flat rates or the standard marginal which we align for simplicity in CG
+      
+      const oldRegimePerq = taxRegime === 'old' ? totalPerquisiteTaxLiability : totalAlternatePerquisiteTax;
+      const newRegimePerq = taxRegime === 'new' ? totalPerquisiteTaxLiability : totalAlternatePerquisiteTax;
+
+      oldRegimeComparison = {
+          perquisiteTax: oldRegimePerq,
+          cgTax: totalCGTaxFinal,
+          totalTax: oldRegimePerq + totalCGTaxFinal
+      };
+      oldRegimeComparison.netGain = grossGain - oldRegimeComparison.totalTax;
+  }
+
+  return {
+    shares,
+    isUnderwater,
+    perquisite: {
+      perquisitePerShare: taxablePerquisitePerShare,
+      totalPerquisite,
+      marginalSlabRate,
+      surchargeRate,
+      surchargeAmount,
+      cess,
+      totalTaxLiability: totalPerquisiteTaxLiability,
+      taxDueNow,
+      taxDeferred,
+      deferralTriggerDate
+    },
+    capitalGains: capitalGainsData,
+    summary: {
+      cashPaidToExercise,
+      totalSaleProceeds,
+      grossGain,
+      totalPerquisiteTax: totalPerquisiteTaxLiability,
+      totalCGTax: totalCGTaxFinal,
+      totalTaxOutflow,
+      netGainAfterTax,
+      effectiveReturnPercent,
+      breakEvenSalePrice,
+      shortfallWarning: (!saleDetails.isSelling && totalPerquisiteTaxLiability > 0 && !startupDeferralOptions.isAvailing)
+    },
+    oldRegimeComparison
+  };
+};
