@@ -2615,3 +2615,113 @@ export const calculateESOPTaxBreakdown = ({
     oldRegimeComparison
   };
 };
+
+export const calculateLeaveEncashment = (inputs) => {
+  const {
+    employeeType,
+    encashmentTrigger,
+    taxRegime,
+    basicSalary,
+    da,
+    commission,
+    yearsOfService,
+    entitledLeaveDays,
+    unusedLeaveDays,
+    maxEncashableDaysGovt = 300,
+    priorExemptionClaimed = 0,
+    otherSalaryIncome = 0,
+    leaveEncashmentDuringServiceThisYear = 0,
+    overrideSlabRate = null
+  } = inputs;
+
+  const monthlySalaryBase = basicSalary + da + commission;
+  const dailySalaryRate = monthlySalaryBase / 30;
+
+  let grossLeaveEncashment = 0;
+  let exemptAmount = 0;
+  let taxableLeaveEncashment = 0;
+  let limbs = null;
+
+  if (encashmentTrigger === 'service') {
+    grossLeaveEncashment = dailySalaryRate * unusedLeaveDays;
+    taxableLeaveEncashment = grossLeaveEncashment;
+    exemptAmount = 0;
+  } else if (encashmentTrigger === 'death') {
+    grossLeaveEncashment = dailySalaryRate * unusedLeaveDays;
+    exemptAmount = grossLeaveEncashment;
+    taxableLeaveEncashment = 0;
+  } else {
+    if (employeeType === 'government') {
+      const cappedDays = Math.min(unusedLeaveDays, maxEncashableDaysGovt);
+      grossLeaveEncashment = dailySalaryRate * cappedDays;
+      exemptAmount = grossLeaveEncashment;
+      taxableLeaveEncashment = 0;
+    } else {
+      grossLeaveEncashment = dailySalaryRate * unusedLeaveDays;
+      const limb1 = grossLeaveEncashment;
+      const limb2 = Math.max(0, 2500000 - priorExemptionClaimed);
+      const limb3 = monthlySalaryBase * 10;
+      const limb4 = (yearsOfService * Math.min(entitledLeaveDays, 30)) * dailySalaryRate;
+      
+      exemptAmount = Math.min(limb1, limb2, limb3, limb4);
+      taxableLeaveEncashment = Math.max(0, grossLeaveEncashment - exemptAmount);
+      
+      limbs = {
+        limb1, limb2, limb3, limb4,
+        bindingLimb: limb1 === exemptAmount ? 1 : limb2 === exemptAmount ? 2 : limb3 === exemptAmount ? 3 : 4
+      };
+    }
+  }
+
+  let netTaxOnLeaveEncashment = 0;
+  let marginalSlabRate = 0;
+
+  if (taxableLeaveEncashment > 0) {
+    if (overrideSlabRate !== null) {
+      marginalSlabRate = overrideSlabRate;
+      netTaxOnLeaveEncashment = taxableLeaveEncashment * (marginalSlabRate / 100) * 1.04;
+    } else {
+      const totalIncomeWithoutLE = otherSalaryIncome + leaveEncashmentDuringServiceThisYear;
+      const totalIncomeWithLE = totalIncomeWithoutLE + taxableLeaveEncashment;
+
+      const taxBreakdownWithoutLE = calculateIncomeTaxBreakdown({
+        grossIncome: totalIncomeWithoutLE,
+        taxpayerType: 'salaried',
+        ageGroup: 'below60'
+      });
+      
+      const taxBreakdownWithLE = calculateIncomeTaxBreakdown({
+        grossIncome: totalIncomeWithLE,
+        taxpayerType: 'salaried',
+        ageGroup: 'below60'
+      });
+
+      const taxWithoutLE = taxRegime === 'new' ? taxBreakdownWithoutLE.newRegime.totalTax : taxBreakdownWithoutLE.oldRegime.totalTax;
+      const taxWithLE = taxRegime === 'new' ? taxBreakdownWithLE.newRegime.totalTax : taxBreakdownWithLE.oldRegime.totalTax;
+
+      netTaxOnLeaveEncashment = Math.max(0, taxWithLE - taxWithoutLE);
+      
+      const marginalTaxBeforeCess = netTaxOnLeaveEncashment / 1.04;
+      marginalSlabRate = Math.round((marginalTaxBeforeCess / taxableLeaveEncashment) * 100);
+      if (marginalSlabRate > 30) marginalSlabRate = 30; 
+    }
+  }
+
+  const netAmountReceived = grossLeaveEncashment - netTaxOnLeaveEncashment;
+  const effectiveTaxRate = grossLeaveEncashment > 0 ? (netTaxOnLeaveEncashment / grossLeaveEncashment) * 100 : 0;
+  const remainingLifetimeExemption = Math.max(0, 2500000 - priorExemptionClaimed - (employeeType !== 'government' ? exemptAmount : 0));
+
+  return {
+    dailySalaryRate,
+    grossLeaveEncashment,
+    exemptAmount,
+    taxableLeaveEncashment,
+    limbs,
+    marginalSlabRate,
+    taxOnTaxablePortion: netTaxOnLeaveEncashment,
+    netAmountReceived,
+    effectiveTaxRate,
+    remainingLifetimeExemption,
+    monthlySalaryBase
+  };
+};

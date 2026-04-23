@@ -166,5 +166,13 @@ export const calculatorData = [
   link: "/calculators/esop-tax",
   icon: <Image src={ESPP} alt="ESOP" />,
   categories: ["salary", "investing"]
+  },
+  {
+  id: 19,
+  title: "Leave Encashment Calculator",
+  description: "Calculate your tax exemption for leave encashment under Section 10(10AA) for FY 2026-27",
+  link: "/calculators/leave-encashment",
+  icon: <Image src={Tax} alt="Tax" />,
+  categories: ["salary"]
   }
 ];
