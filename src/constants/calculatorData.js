@@ -174,5 +174,13 @@ export const calculatorData = [
   link: "/calculators/leave-encashment",
   icon: <Image src={Tax} alt="Tax" />,
   categories: ["salary"]
+  },
+  {
+  id: 20,
+  title: "CAGR Returns & Tax",
+  description: "Calculate your exact returns, compare with benchmarks, and adjust for tax and inflation",
+  link: "/calculators/cagr-calculator",
+  icon: <Image src={Investment} alt="CAGR" />,
+  categories: ["investing"]
   }
 ];
