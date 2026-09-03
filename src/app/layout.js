@@ -1,4 +1,5 @@
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 import { lexend } from "../../public/fonts";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
@@ -24,6 +25,7 @@ export default function RootLayout({ children }) {
         <Navbar />
         <main className=" py-3 px-6 max-w-xl ">{children}</main>
         <Footer />
+        <Analytics />
       </body>
     </html>
   );
