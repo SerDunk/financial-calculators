@@ -19,6 +19,8 @@ const SliderInput = ({
   showCurrency = true,
 }) => {
   const [inputValue, setInputValue] = useState("");
+  const allowDecimal =
+    !showCurrency && (label?.includes("%") || !Number.isInteger(step));
 
   // Format Indian number with commas
   const formatIndianNumber = (num) => {
@@ -69,6 +71,16 @@ const SliderInput = ({
       const raw = e.target.value.replace(/[^0-9]/g, "");
       setInputValue(raw ? formatIndianNumber(+raw) : "");
       onChange(raw ? +raw : 0);
+    } else if (allowDecimal) {
+      let raw = e.target.value.replace(/[^0-9.]/g, "");
+      const firstDot = raw.indexOf(".");
+      if (firstDot !== -1) {
+        raw =
+          raw.slice(0, firstDot + 1) +
+          raw.slice(firstDot + 1).replace(/\./g, "");
+      }
+      setInputValue(raw);
+      onChange(raw ? parseFloat(raw) || 0 : 0);
     } else {
       const raw = e.target.value.replace(/[^0-9]/g, "");
       setInputValue(raw);
@@ -91,7 +103,7 @@ const SliderInput = ({
       onChange(constrainedValue);
       setInputValue(formatIndianNumber(constrainedValue));
     } else {
-      const val = parseInt(inputValue) || 0;
+      const val = (allowDecimal ? parseFloat(inputValue) : parseInt(inputValue)) || 0;
       const constrainedValue = Math.min(Math.max(val, min), max);
       onChange(constrainedValue);
       setInputValue(constrainedValue.toString());
