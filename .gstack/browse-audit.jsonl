@@ -1,0 +1,13 @@
+{"ts":"2026-09-21T17:23:46.334Z","cmd":"goto","args":"http://localhost:3000/calculators/sip","origin":"http://localhost:3000/calculators/sip","durationMs":42,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-21T17:23:46.511Z","cmd":"snapshot","args":"-i","origin":"http://localhost:3000/calculators/sip","durationMs":69,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-21T17:23:50.177Z","cmd":"click","args":"@e5","origin":"http://localhost:3000/calculators/sip","durationMs":42,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-21T17:23:50.215Z","cmd":"fill","args":"@e5 12.75","origin":"http://localhost:3000/calculators/sip","durationMs":11,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-21T17:23:50.241Z","cmd":"js","args":"document.querySelectorAll('input')[1].value","origin":"http://localhost:3000/calculators/sip","durationMs":2,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-21T17:23:54.142Z","cmd":"snapshot","args":"-i","origin":"http://localhost:3000/calculators/sip","durationMs":4,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-21T17:23:58.089Z","cmd":"click","args":"@e7","origin":"http://localhost:3000/calculators/sip","durationMs":22,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-21T17:23:58.120Z","cmd":"snapshot","args":"-i","origin":"http://localhost:3000/calculators/sip","durationMs":4,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-21T17:24:02.858Z","cmd":"goto","args":"http://localhost:3000/calculators/mortgage","origin":"http://localhost:3000/calculators/mortgage","durationMs":375,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-21T17:24:02.985Z","cmd":"snapshot","args":"-i","origin":"http://localhost:3000/calculators/mortgage","durationMs":78,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-21T17:24:06.800Z","cmd":"click","args":"@e6","origin":"http://localhost:3000/calculators/mortgage","durationMs":30,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-21T17:24:06.854Z","cmd":"fill","args":"@e6 22.5","origin":"http://localhost:3000/calculators/mortgage","durationMs":26,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-21T17:24:06.889Z","cmd":"snapshot","args":"-i","origin":"http://localhost:3000/calculators/mortgage","durationMs":8,"status":"ok","hasCookies":false,"mode":"launched"}
